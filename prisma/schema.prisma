@@ -1,0 +1,350 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String     @id @default(cuid())
+  email     String     @unique
+  password  String
+  name      String
+  role      Role
+  phone     String?
+  avatar    String?
+  status    UserStatus @default(ACTIVE)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  clientProfile ClientProfile?
+  coachProfile  CoachProfile?
+  notifications Notification[]
+}
+
+model ClientProfile {
+  id               String    @id @default(cuid())
+  userId           String    @unique
+  dateOfBirth      DateTime?
+  weight           Float?
+  height           Float?
+  emergencyContact String?
+  joinDate         DateTime  @default(now())
+
+  user               User               @relation(fields: [userId], references: [id])
+  memberships        ClientMembership[]
+  goals              ClientGoal[]
+  payments           Payment[]
+  attendances        Attendance[]
+  workoutProgress    WorkoutProgress[]
+  workoutAssignments WorkoutAssignment[]
+  assignedCoachId    String?
+  assignedCoach      CoachProfile?      @relation("CoachAssignedClients", fields: [assignedCoachId], references: [id])
+}
+
+model CoachProfile {
+  id              String    @id @default(cuid())
+  userId          String    @unique
+  specialization  String?
+  bio             String?
+  certifications  String?
+  yearsExperience Int?
+
+  user             User              @relation(fields: [userId], references: [id])
+  assignedClients  ClientProfile[]   @relation("CoachAssignedClients")
+  createdWorkouts  Workout[]
+  assignedWorkouts WorkoutAssignment[]
+  schedules        Schedule[]
+}
+
+model Membership {
+  id       String           @id @default(cuid())
+  name     String
+  type     MembershipType
+  duration Int              // in days
+  price    Float
+  hasCoach Boolean          @default(false)
+  features Json?
+  status   MembershipStatus @default(ACTIVE)
+
+  clientMemberships ClientMembership[]
+}
+
+model ClientMembership {
+  id           String                  @id @default(cuid())
+  clientId     String
+  membershipId String
+  startDate    DateTime
+  endDate      DateTime
+  status       MembershipInstanceStatus @default(ACTIVE)
+
+  client      ClientProfile   @relation(fields: [clientId], references: [id])
+  membership  Membership      @relation(fields: [membershipId], references: [id])
+
+  renewals    MembershipRenewal[]
+
+  @@index([clientId, status])
+}
+
+model MembershipRenewal {
+  id                 String   @id @default(cuid())
+  clientMembershipId String
+  renewalDate        DateTime @default(now())
+  newEndDate         DateTime
+  amount             Float
+
+  clientMembership ClientMembership @relation(fields: [clientMembershipId], references: [id])
+}
+
+model WorkoutGoal {
+  id          String             @id @default(cuid())
+  name        String
+  description String?
+  category    WorkoutGoalCategory
+
+  clientGoals ClientGoal[]
+}
+
+model ClientGoal {
+  id           String      @id @default(cuid())
+  clientId     String
+  goalId       String
+  targetValue  Float?
+  currentValue Float?
+  deadline     DateTime?
+  status       GoalStatus  @default(ACTIVE)
+
+  client ClientProfile @relation(fields: [clientId], references: [id])
+  goal   WorkoutGoal   @relation(fields: [goalId], references: [id])
+}
+
+model Exercise {
+  id           String  @id @default(cuid())
+  name         String
+  description  String?
+  category     String?
+  muscleGroup  String?
+  difficulty   String?
+  equipment    String?
+  videoUrl     String?
+  instructions String?
+
+  workoutExercises WorkoutExercise[]
+}
+
+model Workout {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  createdById String
+  targetGoals String?
+  duration    Int?     // minutes
+  difficulty  String?
+
+  createdBy   CoachProfile      @relation(fields: [createdById], references: [id])
+  exercises   WorkoutExercise[]
+  assignments WorkoutAssignment[]
+}
+
+model WorkoutExercise {
+  id         String   @id @default(cuid())
+  workoutId  String
+  exerciseId String
+  sets       Int?
+  reps       Int?
+  duration   Int?     // seconds
+  restTime   Int?     // seconds
+  order      Int
+
+  workout  Workout  @relation(fields: [workoutId], references: [id])
+  exercise Exercise @relation(fields: [exerciseId], references: [id])
+  progressEntries WorkoutProgress[]
+}
+
+model WorkoutAssignment {
+  id           String           @id @default(cuid())
+  clientId     String
+  workoutId    String
+  assignedById String
+  startDate    DateTime
+  endDate      DateTime?
+  frequency    String?
+  status       AssignmentStatus @default(ACTIVE)
+
+  client     ClientProfile @relation(fields: [clientId], references: [id])
+  workout    Workout       @relation(fields: [workoutId], references: [id])
+  assignedBy CoachProfile  @relation(fields: [assignedById], references: [id])
+}
+
+model WorkoutProgress {
+  id                String   @id @default(cuid())
+  clientId          String
+  workoutExerciseId String
+  completedDate     DateTime @default(now())
+  actualSets        Int?
+  actualReps        Int?
+  weight            Float?
+  notes             String?
+  rating            Int?
+
+  client          ClientProfile  @relation(fields: [clientId], references: [id])
+  workoutExercise WorkoutExercise @relation(fields: [workoutExerciseId], references: [id])
+
+  @@index([clientId, completedDate])
+}
+
+model Schedule {
+  id         String       @id @default(cuid())
+  title      String
+  type       ScheduleType
+  startTime  DateTime
+  endTime    DateTime
+  coachId    String?
+  capacity   Int?
+  recurrence String?
+
+  coach      CoachProfile? @relation(fields: [coachId], references: [id])
+  attendances Attendance[]
+}
+
+model Attendance {
+  id           String           @id @default(cuid())
+  clientId     String
+  scheduleId   String?
+  checkInTime  DateTime         @default(now())
+  checkOutTime DateTime?
+  qrCode       String?
+  method       AttendanceMethod
+
+  client   ClientProfile @relation(fields: [clientId], references: [id])
+  schedule Schedule?     @relation(fields: [scheduleId], references: [id])
+
+  @@index([clientId, checkInTime])
+}
+
+model Equipment {
+  id              String          @id @default(cuid())
+  name            String
+  type            String?
+  brand           String?
+  purchaseDate    DateTime?
+  lastMaintenance DateTime?
+  nextMaintenance DateTime?
+  status          EquipmentStatus @default(AVAILABLE)
+  quantity        Int             @default(1)
+}
+
+model Payment {
+  id         String        @id @default(cuid())
+  clientId   String
+  amount     Float
+  type       PaymentType
+  status     PaymentStatus
+  method     String?
+  referenceId String?
+  date       DateTime      @default(now())
+
+  client  ClientProfile @relation(fields: [clientId], references: [id])
+
+  @@index([clientId, date])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  metadata  Json?
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId, read])
+}
+
+enum Role {
+  ADMIN
+  CLIENT
+  COACH
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum MembershipType {
+  BASIC
+  PREMIUM
+  VIP
+}
+
+enum MembershipStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum MembershipInstanceStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+}
+
+enum WorkoutGoalCategory {
+  WEIGHT_LOSS
+  MUSCLE_GAIN
+  ENDURANCE
+  FLEXIBILITY
+  GENERAL_FITNESS
+}
+
+enum GoalStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum AssignmentStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+enum ScheduleType {
+  CLASS
+  PERSONAL_TRAINING
+  GYM_HOURS
+}
+
+enum AttendanceMethod {
+  QR
+  MANUAL
+}
+
+enum EquipmentStatus {
+  AVAILABLE
+  MAINTENANCE
+  BROKEN
+}
+
+enum PaymentType {
+  MEMBERSHIP
+  RENEWAL
+  PENALTY
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}

@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/hernan%20system/gym/components/session-provider.tsx"],"sourcesContent":["\"use client\";\n\nimport { SessionProvider } from \"next-auth/react\";\nimport type { ReactNode } from \"react\";\n\nexport function AppSessionProvider({ children }: { children: ReactNode }) {\n  return <SessionProvider>{children}</SessionProvider>;\n}\n\n"],"names":[],"mappings":";;;;;AAEA;AAFA;;;AAKO,SAAS,mBAAmB,EAAE,QAAQ,EAA2B;IACtE,qBAAO,6LAAC,oKAAe;kBAAE;;;;;;AAC3B;KAFgB"}},
+    {"offset": {"line": 32, "column": 0}, "map": {"version":3,"sources":["file:///C:/hernan%20system/gym/components/ui/toaster.tsx"],"sourcesContent":["\"use client\";\n\nimport { Toaster } from \"sonner\";\n\nexport { Toaster };\n\n"],"names":[],"mappings":";AAEA;AAFA"}}]
+}
