@@ -1,5 +1,6 @@
 "use client"
 
+import { signOut } from "next-auth/react"
 import {
   BadgeCheck,
   Bell,
@@ -8,6 +9,7 @@ import {
   LogOut,
   Sparkles,
 } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 import {
   Avatar,
@@ -40,6 +42,7 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
+  const router = useRouter()
 
   return (
     <SidebarMenu>
@@ -96,13 +99,19 @@ export function NavUser({
                 <CreditCard />
                 Billing
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  router.push("/client/notifications")
+                }}
+              >
                 <Bell />
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => signOut({ callbackUrl: "/auth/sign-in" })}
+            >
               <LogOut />
               Log out
             </DropdownMenuItem>

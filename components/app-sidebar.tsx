@@ -57,12 +57,32 @@ function getNavItems(role?: string): NavItem[] {
         icon: CreditCard,
       },
       {
+        title: "Client Memberships",
+        url: "/admin/client-memberships",
+        icon: Users,
+      },
+      {
+        title: "Renewals",
+        url: "/admin/renewals",
+        icon: CreditCard,
+      },
+      {
+        title: "Payments",
+        url: "/admin/payments",
+        icon: CreditCard,
+      },
+      {
         title: "Workout Goals",
         url: "/admin/goals",
         icon: Activity,
       },
       {
-        title: "Exercises",
+        title: "Client Goals",
+        url: "/admin/client-goals",
+        icon: Users,
+      },
+      {
+        title: "Workouts",
         url: "/admin/exercises",
         icon: Dumbbell,
       },
@@ -101,7 +121,9 @@ function getNavItems(role?: string): NavItem[] {
       },
       { title: "Memberships", url: "/client/memberships", icon: CreditCard },
       { title: "Workouts", url: "/client/workouts", icon: Dumbbell },
+      { title: "Goals", url: "/client/goals", icon: Activity },
       { title: "Check-in", url: "/client/checkin", icon: CalendarClock },
+      { title: "Attendance", url: "/client/attendance", icon: CalendarClock },
       { title: "Payments", url: "/client/payments", icon: CreditCard },
     ]
   }

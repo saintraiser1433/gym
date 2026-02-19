@@ -89,13 +89,14 @@ export function DataTable<T extends { id: string | number }>({
                     typeof rawValue === "string" &&
                     String(col.key).toLowerCase().includes("status")
                   ) {
+                    const upper = rawValue.toUpperCase();
                     const formatted =
-                      rawValue.charAt(0).toUpperCase() +
-                      rawValue.slice(1).toLowerCase();
+                      upper === "FAILED"
+                        ? "Rejected"
+                        : upper.charAt(0) + upper.slice(1).toLowerCase();
 
                     const isActive =
-                      rawValue.toUpperCase() === "ACTIVE" ||
-                      rawValue.toUpperCase() === "PAID";
+                      upper === "ACTIVE" || upper === "PAID" || upper === "COMPLETED";
 
                     const badgeClass = isActive
                       ? "from-emerald-500 via-sky-500 to-blue-500"

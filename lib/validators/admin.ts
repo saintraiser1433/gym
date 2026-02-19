@@ -58,6 +58,22 @@ export const createGoalSchema = z.object({
 
 export const updateGoalSchema = createGoalSchema.partial();
 
+/** Assign a workout goal to a client (create ClientGoal) */
+export const createClientGoalSchema = z.object({
+  clientId: z.string().min(1),
+  goalId: z.string().min(1),
+  targetValue: z.number().optional(),
+  currentValue: z.number().optional(),
+  deadline: z.string().datetime().optional(),
+  status: z.enum(["ACTIVE", "COMPLETED", "CANCELLED"]).default("ACTIVE"),
+});
+export const updateClientGoalSchema = z.object({
+  targetValue: z.number().optional().nullable(),
+  currentValue: z.number().optional().nullable(),
+  deadline: z.string().datetime().optional().nullable(),
+  status: z.enum(["ACTIVE", "COMPLETED", "CANCELLED"]).optional(),
+});
+
 export const createRegistrationSchema = z.object({
   client: z.object({
     name: z.string().min(1),
@@ -69,6 +85,21 @@ export const createRegistrationSchema = z.object({
   membershipId: z.string().min(1),
   startDate: z.string().datetime().optional(),
   amountPaid: z.number().nonnegative(),
+});
+
+/** Assign an existing client to a membership (create ClientMembership only) */
+export const createClientMembershipSchema = z.object({
+  clientId: z.string().min(1),
+  membershipId: z.string().min(1),
+  startDate: z.string().datetime(),
+  endDate: z.string().datetime(),
+  status: z.enum(["ACTIVE", "EXPIRED", "CANCELLED"]).default("ACTIVE"),
+});
+
+export const updateClientMembershipSchema = z.object({
+  startDate: z.string().datetime().optional(),
+  endDate: z.string().datetime().optional(),
+  status: z.enum(["ACTIVE", "EXPIRED", "CANCELLED"]).optional(),
 });
 
 export const createRenewalSchema = z.object({
@@ -109,5 +140,16 @@ export const createEquipmentSchema = z.object({
 });
 
 export const updateEquipmentSchema = createEquipmentSchema.partial();
+
+export const createAttendanceSchema = z.object({
+  clientId: z.string().min(1),
+  scheduleId: z.string().optional(),
+  checkInTime: z.string().datetime().optional(),
+  checkOutTime: z.string().datetime().optional(),
+  method: z.enum(["QR", "MANUAL"]).default("MANUAL"),
+});
+export const updateAttendanceSchema = z.object({
+  checkOutTime: z.string().datetime().optional().nullable(),
+});
 
 

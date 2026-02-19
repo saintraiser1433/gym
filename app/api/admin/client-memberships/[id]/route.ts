@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
-import { updateMembershipSchema } from "@/lib/validators/admin";
+import { updateClientMembershipSchema } from "@/lib/validators/admin";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -9,7 +9,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   await requireAdmin();
   const { id } = await params;
   const json = await req.json();
-  const parsed = updateMembershipSchema.safeParse(json);
+  const parsed = updateClientMembershipSchema.safeParse(json);
 
   if (!parsed.success) {
     return NextResponse.json(
@@ -18,15 +18,20 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     );
   }
 
+  const data: { startDate?: Date; endDate?: Date; status?: string } = {};
+  if (parsed.data.startDate) data.startDate = new Date(parsed.data.startDate);
+  if (parsed.data.endDate) data.endDate = new Date(parsed.data.endDate);
+  if (parsed.data.status) data.status = parsed.data.status;
+
   try {
-    const membership = await prisma.membership.update({
+    const clientMembership = await prisma.clientMembership.update({
       where: { id },
-      data: parsed.data,
+      data,
     });
-    return NextResponse.json(membership);
+    return NextResponse.json(clientMembership);
   } catch {
     return NextResponse.json(
-      { error: "Membership not found" },
+      { error: "Client membership not found" },
       { status: 404 },
     );
   }
@@ -37,19 +42,14 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   const { id } = await params;
 
   try {
-    await prisma.membership.delete({
+    await prisma.clientMembership.delete({
       where: { id },
     });
     return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error("Delete membership error", error);
+  } catch {
     return NextResponse.json(
-      {
-        error:
-          "Cannot delete membership. It may be in use by client memberships or payments.",
-      },
-      { status: 400 },
+      { error: "Client membership not found" },
+      { status: 404 },
     );
   }
 }
-

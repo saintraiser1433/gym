@@ -4,7 +4,7 @@ import { requireClient } from "@/lib/auth";
 
 export async function GET() {
   const session = await requireClient();
-  const userId = (session.user as { id?: string }).id as string;
+  const userId = (session.user as any).id as string;
 
   const profile = await prisma.clientProfile.findUnique({
     where: { userId },
@@ -15,11 +15,14 @@ export async function GET() {
     return NextResponse.json({ data: [] });
   }
 
-  const payments = await prisma.payment.findMany({
+  const records = await prisma.attendance.findMany({
     where: { clientId: profile.id },
-    orderBy: { date: "desc" },
+    orderBy: { checkInTime: "desc" },
+    include: {
+      schedule: true,
+    },
   });
 
-  return NextResponse.json({ data: payments });
+  return NextResponse.json({ data: records });
 }
 

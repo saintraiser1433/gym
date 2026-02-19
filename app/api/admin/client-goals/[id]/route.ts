@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
-import { updateScheduleSchema } from "@/lib/validators/admin";
+import { updateClientGoalSchema } from "@/lib/validators/admin";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -9,7 +9,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   await requireAdmin();
   const { id } = await params;
   const json = await req.json();
-  const parsed = updateScheduleSchema.safeParse(json);
+  const parsed = updateClientGoalSchema.safeParse(json);
 
   if (!parsed.success) {
     return NextResponse.json(
@@ -18,20 +18,28 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     );
   }
 
-  const data: any = { ...parsed.data };
-  if (data.startTime) data.startTime = new Date(data.startTime);
-  if (data.endTime) data.endTime = new Date(data.endTime);
-  if (data.coachId === "") data.coachId = null;
+  const data: {
+    targetValue?: number | null;
+    currentValue?: number | null;
+    deadline?: Date | null;
+    status?: string;
+  } = {};
+  if (parsed.data.targetValue !== undefined) data.targetValue = parsed.data.targetValue;
+  if (parsed.data.currentValue !== undefined) data.currentValue = parsed.data.currentValue;
+  if (parsed.data.deadline !== undefined) {
+    data.deadline = parsed.data.deadline ? new Date(parsed.data.deadline) : null;
+  }
+  if (parsed.data.status) data.status = parsed.data.status;
 
   try {
-    const schedule = await prisma.schedule.update({
+    const clientGoal = await prisma.clientGoal.update({
       where: { id },
       data,
     });
-    return NextResponse.json(schedule);
+    return NextResponse.json(clientGoal);
   } catch {
     return NextResponse.json(
-      { error: "Schedule not found" },
+      { error: "Client goal not found" },
       { status: 404 },
     );
   }
@@ -42,15 +50,14 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   const { id } = await params;
 
   try {
-    await prisma.schedule.delete({
+    await prisma.clientGoal.delete({
       where: { id },
     });
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json(
-      { error: "Schedule not found" },
+      { error: "Client goal not found" },
       { status: 404 },
     );
   }
 }
-

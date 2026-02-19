@@ -18,6 +18,14 @@ export async function GET() {
   const progress = await prisma.workoutProgress.findMany({
     where: { clientId: profile.id },
     orderBy: { completedDate: "desc" },
+    include: {
+      workoutExercise: {
+        include: {
+          workout: true,
+          exercise: true,
+        },
+      },
+    },
   });
 
   return NextResponse.json({ data: progress });

@@ -2,13 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import {
+  createClientGoalSchema,
   paginationSchema,
-  createAttendanceSchema,
 } from "@/lib/validators/admin";
 
 export async function GET(req: NextRequest) {
   await requireAdmin();
-
   const url = new URL(req.url);
   const parsed = paginationSchema.safeParse({
     page: url.searchParams.get("page"),
@@ -24,44 +23,38 @@ export async function GET(req: NextRequest) {
   }
 
   const { page, pageSize, search } = parsed.data;
-
   const where =
     search && search.trim().length > 0
       ? {
-          OR: [
-            { client: { user: { name: { contains: search, mode: "insensitive" } } } },
-            { client: { user: { email: { contains: search, mode: "insensitive" } } } },
-            { schedule: { title: { contains: search, mode: "insensitive" } } },
-          ],
+          client: {
+            user: {
+              name: { contains: search, mode: "insensitive" as const },
+            },
+          },
         }
       : {};
 
-  const [total, records] = await Promise.all([
-    prisma.attendance.count({ where }),
-    prisma.attendance.findMany({
+  const [total, rows] = await Promise.all([
+    prisma.clientGoal.count({ where }),
+    prisma.clientGoal.findMany({
       where,
-      orderBy: { checkInTime: "desc" },
+      orderBy: { deadline: "asc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
       include: {
         client: { include: { user: true } },
-        schedule: true,
+        goal: true,
       },
     }),
   ]);
 
-  return NextResponse.json({
-    data: records,
-    page,
-    pageSize,
-    total,
-  });
+  return NextResponse.json({ data: rows, page, pageSize, total });
 }
 
 export async function POST(req: NextRequest) {
   await requireAdmin();
   const json = await req.json();
-  const parsed = createAttendanceSchema.safeParse(json);
+  const parsed = createClientGoalSchema.safeParse(json);
 
   if (!parsed.success) {
     return NextResponse.json(
@@ -70,16 +63,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { checkInTime, checkOutTime, ...rest } = parsed.data;
+  const { deadline, ...rest } = parsed.data;
 
-  const attendance = await prisma.attendance.create({
+  const clientGoal = await prisma.clientGoal.create({
     data: {
       ...rest,
-      checkInTime: checkInTime ? new Date(checkInTime) : new Date(),
-      checkOutTime: checkOutTime ? new Date(checkOutTime) : undefined,
+      deadline: deadline ? new Date(deadline) : undefined,
     },
   });
 
-  return NextResponse.json(attendance, { status: 201 });
+  return NextResponse.json(clientGoal, { status: 201 });
 }
-

@@ -24,13 +24,26 @@ export async function GET(req: NextRequest) {
   }
 
   const { page, pageSize, search } = parsed.data;
-  const where = search
-    ? {
-        user: {
-          name: { contains: search, mode: "insensitive" },
-        },
-      }
-    : {};
+  const where =
+    search && search.trim().length > 0
+      ? {
+          client: {
+            user: {
+              name: { contains: search, mode: "insensitive" },
+            },
+          },
+        }
+      : {};
+
+  // Auto-mark expired memberships for all clients based on today's date
+  const now = new Date();
+  await prisma.clientMembership.updateMany({
+    where: {
+      status: "ACTIVE",
+      endDate: { lt: now },
+    },
+    data: { status: "EXPIRED" },
+  });
 
   const [total, memberships] = await Promise.all([
     prisma.clientMembership.count({ where }),
