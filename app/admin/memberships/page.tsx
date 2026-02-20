@@ -23,10 +23,9 @@ type MembershipRow = {
   id: string;
   name: string;
   type: string;
-  duration: number;
+  description?: string | null;
   price: number;
   status: string;
-  coachPrice?: number | null;
 };
 
 export default function AdminMembershipsPage() {
@@ -41,9 +40,8 @@ export default function AdminMembershipsPage() {
   const [formValues, setFormValues] = React.useState({
     name: "",
     type: "BASIC",
-    duration: "",
+    description: "",
     price: "",
-    coachPrice: "",
     status: "ACTIVE",
   });
   const [saving, setSaving] = React.useState(false);
@@ -68,13 +66,9 @@ export default function AdminMembershipsPage() {
             id: m.id as string,
             name: m.name as string,
             type: m.type as string,
-            duration: m.duration as number,
+            description: (m.description as string | null | undefined) ?? null,
             price: m.price as number,
             status: m.status as string,
-            coachPrice:
-              m.features && typeof m.features === "object"
-                ? (m.features.coachPrice as number | null | undefined) ?? null
-                : null,
           })),
         );
         setTotal(json.total ?? 0);
@@ -95,9 +89,8 @@ export default function AdminMembershipsPage() {
     setFormValues({
       name: "",
       type: "BASIC",
-      duration: "",
+      description: "",
       price: "",
-      coachPrice: "",
       status: "ACTIVE",
     });
     setDialogOpen(true);
@@ -108,16 +101,15 @@ export default function AdminMembershipsPage() {
     setFormValues({
       name: row.name,
       type: row.type,
-      duration: String(row.duration),
+      description: row.description ?? "",
       price: String(row.price),
-      coachPrice: row.coachPrice != null ? String(row.coachPrice) : "",
       status: row.status,
     });
     setDialogOpen(true);
   };
 
   const handleFormChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormValues((prev) => ({ ...prev, [name]: value }));
@@ -127,38 +119,31 @@ export default function AdminMembershipsPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      const coachPriceNumber =
-        formValues.coachPrice && formValues.coachPrice.trim().length > 0
-          ? parseFloat(formValues.coachPrice)
-          : undefined;
-
       const payload: any = {
-        name: formValues.name,
+        name: formValues.name.trim(),
         type: formValues.type,
-        duration: parseInt(formValues.duration, 10),
         price: parseFloat(formValues.price),
         status: formValues.status,
       };
-
-      if (coachPriceNumber != null && !Number.isNaN(coachPriceNumber)) {
-        payload.features = { coachPrice: coachPriceNumber };
+      if (formValues.description.trim()) {
+        payload.description = formValues.description.trim();
       }
 
-      if (editingMembership) {
-        await fetch(`/api/admin/memberships/${editingMembership.id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        toast.success("Membership updated");
-      } else {
-        await fetch("/api/admin/memberships", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        toast.success("Membership created");
+      const url = editingMembership
+        ? `/api/admin/memberships/${editingMembership.id}`
+        : "/api/admin/memberships";
+      const res = await fetch(url, {
+        method: editingMembership ? "PATCH" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const json = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        toast.error((json as { error?: string }).error ?? "Failed to save membership");
+        return;
       }
+      toast.success(editingMembership ? "Membership updated" : "Membership created");
       setDialogOpen(false);
       await fetchData({ page: 1, search });
     } catch {
@@ -176,17 +161,15 @@ export default function AdminMembershipsPage() {
       render: (row) =>
         row.type.charAt(0) + row.type.slice(1).toLowerCase(),
     },
-    { key: "duration", header: "Duration (days)" },
     {
-      key: "price",
-      header: "Price (no coach)",
-      render: (row) => `₱${row.price.toLocaleString()}`,
+      key: "description",
+      header: "Description",
+      render: (row) => (row.description ? String(row.description).slice(0, 40) + (row.description.length > 40 ? "…" : "") : "—"),
     },
     {
-      key: "coachPrice",
-      header: "Price (with coach)",
-      render: (row) =>
-        row.coachPrice != null ? `₱${row.coachPrice.toLocaleString()}` : "—",
+      key: "price",
+      header: "Price",
+      render: (row) => `₱${row.price.toLocaleString()}`,
     },
     { key: "status", header: "Status" },
     {
@@ -330,10 +313,12 @@ export default function AdminMembershipsPage() {
                     onChange={handleFormChange}
                     className="h-7 w-full rounded-md border bg-transparent px-2 text-[11px]"
                   >
-                    <option value="BASIC">Basic</option>
-                    <option value="PREMIUM">Premium</option>
-                    <option value="VIP">VIP</option>
+                    <option value="BASIC">Basic (no coach)</option>
+                    <option value="PREMIUM">Premium (has coach)</option>
                   </select>
+                  <p className="text-[10px] text-muted-foreground">
+                    Basic is automatic; Premium includes a coach.
+                  </p>
                 </div>
                 <div className="space-y-1">
                   <label className="font-medium" htmlFor="status">
@@ -351,53 +336,33 @@ export default function AdminMembershipsPage() {
                   </select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <label className="font-medium" htmlFor="duration">
-                    Duration (days)
-                  </label>
-                  <Input
-                    id="duration"
-                    name="duration"
-                    type="number"
-                    min={1}
-                    value={formValues.duration}
-                    onChange={handleFormChange}
-                    className="h-7 text-[11px]"
-                    required
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-medium" htmlFor="price">
-                    Price without coach (₱)
-                  </label>
-                  <Input
-                    id="price"
-                    name="price"
-                    type="number"
-                    min={0}
-                    step="0.01"
-                    value={formValues.price}
-                    onChange={handleFormChange}
-                    className="h-7 text-[11px]"
-                    required
-                  />
-                </div>
+              <div className="space-y-1">
+                <label className="font-medium" htmlFor="description">
+                  Description (optional)
+                </label>
+                <textarea
+                  id="description"
+                  name="description"
+                  value={formValues.description}
+                  onChange={handleFormChange}
+                  className="h-16 w-full rounded-md border bg-background px-2 py-1 text-[11px]"
+                  placeholder="Details about this membership"
+                />
               </div>
               <div className="space-y-1">
-                <label className="font-medium" htmlFor="coachPrice">
-                  Price with coach (₱)
+                <label className="font-medium" htmlFor="price">
+                  Price (₱)
                 </label>
                 <Input
-                  id="coachPrice"
-                  name="coachPrice"
+                  id="price"
+                  name="price"
                   type="number"
                   min={0}
                   step="0.01"
-                  value={formValues.coachPrice}
+                  value={formValues.price}
                   onChange={handleFormChange}
                   className="h-7 text-[11px]"
-                  placeholder="e.g. 7500"
+                  required
                 />
               </div>
               <div className="flex justify-end gap-2 pt-2">

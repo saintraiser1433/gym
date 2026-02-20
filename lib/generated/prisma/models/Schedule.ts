@@ -65,6 +65,7 @@ export type ScheduleCountAggregateOutputType = {
   coachId: number
   capacity: number
   recurrence: number
+  allowedMembershipTypes: number
   _all: number
 }
 
@@ -108,6 +109,7 @@ export type ScheduleCountAggregateInputType = {
   coachId?: true
   capacity?: true
   recurrence?: true
+  allowedMembershipTypes?: true
   _all?: true
 }
 
@@ -206,6 +208,7 @@ export type ScheduleGroupByOutputType = {
   coachId: string | null
   capacity: number | null
   recurrence: string | null
+  allowedMembershipTypes: runtime.JsonValue | null
   _count: ScheduleCountAggregateOutputType | null
   _avg: ScheduleAvgAggregateOutputType | null
   _sum: ScheduleSumAggregateOutputType | null
@@ -240,6 +243,7 @@ export type ScheduleWhereInput = {
   coachId?: Prisma.StringNullableFilter<"Schedule"> | string | null
   capacity?: Prisma.IntNullableFilter<"Schedule"> | number | null
   recurrence?: Prisma.StringNullableFilter<"Schedule"> | string | null
+  allowedMembershipTypes?: Prisma.JsonNullableFilter<"Schedule">
   coach?: Prisma.XOR<Prisma.CoachProfileNullableScalarRelationFilter, Prisma.CoachProfileWhereInput> | null
   attendances?: Prisma.AttendanceListRelationFilter
 }
@@ -253,6 +257,7 @@ export type ScheduleOrderByWithRelationInput = {
   coachId?: Prisma.SortOrderInput | Prisma.SortOrder
   capacity?: Prisma.SortOrderInput | Prisma.SortOrder
   recurrence?: Prisma.SortOrderInput | Prisma.SortOrder
+  allowedMembershipTypes?: Prisma.SortOrderInput | Prisma.SortOrder
   coach?: Prisma.CoachProfileOrderByWithRelationInput
   attendances?: Prisma.AttendanceOrderByRelationAggregateInput
 }
@@ -269,6 +274,7 @@ export type ScheduleWhereUniqueInput = Prisma.AtLeast<{
   coachId?: Prisma.StringNullableFilter<"Schedule"> | string | null
   capacity?: Prisma.IntNullableFilter<"Schedule"> | number | null
   recurrence?: Prisma.StringNullableFilter<"Schedule"> | string | null
+  allowedMembershipTypes?: Prisma.JsonNullableFilter<"Schedule">
   coach?: Prisma.XOR<Prisma.CoachProfileNullableScalarRelationFilter, Prisma.CoachProfileWhereInput> | null
   attendances?: Prisma.AttendanceListRelationFilter
 }, "id">
@@ -282,6 +288,7 @@ export type ScheduleOrderByWithAggregationInput = {
   coachId?: Prisma.SortOrderInput | Prisma.SortOrder
   capacity?: Prisma.SortOrderInput | Prisma.SortOrder
   recurrence?: Prisma.SortOrderInput | Prisma.SortOrder
+  allowedMembershipTypes?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ScheduleCountOrderByAggregateInput
   _avg?: Prisma.ScheduleAvgOrderByAggregateInput
   _max?: Prisma.ScheduleMaxOrderByAggregateInput
@@ -301,6 +308,7 @@ export type ScheduleScalarWhereWithAggregatesInput = {
   coachId?: Prisma.StringNullableWithAggregatesFilter<"Schedule"> | string | null
   capacity?: Prisma.IntNullableWithAggregatesFilter<"Schedule"> | number | null
   recurrence?: Prisma.StringNullableWithAggregatesFilter<"Schedule"> | string | null
+  allowedMembershipTypes?: Prisma.JsonNullableWithAggregatesFilter<"Schedule">
 }
 
 export type ScheduleCreateInput = {
@@ -311,6 +319,7 @@ export type ScheduleCreateInput = {
   endTime: Date | string
   capacity?: number | null
   recurrence?: string | null
+  allowedMembershipTypes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   coach?: Prisma.CoachProfileCreateNestedOneWithoutSchedulesInput
   attendances?: Prisma.AttendanceCreateNestedManyWithoutScheduleInput
 }
@@ -324,6 +333,7 @@ export type ScheduleUncheckedCreateInput = {
   coachId?: string | null
   capacity?: number | null
   recurrence?: string | null
+  allowedMembershipTypes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutScheduleInput
 }
 
@@ -335,6 +345,7 @@ export type ScheduleUpdateInput = {
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recurrence?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowedMembershipTypes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   coach?: Prisma.CoachProfileUpdateOneWithoutSchedulesNestedInput
   attendances?: Prisma.AttendanceUpdateManyWithoutScheduleNestedInput
 }
@@ -348,6 +359,7 @@ export type ScheduleUncheckedUpdateInput = {
   coachId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recurrence?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowedMembershipTypes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutScheduleNestedInput
 }
 
@@ -360,6 +372,7 @@ export type ScheduleCreateManyInput = {
   coachId?: string | null
   capacity?: number | null
   recurrence?: string | null
+  allowedMembershipTypes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type ScheduleUpdateManyMutationInput = {
@@ -370,6 +383,7 @@ export type ScheduleUpdateManyMutationInput = {
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recurrence?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowedMembershipTypes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type ScheduleUncheckedUpdateManyInput = {
@@ -381,6 +395,7 @@ export type ScheduleUncheckedUpdateManyInput = {
   coachId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recurrence?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowedMembershipTypes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type ScheduleListRelationFilter = {
@@ -402,6 +417,7 @@ export type ScheduleCountOrderByAggregateInput = {
   coachId?: Prisma.SortOrder
   capacity?: Prisma.SortOrder
   recurrence?: Prisma.SortOrder
+  allowedMembershipTypes?: Prisma.SortOrder
 }
 
 export type ScheduleAvgOrderByAggregateInput = {
@@ -509,6 +525,7 @@ export type ScheduleCreateWithoutCoachInput = {
   endTime: Date | string
   capacity?: number | null
   recurrence?: string | null
+  allowedMembershipTypes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   attendances?: Prisma.AttendanceCreateNestedManyWithoutScheduleInput
 }
 
@@ -520,6 +537,7 @@ export type ScheduleUncheckedCreateWithoutCoachInput = {
   endTime: Date | string
   capacity?: number | null
   recurrence?: string | null
+  allowedMembershipTypes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   attendances?: Prisma.AttendanceUncheckedCreateNestedManyWithoutScheduleInput
 }
 
@@ -561,6 +579,7 @@ export type ScheduleScalarWhereInput = {
   coachId?: Prisma.StringNullableFilter<"Schedule"> | string | null
   capacity?: Prisma.IntNullableFilter<"Schedule"> | number | null
   recurrence?: Prisma.StringNullableFilter<"Schedule"> | string | null
+  allowedMembershipTypes?: Prisma.JsonNullableFilter<"Schedule">
 }
 
 export type ScheduleCreateWithoutAttendancesInput = {
@@ -571,6 +590,7 @@ export type ScheduleCreateWithoutAttendancesInput = {
   endTime: Date | string
   capacity?: number | null
   recurrence?: string | null
+  allowedMembershipTypes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   coach?: Prisma.CoachProfileCreateNestedOneWithoutSchedulesInput
 }
 
@@ -583,6 +603,7 @@ export type ScheduleUncheckedCreateWithoutAttendancesInput = {
   coachId?: string | null
   capacity?: number | null
   recurrence?: string | null
+  allowedMembershipTypes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type ScheduleCreateOrConnectWithoutAttendancesInput = {
@@ -609,6 +630,7 @@ export type ScheduleUpdateWithoutAttendancesInput = {
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recurrence?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowedMembershipTypes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   coach?: Prisma.CoachProfileUpdateOneWithoutSchedulesNestedInput
 }
 
@@ -621,6 +643,7 @@ export type ScheduleUncheckedUpdateWithoutAttendancesInput = {
   coachId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recurrence?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowedMembershipTypes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type ScheduleCreateManyCoachInput = {
@@ -631,6 +654,7 @@ export type ScheduleCreateManyCoachInput = {
   endTime: Date | string
   capacity?: number | null
   recurrence?: string | null
+  allowedMembershipTypes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type ScheduleUpdateWithoutCoachInput = {
@@ -641,6 +665,7 @@ export type ScheduleUpdateWithoutCoachInput = {
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recurrence?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowedMembershipTypes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   attendances?: Prisma.AttendanceUpdateManyWithoutScheduleNestedInput
 }
 
@@ -652,6 +677,7 @@ export type ScheduleUncheckedUpdateWithoutCoachInput = {
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recurrence?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowedMembershipTypes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   attendances?: Prisma.AttendanceUncheckedUpdateManyWithoutScheduleNestedInput
 }
 
@@ -663,6 +689,7 @@ export type ScheduleUncheckedUpdateManyWithoutCoachInput = {
   endTime?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capacity?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   recurrence?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  allowedMembershipTypes?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 
@@ -705,6 +732,7 @@ export type ScheduleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   coachId?: boolean
   capacity?: boolean
   recurrence?: boolean
+  allowedMembershipTypes?: boolean
   coach?: boolean | Prisma.Schedule$coachArgs<ExtArgs>
   attendances?: boolean | Prisma.Schedule$attendancesArgs<ExtArgs>
   _count?: boolean | Prisma.ScheduleCountOutputTypeDefaultArgs<ExtArgs>
@@ -719,6 +747,7 @@ export type ScheduleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   coachId?: boolean
   capacity?: boolean
   recurrence?: boolean
+  allowedMembershipTypes?: boolean
   coach?: boolean | Prisma.Schedule$coachArgs<ExtArgs>
 }, ExtArgs["result"]["schedule"]>
 
@@ -731,6 +760,7 @@ export type ScheduleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   coachId?: boolean
   capacity?: boolean
   recurrence?: boolean
+  allowedMembershipTypes?: boolean
   coach?: boolean | Prisma.Schedule$coachArgs<ExtArgs>
 }, ExtArgs["result"]["schedule"]>
 
@@ -743,9 +773,10 @@ export type ScheduleSelectScalar = {
   coachId?: boolean
   capacity?: boolean
   recurrence?: boolean
+  allowedMembershipTypes?: boolean
 }
 
-export type ScheduleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "type" | "startTime" | "endTime" | "coachId" | "capacity" | "recurrence", ExtArgs["result"]["schedule"]>
+export type ScheduleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "type" | "startTime" | "endTime" | "coachId" | "capacity" | "recurrence" | "allowedMembershipTypes", ExtArgs["result"]["schedule"]>
 export type ScheduleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   coach?: boolean | Prisma.Schedule$coachArgs<ExtArgs>
   attendances?: boolean | Prisma.Schedule$attendancesArgs<ExtArgs>
@@ -773,6 +804,7 @@ export type $SchedulePayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     coachId: string | null
     capacity: number | null
     recurrence: string | null
+    allowedMembershipTypes: runtime.JsonValue | null
   }, ExtArgs["result"]["schedule"]>
   composites: {}
 }
@@ -1206,6 +1238,7 @@ export interface ScheduleFieldRefs {
   readonly coachId: Prisma.FieldRef<"Schedule", 'String'>
   readonly capacity: Prisma.FieldRef<"Schedule", 'Int'>
   readonly recurrence: Prisma.FieldRef<"Schedule", 'String'>
+  readonly allowedMembershipTypes: Prisma.FieldRef<"Schedule", 'Json'>
 }
     
 

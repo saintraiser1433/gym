@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
+import { createNotification } from "@/lib/notifications";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -61,10 +62,19 @@ export async function POST(_req: Request, { params }: Params) {
     return NextResponse.json({ error: "Membership plan not found" }, { status: 400 });
   }
 
+  const getClientUserId = async () => {
+    const client = await prisma.clientProfile.findUnique({
+      where: { id: payment.clientId },
+      select: { userId: true },
+    });
+    return client?.userId ?? null;
+  };
+
   if (payment.type === "MEMBERSHIP") {
     const startDate = new Date();
     const endDate = new Date(startDate);
-    endDate.setDate(endDate.getDate() + membership.duration);
+    const durationDays = membership.duration ?? 30;
+    endDate.setDate(endDate.getDate() + durationDays);
 
     if (upgradeFromClientMembershipId) {
       // Upgrade existing membership instance instead of creating a new one
@@ -109,6 +119,16 @@ export async function POST(_req: Request, { params }: Params) {
         }),
       ]);
     }
+    const clientUserId = await getClientUserId();
+    if (clientUserId) {
+      await createNotification(
+        clientUserId,
+        "MEMBERSHIP_APPROVED",
+        "Payment approved",
+        `Your membership payment has been approved. You now have access to ${membership.name}.`,
+        { paymentId: id, membershipId },
+      );
+    }
   } else if (payment.type === "RENEWAL") {
     if (!clientMembershipId) {
       return NextResponse.json(
@@ -127,7 +147,8 @@ export async function POST(_req: Request, { params }: Params) {
 
       const startDate = new Date();
       const endDate = new Date(startDate);
-      endDate.setDate(endDate.getDate() + membership.duration);
+      const durationDays = membership.duration ?? 30;
+      endDate.setDate(endDate.getDate() + durationDays);
 
       const updatedMembership = await tx.clientMembership.update({
         where: { id: clientMembershipId! },
@@ -153,6 +174,17 @@ export async function POST(_req: Request, { params }: Params) {
 
       return renewal;
     });
+
+    const clientUserId = await getClientUserId();
+    if (clientUserId) {
+      await createNotification(
+        clientUserId,
+        "RENEWAL_APPROVED",
+        "Renewal approved",
+        `Your membership renewal payment has been approved. Your plan is now active.`,
+        { paymentId: id },
+      );
+    }
 
     return NextResponse.json({ success: true, renewal: result });
   } else {

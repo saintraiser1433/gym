@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { updateClientMembershipSchema } from "@/lib/validators/admin";
+import { createNotification } from "@/lib/notifications";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -27,7 +28,20 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     const clientMembership = await prisma.clientMembership.update({
       where: { id },
       data,
+      include: {
+        client: { select: { userId: true } },
+        membership: { select: { name: true } },
+      },
     });
+    if (data.status === "EXPIRED" && clientMembership.client?.userId) {
+      await createNotification(
+        clientMembership.client.userId,
+        "MEMBERSHIP_EXPIRED",
+        "Membership expired",
+        `Your membership (${clientMembership.membership?.name ?? "plan"}) has been marked as expired. You can renew from the Memberships page.`,
+        { clientMembershipId: id },
+      );
+    }
     return NextResponse.json(clientMembership);
   } catch {
     return NextResponse.json(

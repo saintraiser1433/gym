@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
+import { createNotification } from "@/lib/notifications";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -25,6 +26,20 @@ export async function POST(_req: Request, { params }: Params) {
     where: { id },
     data: { status: "FAILED" },
   });
+
+  const client = await prisma.clientProfile.findUnique({
+    where: { id: payment.clientId },
+    select: { userId: true },
+  });
+  if (client?.userId) {
+    await createNotification(
+      client.userId,
+      "PAYMENT_REJECTED",
+      "Payment rejected",
+      "Your membership payment was rejected. Please contact the gym or submit again with correct details.",
+      { paymentId: id },
+    );
+  }
 
   return NextResponse.json({ success: true });
 }

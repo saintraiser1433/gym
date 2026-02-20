@@ -1,11 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { DataTable, type Column } from "@/components/data-table";
+import { format, getDay, startOfWeek, startOfDay } from "date-fns";
+import { Calendar, dateFnsLocalizer } from "react-big-calendar";
+import "react-big-calendar/lib/css/react-big-calendar.css";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -19,81 +20,85 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-type ScheduleRow = {
+type ScheduleEvent = {
   id: string;
   title: string;
-  type: string;
-  startTime: string;
-  endTime: string;
-  startTimeRaw: string;
-  endTimeRaw: string;
-  coachId: string | null;
-  coachName: string;
-  capacity: number | null;
-  recurrence: string | null;
+  start: Date;
+  end: Date;
+  type?: string;
+  coachId?: string | null;
+  coachName?: string;
+  allowedMembershipTypes?: string[] | null;
 };
 
 type CoachOption = { id: string; name: string; email: string };
 
+const locales = { "en-US": undefined };
+const localizer = dateFnsLocalizer({
+  format,
+  getDay,
+  startOfWeek,
+  locales,
+});
+
 export default function AdminSchedulesPage() {
-  const [rows, setRows] = React.useState<ScheduleRow[]>([]);
-  const [page, setPage] = React.useState(1);
-  const [pageSize] = React.useState(10);
-  const [total, setTotal] = React.useState(0);
-  const [search, setSearch] = React.useState<string | undefined>();
+  const [events, setEvents] = React.useState<ScheduleEvent[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [coaches, setCoaches] = React.useState<CoachOption[]>([]);
   const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [editingSchedule, setEditingSchedule] = React.useState<ScheduleRow | null>(null);
+  const [editingSchedule, setEditingSchedule] = React.useState<ScheduleEvent | null>(null);
+  const [slotDate, setSlotDate] = React.useState<Date | null>(null);
   const [formValues, setFormValues] = React.useState({
     title: "",
     type: "CLASS",
     startTime: "",
     endTime: "",
     coachId: "",
-    capacity: "",
-    recurrence: "",
+    allowedMembershipTypes: [] as string[],
   });
   const [saving, setSaving] = React.useState(false);
 
-  const fetchData = React.useCallback(
-    async (opts?: { page?: number; search?: string }) => {
-      setLoading(true);
-      try {
-        const params = new URLSearchParams();
-        params.set("page", String(opts?.page ?? page));
-        params.set("pageSize", String(pageSize));
-        if (opts?.search ?? search) {
-          params.set("search", (opts?.search ?? search) as string);
-        }
-        const res = await fetch(`/api/admin/schedules?${params.toString()}`, {
-          cache: "no-store",
-        });
-        const json = await res.json();
-        const data = json.data ?? [];
-        setRows(
-          data.map((s: any) => ({
-            id: s.id,
-            title: s.title,
-            type: s.type,
-            startTime: new Date(s.startTime).toLocaleString(),
-            endTime: new Date(s.endTime).toLocaleString(),
-            startTimeRaw: new Date(s.startTime).toISOString().slice(0, 16),
-            endTimeRaw: new Date(s.endTime).toISOString().slice(0, 16),
-            coachId: s.coachId ?? null,
-            coachName: s.coach?.user?.name ?? "Unassigned",
-            capacity: s.capacity ?? null,
-            recurrence: s.recurrence ?? null,
-          })),
-        );
-        setTotal(json.total ?? 0);
-        if (opts?.page) setPage(opts.page);
-      } finally {
-        setLoading(false);
-      }
+  const scheduleToEvent = (
+    s: {
+      id: string;
+      title?: string;
+      type?: string;
+      startTime?: string;
+      endTime?: string;
+      coachId?: string | null;
+      coach?: { user?: { name?: string } };
+      allowedMembershipTypes?: unknown;
     },
-    [page, pageSize, search],
-  );
+  ): ScheduleEvent => ({
+    id: s.id,
+    title: s.title ?? "Session",
+    start: s.startTime ? new Date(s.startTime) : new Date(),
+    end: s.endTime ? new Date(s.endTime) : new Date(),
+    type: s.type,
+    coachId: s.coachId,
+    coachName: s.coach?.user?.name ?? "Unassigned",
+    allowedMembershipTypes: Array.isArray(s.allowedMembershipTypes)
+      ? (s.allowedMembershipTypes as string[])
+      : null,
+  });
+
+  const fetchData = React.useCallback(async (options?: { silent?: boolean }) => {
+    if (!options?.silent) setLoading(true);
+    try {
+      const res = await fetch("/api/admin/schedules?page=1&pageSize=500", {
+        cache: "no-store",
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        toast.error((json as { error?: string }).error ?? "Failed to load schedules");
+        return;
+      }
+      const data = json.data ?? [];
+      setEvents(data.map((s: Parameters<typeof scheduleToEvent>[0]) => scheduleToEvent(s)));
+    } finally {
+      if (!options?.silent) setLoading(false);
+    }
+  }, []);
 
   const fetchCoaches = React.useCallback(async () => {
     try {
@@ -110,32 +115,30 @@ export default function AdminSchedulesPage() {
     void fetchCoaches();
   }, []);
 
-  const openNewDialog = () => {
+  const openNewDialogForSlot = (start: Date, end: Date) => {
     setEditingSchedule(null);
-    const now = new Date();
-    const end = new Date(now.getTime() + 60 * 60 * 1000);
+    setSlotDate(startOfDay(start));
     setFormValues({
       title: "",
       type: "CLASS",
-      startTime: now.toISOString().slice(0, 16),
-      endTime: end.toISOString().slice(0, 16),
+      startTime: format(start, "HH:mm"),
+      endTime: format(end, "HH:mm"),
       coachId: "",
-      capacity: "",
-      recurrence: "",
+      allowedMembershipTypes: [],
     });
     setDialogOpen(true);
   };
 
-  const openEditDialog = (row: ScheduleRow) => {
-    setEditingSchedule(row);
+  const openEditDialog = (event: ScheduleEvent) => {
+    setEditingSchedule(event);
+    setSlotDate(startOfDay(event.start));
     setFormValues({
-      title: row.title,
-      type: row.type,
-      startTime: row.startTimeRaw,
-      endTime: row.endTimeRaw,
-      coachId: row.coachId ?? "",
-      capacity: row.capacity != null ? String(row.capacity) : "",
-      recurrence: row.recurrence ?? "",
+      title: event.title,
+      type: (event as any).type ?? "CLASS",
+      startTime: format(event.start, "HH:mm"),
+      endTime: format(event.end, "HH:mm"),
+      coachId: (event as any).coachId ?? "",
+      allowedMembershipTypes: (event as any).allowedMembershipTypes ?? [],
     });
     setDialogOpen(true);
   };
@@ -147,39 +150,88 @@ export default function AdminSchedulesPage() {
     setFormValues((prev) => ({ ...prev, [name]: value }));
   };
 
+  const toggleMembershipType = (type: "BASIC" | "PREMIUM") => {
+    setFormValues((prev) => {
+      const current = prev.allowedMembershipTypes ?? [];
+      const exists = current.includes(type);
+      const next = exists ? current.filter((t) => t !== type) : [...current, type];
+      // When Premium is not allowed (Basic only), remove coach
+      const noPremium = !next.includes("PREMIUM");
+      return {
+        ...prev,
+        allowedMembershipTypes: next,
+        ...(noPremium ? { coachId: "" } : {}),
+      };
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const allowed = formValues.allowedMembershipTypes ?? [];
+    if (allowed.length === 0) {
+      toast.error("Select at least one allowed membership type (Basic or Premium).");
+      return;
+    }
     setSaving(true);
     try {
-      const start = new Date(formValues.startTime);
-      const end = new Date(formValues.endTime);
+      const baseDate = slotDate ?? startOfDay(new Date());
+      const [startHours, startMins] = formValues.startTime.split(":").map(Number);
+      const [endHours, endMins] = formValues.endTime.split(":").map(Number);
+      const start = new Date(baseDate);
+      start.setHours(startHours, startMins ?? 0, 0, 0);
+      const end = new Date(baseDate);
+      end.setHours(endHours, endMins ?? 0, 0, 0);
+      if (end <= start) end.setDate(end.getDate() + 1);
       const payload = {
         title: formValues.title,
         type: formValues.type,
         startTime: start.toISOString(),
         endTime: end.toISOString(),
-        coachId: formValues.coachId || undefined,
-        capacity: formValues.capacity ? parseInt(formValues.capacity, 10) : undefined,
-        recurrence: formValues.recurrence || undefined,
+        coachId: formValues.allowedMembershipTypes?.includes("PREMIUM")
+          ? formValues.coachId || undefined
+          : undefined,
+        allowedMembershipTypes: allowed,
       };
 
+      let res: Response;
       if (editingSchedule) {
-        await fetch(`/api/admin/schedules/${editingSchedule.id}`, {
+        res = await fetch(`/api/admin/schedules/${editingSchedule.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
-        toast.success("Schedule updated");
       } else {
-        await fetch("/api/admin/schedules", {
+        res = await fetch("/api/admin/schedules", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
-        toast.success("Schedule created");
       }
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        const message = (err as { error?: string }).error ?? "Failed to save schedule";
+        toast.error(message);
+        return;
+      }
+
+      const json = await res.json();
+      const newEvent = scheduleToEvent(json);
+
+      if (editingSchedule) {
+        setEvents((prev) =>
+          prev.map((e) => (e.id === editingSchedule.id ? newEvent : e)),
+        );
+      } else {
+        setEvents((prev) => [
+          { ...newEvent, start, end },
+          ...prev,
+        ]);
+      }
+
+      toast.success(editingSchedule ? "Schedule updated" : "Schedule created");
       setDialogOpen(false);
-      await fetchData({ page: 1, search });
+      await fetchData({ silent: true });
     } catch {
       toast.error("Failed to save schedule");
     } finally {
@@ -187,120 +239,63 @@ export default function AdminSchedulesPage() {
     }
   };
 
-  const columns: Column<ScheduleRow>[] = [
-    { key: "title", header: "Title" },
-    {
-      key: "type",
-      header: "Type",
-      render: (row) =>
-        row.type
-          .split("_")
-          .map((p) => p.charAt(0) + p.slice(1).toLowerCase())
-          .join(" "),
-    },
-    { key: "coachName", header: "Coach" },
-    { key: "startTime", header: "Start Time" },
-    { key: "endTime", header: "End Time" },
-    {
-      key: "capacity",
-      header: "Capacity",
-      render: (row) => (row.capacity ?? "—"),
-    },
-    {
-      key: "id",
-      header: "Actions",
-      render: (row) => (
-        <div className="flex items-center gap-1">
-          <Button
-            size="xs"
-            variant="outline"
-            className="h-7 w-7 p-0"
-            aria-label={`Edit ${row.title}`}
-            onClick={() => openEditDialog(row)}
-          >
-            <Pencil className="h-3.5 w-3.5" />
-          </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                size="xs"
-                variant="outline"
-                className="h-7 w-7 p-0"
-                aria-label={`Delete ${row.title}`}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle className="text-sm">
-                  Delete schedule?
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will remove &quot;{row.title}&quot;. This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel className="h-7 px-2 text-[11px]">
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  className="h-7 px-3 text-[11px]"
-                  onClick={async () => {
-                    setLoading(true);
-                    try {
-                      await fetch(`/api/admin/schedules/${row.id}`, {
-                        method: "DELETE",
-                      });
-                      await fetchData({ page, search });
-                      toast.success("Schedule deleted");
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}
-                >
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      ),
-    },
-  ];
+  const handleDelete = async (id: string) => {
+    setLoading(true);
+    try {
+      await fetch(`/api/admin/schedules/${id}`, { method: "DELETE" });
+      await fetchData();
+      toast.success("Schedule deleted");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const todayStart = startOfDay(new Date());
+  const handleSelectSlot = (slotInfo: { start: Date; end: Date }) => {
+    if (slotInfo.start < todayStart) return;
+    const end = slotInfo.end.getTime() - slotInfo.start.getTime() < 60 * 60 * 1000
+      ? new Date(slotInfo.start.getTime() + 60 * 60 * 1000)
+      : slotInfo.end;
+    openNewDialogForSlot(slotInfo.start, end);
+  };
+  const dayPropGetter = (date: Date) => {
+    if (date < todayStart) {
+      return { className: "rbc-past-disabled", style: { pointerEvents: "none" as const, opacity: 0.6 } };
+    }
+    return {};
+  };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold">Schedules</h1>
-          <p className="text-sm text-muted-foreground">
-            View and manage workout class schedules.
-          </p>
-        </div>
-        <Button
-          size="xs"
-          className="h-7 px-2 text-[11px]"
-          onClick={openNewDialog}
-        >
-          New Schedule
-        </Button>
+      <div>
+        <h1 className="text-lg font-semibold">Schedules</h1>
+        <p className="text-sm text-muted-foreground">
+          Click a date (today or later) to add a schedule. Click an event to edit.
+        </p>
       </div>
 
       <Card className="p-3">
-        <DataTable
-          columns={columns}
-          data={rows}
-          page={page}
-          pageSize={pageSize}
-          total={total}
-          isLoading={loading}
-          onPageChange={(newPage) => void fetchData({ page: newPage })}
-          onSearchChange={(value) => {
-            setSearch(value || undefined);
-            void fetchData({ page: 1, search: value });
-          }}
-        />
+        <div className="h-[600px]">
+          {loading ? (
+            <p className="text-sm text-muted-foreground">Loading calendar…</p>
+          ) : (
+            <Calendar
+              localizer={localizer}
+              events={events}
+              startAccessor="start"
+              endAccessor="end"
+              titleAccessor="title"
+              defaultView="month"
+              views={["month", "week", "day", "agenda"]}
+              popup
+              selectable
+              onSelectSlot={handleSelectSlot}
+              onSelectEvent={(event) => openEditDialog(event as ScheduleEvent)}
+              dayPropGetter={dayPropGetter}
+              className="rbc-calendar rounded-md border border-border bg-card text-foreground"
+            />
+          )}
+        </div>
       </Card>
 
       {dialogOpen && (
@@ -339,15 +334,20 @@ export default function AdminSchedulesPage() {
                   <option value="GYM_HOURS">Gym hours</option>
                 </select>
               </div>
+              {slotDate && (
+                <p className="text-[11px] text-muted-foreground">
+                  Date: {format(slotDate, "PPP")}
+                </p>
+              )}
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
                   <label className="font-medium" htmlFor="startTime">
-                    Start
+                    Start time
                   </label>
                   <Input
                     id="startTime"
                     name="startTime"
-                    type="datetime-local"
+                    type="time"
                     value={formValues.startTime}
                     onChange={handleFormChange}
                     className="h-7 text-[11px]"
@@ -356,12 +356,12 @@ export default function AdminSchedulesPage() {
                 </div>
                 <div className="space-y-1">
                   <label className="font-medium" htmlFor="endTime">
-                    End
+                    End time
                   </label>
                   <Input
                     id="endTime"
                     name="endTime"
-                    type="datetime-local"
+                    type="time"
                     value={formValues.endTime}
                     onChange={handleFormChange}
                     className="h-7 text-[11px]"
@@ -370,55 +370,93 @@ export default function AdminSchedulesPage() {
                 </div>
               </div>
               <div className="space-y-1">
-                <label className="font-medium" htmlFor="coachId">
-                  Coach
+                <label className="font-medium">
+                  Allowed membership types <span className="text-destructive">*</span>
                 </label>
-                <select
-                  id="coachId"
-                  name="coachId"
-                  value={formValues.coachId}
-                  onChange={handleFormChange}
-                  className="h-7 w-full rounded-md border bg-transparent px-2 text-[11px]"
-                >
-                  <option value="">Unassigned</option>
-                  {coaches.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <label className="font-medium" htmlFor="capacity">
-                    Capacity
+                <p className="text-[10px] text-muted-foreground">
+                  Required: select at least one (Basic and/or Premium).
+                </p>
+                <div className="flex flex-wrap gap-2 text-[11px]">
+                  <label className="inline-flex items-center gap-1">
+                    <input
+                      type="checkbox"
+                      className="h-3 w-3"
+                      checked={formValues.allowedMembershipTypes.includes("BASIC")}
+                      onChange={() => toggleMembershipType("BASIC")}
+                    />
+                    <span>Basic</span>
                   </label>
-                  <Input
-                    id="capacity"
-                    name="capacity"
-                    type="number"
-                    min={1}
-                    value={formValues.capacity}
-                    onChange={handleFormChange}
-                    className="h-7 text-[11px]"
-                    placeholder="Optional"
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className="font-medium" htmlFor="recurrence">
-                    Recurrence
+                  <label className="inline-flex items-center gap-1">
+                    <input
+                      type="checkbox"
+                      className="h-3 w-3"
+                      checked={formValues.allowedMembershipTypes.includes("PREMIUM")}
+                      onChange={() => toggleMembershipType("PREMIUM")}
+                    />
+                    <span>Premium</span>
                   </label>
-                  <Input
-                    id="recurrence"
-                    name="recurrence"
-                    value={formValues.recurrence}
-                    onChange={handleFormChange}
-                    className="h-7 text-[11px]"
-                    placeholder="e.g. Weekly"
-                  />
                 </div>
               </div>
+              {formValues.allowedMembershipTypes.includes("PREMIUM") && (
+                <div className="space-y-1">
+                  <label className="font-medium" htmlFor="coachId">
+                    Coach
+                  </label>
+                  <select
+                    id="coachId"
+                    name="coachId"
+                    value={formValues.coachId}
+                    onChange={handleFormChange}
+                    className="h-7 w-full rounded-md border bg-transparent px-2 text-[11px]"
+                  >
+                    <option value="">Unassigned</option>
+                    {coaches.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="flex justify-end gap-2 pt-2">
+                {editingSchedule && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        type="button"
+                        size="xs"
+                        variant="outline"
+                        className="h-7 px-2 text-[11px] text-destructive"
+                      >
+                        Delete
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle className="text-sm">
+                          Delete schedule?
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will remove &quot;{editingSchedule.title}&quot;. This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel className="h-7 px-2 text-[11px]">
+                          Cancel
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                          className="h-7 px-3 text-[11px]"
+                          onClick={() => {
+                            void handleDelete(editingSchedule.id);
+                            setDialogOpen(false);
+                          }}
+                        >
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
                 <Button
                   type="button"
                   size="xs"

@@ -83,7 +83,7 @@ function getNavItems(role?: string): NavItem[] {
       },
       {
         title: "Workouts",
-        url: "/admin/exercises",
+        url: "/admin/workouts",
         icon: Dumbbell,
       },
       {
@@ -96,18 +96,9 @@ function getNavItems(role?: string): NavItem[] {
 
   if (role === "COACH") {
     return [
-      {
-        title: "Coach",
-        url: "/coach/dashboard",
-        icon: Users,
-        isActive: true,
-        items: [
-          { title: "Dashboard", url: "/coach/dashboard" },
-          { title: "Clients", url: "/coach/clients" },
-          { title: "Workouts", url: "/coach/workouts" },
-          { title: "Schedules", url: "/coach/schedules" },
-        ],
-      },
+      { title: "My Dashboard", url: "/coach/dashboard", icon: LayoutDashboard, isActive: true },
+      { title: "My Clients", url: "/coach/clients", icon: Users },
+      { title: "Schedules", url: "/coach/schedules", icon: CalendarClock },
     ]
   }
 
@@ -120,8 +111,8 @@ function getNavItems(role?: string): NavItem[] {
         isActive: true,
       },
       { title: "Memberships", url: "/client/memberships", icon: CreditCard },
-      { title: "Workouts", url: "/client/workouts", icon: Dumbbell },
       { title: "Goals", url: "/client/goals", icon: Activity },
+      { title: "Schedules", url: "/client/schedules", icon: CalendarClock },
       { title: "Check-in", url: "/client/checkin", icon: CalendarClock },
       { title: "Attendance", url: "/client/attendance", icon: CalendarClock },
       { title: "Payments", url: "/client/payments", icon: CreditCard },

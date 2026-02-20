@@ -54,10 +54,18 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const { description, ...dataWithoutDescription } = parsed.data;
   const membership = await prisma.membership.create({
-    data: parsed.data,
+    data: dataWithoutDescription,
   });
-
-  return NextResponse.json(membership, { status: 201 });
+  if (description != null && description !== "") {
+    await prisma.$executeRaw`
+      UPDATE "Membership" SET "description" = ${description} WHERE id = ${membership.id}
+    `;
+  }
+  const created = await prisma.membership.findUnique({
+    where: { id: membership.id },
+  });
+  return NextResponse.json(created ?? membership, { status: 201 });
 }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { Inbox } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,8 @@ type DataTableProps<T> = {
   pageSizeOptions?: number[];
   onSearchChange?: (value: string) => void;
   isLoading?: boolean;
+  /** Shown in the center of the table when there is no data (with icon). */
+  emptyMessage?: string;
 };
 
 export function DataTable<T extends { id: string | number }>({
@@ -35,6 +38,7 @@ export function DataTable<T extends { id: string | number }>({
   pageSizeOptions = [10, 25, 50],
   onSearchChange,
   isLoading,
+  emptyMessage = "No records found.",
 }: DataTableProps<T>) {
   const [search, setSearch] = React.useState("");
   const pageCount = Math.max(1, Math.ceil(total / pageSize));
@@ -45,7 +49,7 @@ export function DataTable<T extends { id: string | number }>({
   };
 
   return (
-    <div className="space-y-3">
+    <div className="w-full space-y-3">
       <form
         onSubmit={handleSearchSubmit}
         className="flex items-center gap-1 text-[11px]"
@@ -61,7 +65,7 @@ export function DataTable<T extends { id: string | number }>({
         </Button>
       </form>
 
-      <Table>
+      <Table className="w-full">
         <TableHeader>
           <TableRow>
             {columns.map((col) => (
@@ -76,7 +80,15 @@ export function DataTable<T extends { id: string | number }>({
             </TableRow>
           ) : data.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={columns.length}>No records found.</TableCell>
+              <TableCell
+                colSpan={columns.length}
+                className="h-48 w-full text-center align-middle"
+              >
+                <div className="flex w-full flex-col items-center justify-center gap-2 text-muted-foreground">
+                  <Inbox className="size-10 shrink-0 opacity-50" />
+                  <p className="text-sm font-medium">{emptyMessage}</p>
+                </div>
+              </TableCell>
             </TableRow>
           ) : (
             data.map((row) => (

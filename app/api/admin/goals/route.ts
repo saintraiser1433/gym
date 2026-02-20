@@ -36,6 +36,9 @@ export async function GET(req: NextRequest) {
       orderBy: { name: "asc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
+      include: {
+        workouts: { select: { id: true, name: true } },
+      },
     }),
   ]);
 
@@ -54,10 +57,25 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const { workoutIds = [], name, description, category } = parsed.data;
+
   const goal = await prisma.workoutGoal.create({
-    data: parsed.data,
+    data: { name, description: description ?? undefined, category },
   });
 
-  return NextResponse.json(goal, { status: 201 });
+  if (workoutIds.length > 0) {
+    await prisma.workoutGoal.update({
+      where: { id: goal.id },
+      data: {
+        workouts: { set: workoutIds.map((id) => ({ id })) },
+      },
+    });
+  }
+
+  const withWorkouts = await prisma.workoutGoal.findUnique({
+    where: { id: goal.id },
+    include: { workouts: { select: { id: true, name: true } } },
+  });
+  return NextResponse.json(withWorkouts ?? goal, { status: 201 });
 }
 

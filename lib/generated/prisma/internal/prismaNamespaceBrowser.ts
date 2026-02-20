@@ -134,6 +134,7 @@ export const MembershipScalarFieldEnum = {
   name: 'name',
   type: 'type',
   duration: 'duration',
+  description: 'description',
   price: 'price',
   hasCoach: 'hasCoach',
   features: 'features',
@@ -211,7 +212,8 @@ export const WorkoutScalarFieldEnum = {
   createdById: 'createdById',
   targetGoals: 'targetGoals',
   duration: 'duration',
-  difficulty: 'difficulty'
+  difficulty: 'difficulty',
+  demoMediaUrl: 'demoMediaUrl'
 } as const
 
 export type WorkoutScalarFieldEnum = (typeof WorkoutScalarFieldEnum)[keyof typeof WorkoutScalarFieldEnum]
@@ -268,7 +270,8 @@ export const ScheduleScalarFieldEnum = {
   endTime: 'endTime',
   coachId: 'coachId',
   capacity: 'capacity',
-  recurrence: 'recurrence'
+  recurrence: 'recurrence',
+  allowedMembershipTypes: 'allowedMembershipTypes'
 } as const
 
 export type ScheduleScalarFieldEnum = (typeof ScheduleScalarFieldEnum)[keyof typeof ScheduleScalarFieldEnum]

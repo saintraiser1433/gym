@@ -549,6 +549,14 @@ export type WorkoutExerciseUncheckedUpdateManyWithoutWorkoutNestedInput = {
   deleteMany?: Prisma.WorkoutExerciseScalarWhereInput | Prisma.WorkoutExerciseScalarWhereInput[]
 }
 
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type WorkoutExerciseCreateNestedOneWithoutProgressEntriesInput = {
   create?: Prisma.XOR<Prisma.WorkoutExerciseCreateWithoutProgressEntriesInput, Prisma.WorkoutExerciseUncheckedCreateWithoutProgressEntriesInput>
   connectOrCreate?: Prisma.WorkoutExerciseCreateOrConnectWithoutProgressEntriesInput

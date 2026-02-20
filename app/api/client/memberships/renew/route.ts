@@ -3,13 +3,13 @@ import { promises as fs } from "fs";
 import path from "path";
 import { prisma } from "@/lib/db";
 import { requireClient } from "@/lib/auth";
+import { notifyAdmins } from "@/lib/notifications";
 import { z } from "zod";
 
 const renewSchema = z.object({
   clientMembershipId: z.string().min(1),
   method: z.enum(["CASH", "GCASH"]),
   reference: z.string().trim().optional(),
-  variant: z.enum(["NO_COACH", "WITH_COACH"]).default("NO_COACH"),
 });
 
 export async function POST(req: NextRequest) {
@@ -30,13 +30,11 @@ export async function POST(req: NextRequest) {
   const reference = formData.get("reference")
     ? String(formData.get("reference"))
     : undefined;
-  const variant = String(formData.get("variant") ?? "NO_COACH");
 
   const parsed = renewSchema.safeParse({
     clientMembershipId,
     method,
     reference,
-    variant,
   });
   if (!parsed.success) {
     return NextResponse.json(
@@ -76,25 +74,14 @@ export async function POST(req: NextRequest) {
     proofUrl = `/uploads/payments/${fileName}`;
   }
 
-  // Determine price based on variant
   const membership = clientMembership.membership;
-  let amount = membership.price;
-  let withCoach = false;
-  if (parsed.data.variant === "WITH_COACH") {
-    const features = (membership.features ?? {}) as any;
-    if (features && typeof features === "object" && features.coachPrice != null) {
-      amount = Number(features.coachPrice);
-      withCoach = true;
-    }
-  }
+  const amount = membership.price;
 
   const refPayload = {
     clientMembershipId: parsed.data.clientMembershipId,
     membershipId: clientMembership.membershipId,
     reference: parsed.data.reference ?? null,
     proofUrl,
-    variant: parsed.data.variant,
-    withCoach,
   };
 
   const payment = await prisma.payment.create({
@@ -107,6 +94,17 @@ export async function POST(req: NextRequest) {
       referenceId: JSON.stringify(refPayload),
     },
   });
+
+  const clientName = (await prisma.clientProfile.findUnique({
+    where: { id: profile.id },
+    select: { user: { select: { name: true } } },
+  }))?.user?.name;
+  await notifyAdmins(
+    "RENEWAL_APPLICATION",
+    "Membership renewal request",
+    `${clientName ?? "A client"} submitted a renewal for ${membership.name}. Approve or reject in Payments.`,
+    { paymentId: payment.id },
+  );
 
   return NextResponse.json({ data: payment }, { status: 201 });
 }

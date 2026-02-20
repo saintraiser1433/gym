@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Archivo, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AppSessionProvider } from "@/components/session-provider";
+import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/toaster";
 
 const archivo = Archivo({
@@ -25,12 +26,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${archivo.className} ${archivo.variable} ${geistMono.variable} antialiased`}
       >
-        <AppSessionProvider>{children}</AppSessionProvider>
-        <Toaster richColors position="top-right" closeButton />
+        <ThemeProvider>
+          <AppSessionProvider>{children}</AppSessionProvider>
+          <Toaster richColors position="top-right" closeButton />
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -3,13 +3,13 @@ import { promises as fs } from "fs";
 import path from "path";
 import { prisma } from "@/lib/db";
 import { requireClient } from "@/lib/auth";
+import { notifyAdmins } from "@/lib/notifications";
 import { z } from "zod";
 
 const applySchema = z.object({
   membershipId: z.string().min(1),
   method: z.enum(["CASH", "GCASH"]),
   reference: z.string().trim().optional(), // e.g. GCash reference number
-  variant: z.enum(["NO_COACH", "WITH_COACH"]).default("NO_COACH"),
   upgradeFromClientMembershipId: z.string().min(1).optional(),
 });
 
@@ -31,7 +31,6 @@ export async function POST(req: NextRequest) {
   const reference = formData.get("reference")
     ? String(formData.get("reference"))
     : undefined;
-  const variant = String(formData.get("variant") ?? "NO_COACH");
   const upgradeFromClientMembershipId = formData.get(
     "upgradeFromClientMembershipId",
   )
@@ -42,7 +41,6 @@ export async function POST(req: NextRequest) {
     membershipId,
     method,
     reference,
-    variant,
     upgradeFromClientMembershipId,
   });
   if (!parsed.success) {
@@ -74,24 +72,13 @@ export async function POST(req: NextRequest) {
     proofUrl = `/uploads/payments/${fileName}`;
   }
 
-  // Determine price based on variant (no coach vs with coach)
-  let amount = membership.price;
-  let withCoach = false;
-  if (parsed.data.variant === "WITH_COACH") {
-    const features = (membership.features ?? {}) as any;
-    if (features && typeof features === "object" && features.coachPrice != null) {
-      amount = Number(features.coachPrice);
-      withCoach = true;
-    }
-  }
+  // Single price per membership (Basic = no coach, Premium = includes coach)
+  const amount = membership.price;
 
-  // Store metadata (membershipId, reference, proofUrl, variant, withCoach) as JSON
   const refPayload = {
     membershipId: parsed.data.membershipId,
     reference: parsed.data.reference ?? null,
     proofUrl,
-    variant: parsed.data.variant,
-    withCoach,
     upgradeFromClientMembershipId:
       parsed.data.upgradeFromClientMembershipId ?? null,
   };
@@ -106,6 +93,18 @@ export async function POST(req: NextRequest) {
       referenceId: JSON.stringify(refPayload),
     },
   });
+
+  const clientName = (await prisma.clientProfile.findUnique({
+    where: { id: profile.id },
+    select: { user: { select: { name: true } } },
+  }))?.user?.name;
+  const isUpgrade = !!parsed.data.upgradeFromClientMembershipId;
+  await notifyAdmins(
+    "MEMBERSHIP_APPLICATION",
+    isUpgrade ? "Membership upgrade request" : "New membership application",
+    `${clientName ?? "A client"} ${isUpgrade ? "requested a membership upgrade" : "applied for a membership"} (${membership.name}). Approve or reject in Payments.`,
+    { paymentId: payment.id },
+  );
 
   return NextResponse.json({ data: payment }, { status: 201 });
 }

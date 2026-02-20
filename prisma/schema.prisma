@@ -66,14 +66,15 @@ model CoachProfile {
 }
 
 model Membership {
-  id       String           @id @default(cuid())
-  name     String
-  type     MembershipType
-  duration Int              // in days
-  price    Float
-  hasCoach Boolean          @default(false)
-  features Json?
-  status   MembershipStatus @default(ACTIVE)
+  id          String           @id @default(cuid())
+  name        String
+  type        MembershipType
+  duration    Int?             // in days (optional)
+  description String?          // details about the membership
+  price       Float
+  hasCoach    Boolean          @default(false)
+  features    Json?
+  status      MembershipStatus @default(ACTIVE)
 
   clientMemberships ClientMembership[]
 }
@@ -111,6 +112,7 @@ model WorkoutGoal {
   category    WorkoutGoalCategory
 
   clientGoals ClientGoal[]
+  workouts    Workout[]
 }
 
 model ClientGoal {
@@ -141,17 +143,19 @@ model Exercise {
 }
 
 model Workout {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  createdById String
-  targetGoals String?
-  duration    Int?     // minutes
-  difficulty  String?
+  id             String   @id @default(cuid())
+  name           String
+  description    String?
+  createdById    String?  // optional: admin-created workouts have null; coach-created have coach id
+  targetGoals    String?
+  duration       Int?     // minutes
+  difficulty     String?
+  demoMediaUrl   String?  // GIF or video URL for how to perform the workout
 
-  createdBy   CoachProfile      @relation(fields: [createdById], references: [id])
+  createdBy   CoachProfile?     @relation(fields: [createdById], references: [id])
   exercises   WorkoutExercise[]
   assignments WorkoutAssignment[]
+  goals       WorkoutGoal[]
 }
 
 model WorkoutExercise {
@@ -210,6 +214,7 @@ model Schedule {
   coachId    String?
   capacity   Int?
   recurrence String?
+  allowedMembershipTypes Json?
 
   coach      CoachProfile? @relation(fields: [coachId], references: [id])
   attendances Attendance[]
@@ -286,7 +291,6 @@ enum UserStatus {
 enum MembershipType {
   BASIC
   PREMIUM
-  VIP
 }
 
 enum MembershipStatus {

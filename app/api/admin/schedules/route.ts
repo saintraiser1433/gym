@@ -57,13 +57,14 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { startTime, endTime, ...rest } = parsed.data;
+  const { startTime, endTime, coachId, ...rest } = parsed.data;
 
   const schedule = await prisma.schedule.create({
     data: {
       ...rest,
       startTime: new Date(startTime),
       endTime: new Date(endTime),
+      ...(coachId ? { coach: { connect: { id: coachId } } } : {}),
     },
   });
 

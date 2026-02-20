@@ -41,6 +41,7 @@ export type MembershipMinAggregateOutputType = {
   name: string | null
   type: $Enums.MembershipType | null
   duration: number | null
+  description: string | null
   price: number | null
   hasCoach: boolean | null
   status: $Enums.MembershipStatus | null
@@ -51,6 +52,7 @@ export type MembershipMaxAggregateOutputType = {
   name: string | null
   type: $Enums.MembershipType | null
   duration: number | null
+  description: string | null
   price: number | null
   hasCoach: boolean | null
   status: $Enums.MembershipStatus | null
@@ -61,6 +63,7 @@ export type MembershipCountAggregateOutputType = {
   name: number
   type: number
   duration: number
+  description: number
   price: number
   hasCoach: number
   features: number
@@ -84,6 +87,7 @@ export type MembershipMinAggregateInputType = {
   name?: true
   type?: true
   duration?: true
+  description?: true
   price?: true
   hasCoach?: true
   status?: true
@@ -94,6 +98,7 @@ export type MembershipMaxAggregateInputType = {
   name?: true
   type?: true
   duration?: true
+  description?: true
   price?: true
   hasCoach?: true
   status?: true
@@ -104,6 +109,7 @@ export type MembershipCountAggregateInputType = {
   name?: true
   type?: true
   duration?: true
+  description?: true
   price?: true
   hasCoach?: true
   features?: true
@@ -201,7 +207,8 @@ export type MembershipGroupByOutputType = {
   id: string
   name: string
   type: $Enums.MembershipType
-  duration: number
+  duration: number | null
+  description: string | null
   price: number
   hasCoach: boolean
   features: runtime.JsonValue | null
@@ -235,7 +242,8 @@ export type MembershipWhereInput = {
   id?: Prisma.StringFilter<"Membership"> | string
   name?: Prisma.StringFilter<"Membership"> | string
   type?: Prisma.EnumMembershipTypeFilter<"Membership"> | $Enums.MembershipType
-  duration?: Prisma.IntFilter<"Membership"> | number
+  duration?: Prisma.IntNullableFilter<"Membership"> | number | null
+  description?: Prisma.StringNullableFilter<"Membership"> | string | null
   price?: Prisma.FloatFilter<"Membership"> | number
   hasCoach?: Prisma.BoolFilter<"Membership"> | boolean
   features?: Prisma.JsonNullableFilter<"Membership">
@@ -247,7 +255,8 @@ export type MembershipOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   type?: Prisma.SortOrder
-  duration?: Prisma.SortOrder
+  duration?: Prisma.SortOrderInput | Prisma.SortOrder
+  description?: Prisma.SortOrderInput | Prisma.SortOrder
   price?: Prisma.SortOrder
   hasCoach?: Prisma.SortOrder
   features?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -262,7 +271,8 @@ export type MembershipWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.MembershipWhereInput | Prisma.MembershipWhereInput[]
   name?: Prisma.StringFilter<"Membership"> | string
   type?: Prisma.EnumMembershipTypeFilter<"Membership"> | $Enums.MembershipType
-  duration?: Prisma.IntFilter<"Membership"> | number
+  duration?: Prisma.IntNullableFilter<"Membership"> | number | null
+  description?: Prisma.StringNullableFilter<"Membership"> | string | null
   price?: Prisma.FloatFilter<"Membership"> | number
   hasCoach?: Prisma.BoolFilter<"Membership"> | boolean
   features?: Prisma.JsonNullableFilter<"Membership">
@@ -274,7 +284,8 @@ export type MembershipOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
   type?: Prisma.SortOrder
-  duration?: Prisma.SortOrder
+  duration?: Prisma.SortOrderInput | Prisma.SortOrder
+  description?: Prisma.SortOrderInput | Prisma.SortOrder
   price?: Prisma.SortOrder
   hasCoach?: Prisma.SortOrder
   features?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -293,7 +304,8 @@ export type MembershipScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Membership"> | string
   name?: Prisma.StringWithAggregatesFilter<"Membership"> | string
   type?: Prisma.EnumMembershipTypeWithAggregatesFilter<"Membership"> | $Enums.MembershipType
-  duration?: Prisma.IntWithAggregatesFilter<"Membership"> | number
+  duration?: Prisma.IntNullableWithAggregatesFilter<"Membership"> | number | null
+  description?: Prisma.StringNullableWithAggregatesFilter<"Membership"> | string | null
   price?: Prisma.FloatWithAggregatesFilter<"Membership"> | number
   hasCoach?: Prisma.BoolWithAggregatesFilter<"Membership"> | boolean
   features?: Prisma.JsonNullableWithAggregatesFilter<"Membership">
@@ -304,7 +316,8 @@ export type MembershipCreateInput = {
   id?: string
   name: string
   type: $Enums.MembershipType
-  duration: number
+  duration?: number | null
+  description?: string | null
   price: number
   hasCoach?: boolean
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -316,7 +329,8 @@ export type MembershipUncheckedCreateInput = {
   id?: string
   name: string
   type: $Enums.MembershipType
-  duration: number
+  duration?: number | null
+  description?: string | null
   price: number
   hasCoach?: boolean
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -328,7 +342,8 @@ export type MembershipUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMembershipTypeFieldUpdateOperationsInput | $Enums.MembershipType
-  duration?: Prisma.IntFieldUpdateOperationsInput | number
+  duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   hasCoach?: Prisma.BoolFieldUpdateOperationsInput | boolean
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -340,7 +355,8 @@ export type MembershipUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMembershipTypeFieldUpdateOperationsInput | $Enums.MembershipType
-  duration?: Prisma.IntFieldUpdateOperationsInput | number
+  duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   hasCoach?: Prisma.BoolFieldUpdateOperationsInput | boolean
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -352,7 +368,8 @@ export type MembershipCreateManyInput = {
   id?: string
   name: string
   type: $Enums.MembershipType
-  duration: number
+  duration?: number | null
+  description?: string | null
   price: number
   hasCoach?: boolean
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -363,7 +380,8 @@ export type MembershipUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMembershipTypeFieldUpdateOperationsInput | $Enums.MembershipType
-  duration?: Prisma.IntFieldUpdateOperationsInput | number
+  duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   hasCoach?: Prisma.BoolFieldUpdateOperationsInput | boolean
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -374,7 +392,8 @@ export type MembershipUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMembershipTypeFieldUpdateOperationsInput | $Enums.MembershipType
-  duration?: Prisma.IntFieldUpdateOperationsInput | number
+  duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   hasCoach?: Prisma.BoolFieldUpdateOperationsInput | boolean
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -386,6 +405,7 @@ export type MembershipCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   type?: Prisma.SortOrder
   duration?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   price?: Prisma.SortOrder
   hasCoach?: Prisma.SortOrder
   features?: Prisma.SortOrder
@@ -402,6 +422,7 @@ export type MembershipMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   type?: Prisma.SortOrder
   duration?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   price?: Prisma.SortOrder
   hasCoach?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -412,6 +433,7 @@ export type MembershipMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   type?: Prisma.SortOrder
   duration?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   price?: Prisma.SortOrder
   hasCoach?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -429,14 +451,6 @@ export type MembershipScalarRelationFilter = {
 
 export type EnumMembershipTypeFieldUpdateOperationsInput = {
   set?: $Enums.MembershipType
-}
-
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
 }
 
 export type FloatFieldUpdateOperationsInput = {
@@ -473,7 +487,8 @@ export type MembershipCreateWithoutClientMembershipsInput = {
   id?: string
   name: string
   type: $Enums.MembershipType
-  duration: number
+  duration?: number | null
+  description?: string | null
   price: number
   hasCoach?: boolean
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -484,7 +499,8 @@ export type MembershipUncheckedCreateWithoutClientMembershipsInput = {
   id?: string
   name: string
   type: $Enums.MembershipType
-  duration: number
+  duration?: number | null
+  description?: string | null
   price: number
   hasCoach?: boolean
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -511,7 +527,8 @@ export type MembershipUpdateWithoutClientMembershipsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMembershipTypeFieldUpdateOperationsInput | $Enums.MembershipType
-  duration?: Prisma.IntFieldUpdateOperationsInput | number
+  duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   hasCoach?: Prisma.BoolFieldUpdateOperationsInput | boolean
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -522,7 +539,8 @@ export type MembershipUncheckedUpdateWithoutClientMembershipsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumMembershipTypeFieldUpdateOperationsInput | $Enums.MembershipType
-  duration?: Prisma.IntFieldUpdateOperationsInput | number
+  duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.FloatFieldUpdateOperationsInput | number
   hasCoach?: Prisma.BoolFieldUpdateOperationsInput | boolean
   features?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
@@ -565,6 +583,7 @@ export type MembershipSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   name?: boolean
   type?: boolean
   duration?: boolean
+  description?: boolean
   price?: boolean
   hasCoach?: boolean
   features?: boolean
@@ -578,6 +597,7 @@ export type MembershipSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   name?: boolean
   type?: boolean
   duration?: boolean
+  description?: boolean
   price?: boolean
   hasCoach?: boolean
   features?: boolean
@@ -589,6 +609,7 @@ export type MembershipSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   name?: boolean
   type?: boolean
   duration?: boolean
+  description?: boolean
   price?: boolean
   hasCoach?: boolean
   features?: boolean
@@ -600,13 +621,14 @@ export type MembershipSelectScalar = {
   name?: boolean
   type?: boolean
   duration?: boolean
+  description?: boolean
   price?: boolean
   hasCoach?: boolean
   features?: boolean
   status?: boolean
 }
 
-export type MembershipOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "type" | "duration" | "price" | "hasCoach" | "features" | "status", ExtArgs["result"]["membership"]>
+export type MembershipOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "type" | "duration" | "description" | "price" | "hasCoach" | "features" | "status", ExtArgs["result"]["membership"]>
 export type MembershipInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   clientMemberships?: boolean | Prisma.Membership$clientMembershipsArgs<ExtArgs>
   _count?: boolean | Prisma.MembershipCountOutputTypeDefaultArgs<ExtArgs>
@@ -623,7 +645,8 @@ export type $MembershipPayload<ExtArgs extends runtime.Types.Extensions.Internal
     id: string
     name: string
     type: $Enums.MembershipType
-    duration: number
+    duration: number | null
+    description: string | null
     price: number
     hasCoach: boolean
     features: runtime.JsonValue | null
@@ -1056,6 +1079,7 @@ export interface MembershipFieldRefs {
   readonly name: Prisma.FieldRef<"Membership", 'String'>
   readonly type: Prisma.FieldRef<"Membership", 'MembershipType'>
   readonly duration: Prisma.FieldRef<"Membership", 'Int'>
+  readonly description: Prisma.FieldRef<"Membership", 'String'>
   readonly price: Prisma.FieldRef<"Membership", 'Float'>
   readonly hasCoach: Prisma.FieldRef<"Membership", 'Boolean'>
   readonly features: Prisma.FieldRef<"Membership", 'Json'>

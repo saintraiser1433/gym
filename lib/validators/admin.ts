@@ -34,15 +34,30 @@ export const updateExerciseSchema = createExerciseSchema.partial();
 
 export const createMembershipSchema = z.object({
   name: z.string().min(1),
-  type: z.enum(["BASIC", "PREMIUM", "VIP"]),
-  duration: z.number().int().min(1),
+  type: z.enum(["BASIC", "PREMIUM"]),
+  duration: z.number().int().min(1).optional(),
   price: z.number().nonnegative(),
   hasCoach: z.boolean().default(false),
+  description: z.string().optional(),
   features: z.any().optional(),
   status: z.enum(["ACTIVE", "INACTIVE"]).default("ACTIVE"),
 });
 
-export const updateMembershipSchema = createMembershipSchema.partial();
+export const updateMembershipSchema = z
+  .object({
+    name: z.string().min(1).optional(),
+    type: z.enum(["BASIC", "PREMIUM"]).optional(),
+    duration: z.number().int().min(1).optional().nullable(),
+    price: z.number().nonnegative().optional(),
+    description: z.string().optional(),
+    features: z.any().optional(),
+    status: z.enum(["ACTIVE", "INACTIVE"]).optional(),
+  })
+  .transform((data) => {
+    const hasCoach =
+      data.type !== undefined ? data.type !== "BASIC" : undefined;
+    return { ...data, hasCoach } as typeof data & { hasCoach?: boolean };
+  });
 
 export const createGoalSchema = z.object({
   name: z.string().min(1),
@@ -54,6 +69,7 @@ export const createGoalSchema = z.object({
     "FLEXIBILITY",
     "GENERAL_FITNESS",
   ]),
+  workoutIds: z.array(z.string().min(1)).optional().default([]),
 });
 
 export const updateGoalSchema = createGoalSchema.partial();
@@ -124,8 +140,9 @@ export const createScheduleSchema = z.object({
   startTime: z.string().datetime(),
   endTime: z.string().datetime(),
   coachId: z.string().optional(),
-  capacity: z.number().int().min(1).optional(),
-  recurrence: z.string().optional(),
+  allowedMembershipTypes: z
+    .array(z.enum(["BASIC", "PREMIUM"]))
+    .min(1, "Select at least one allowed membership type (Basic or Premium)"),
 });
 
 export const updateScheduleSchema = createScheduleSchema.partial();

@@ -19,11 +19,20 @@ export async function PATCH(req: NextRequest, { params }: Params) {
   }
 
   try {
+    const { description, ...dataWithoutDescription } = parsed.data;
     const membership = await prisma.membership.update({
       where: { id },
-      data: parsed.data,
+      data: dataWithoutDescription,
     });
-    return NextResponse.json(membership);
+    if (description !== undefined) {
+      await prisma.$executeRaw`
+        UPDATE "Membership" SET "description" = ${description ?? null} WHERE id = ${id}
+      `;
+    }
+    const updated = await prisma.membership.findUnique({
+      where: { id },
+    });
+    return NextResponse.json(updated ?? membership);
   } catch {
     return NextResponse.json(
       { error: "Membership not found" },

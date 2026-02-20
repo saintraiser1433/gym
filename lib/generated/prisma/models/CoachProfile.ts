@@ -473,10 +473,12 @@ export type CoachProfileCreateNestedOneWithoutCreatedWorkoutsInput = {
   connect?: Prisma.CoachProfileWhereUniqueInput
 }
 
-export type CoachProfileUpdateOneRequiredWithoutCreatedWorkoutsNestedInput = {
+export type CoachProfileUpdateOneWithoutCreatedWorkoutsNestedInput = {
   create?: Prisma.XOR<Prisma.CoachProfileCreateWithoutCreatedWorkoutsInput, Prisma.CoachProfileUncheckedCreateWithoutCreatedWorkoutsInput>
   connectOrCreate?: Prisma.CoachProfileCreateOrConnectWithoutCreatedWorkoutsInput
   upsert?: Prisma.CoachProfileUpsertWithoutCreatedWorkoutsInput
+  disconnect?: Prisma.CoachProfileWhereInput | boolean
+  delete?: Prisma.CoachProfileWhereInput | boolean
   connect?: Prisma.CoachProfileWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.CoachProfileUpdateToOneWithWhereWithoutCreatedWorkoutsInput, Prisma.CoachProfileUpdateWithoutCreatedWorkoutsInput>, Prisma.CoachProfileUncheckedUpdateWithoutCreatedWorkoutsInput>
 }

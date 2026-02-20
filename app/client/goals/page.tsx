@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -221,6 +222,13 @@ export default function ClientGoalsPage() {
                       <dt>Deadline</dt>
                       <dd>{g.deadline ?? "—"}</dd>
                     </dl>
+                    <div className="mt-3">
+                      <Button size="xs" variant="outline" className="h-7 px-2 text-[11px]" asChild>
+                        <Link href={`/client/workouts?goalId=${encodeURIComponent(g.goalId)}`}>
+                          View workouts
+                        </Link>
+                      </Button>
+                    </div>
                   </Card>
                 ))}
               </div>

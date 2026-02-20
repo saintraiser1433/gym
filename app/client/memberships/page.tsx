@@ -15,9 +15,8 @@ type ClientMembershipItem = {
     id: string;
     name: string;
     type: string;
-    duration: number;
+    description?: string | null;
     price: number;
-    coachPrice?: number | null;
   };
 };
 
@@ -25,9 +24,8 @@ type AvailablePlan = {
   id: string;
   name: string;
   type: string;
-  duration: number;
+  description?: string | null;
   price: number;
-  coachPrice?: number | null;
 };
 
 type PendingApplication = {
@@ -40,9 +38,7 @@ type PendingApplication = {
     id: string;
     name: string;
     type: string;
-    duration: number;
     price: number;
-    coachPrice?: number | null;
   } | null;
 };
 
@@ -56,9 +52,6 @@ export default function ClientMembershipsPage() {
   const [paymentMethod, setPaymentMethod] = React.useState<"CASH" | "GCASH">("CASH");
   const [reference, setReference] = React.useState("");
   const [submitting, setSubmitting] = React.useState(false);
-  const [coachOption, setCoachOption] = React.useState<"NO_COACH" | "WITH_COACH">(
-    "NO_COACH",
-  );
 
   const loadData = React.useCallback(async () => {
     try {
@@ -82,15 +75,8 @@ export default function ClientMembershipsPage() {
                   id: r.membership.id,
                   name: r.membership.name,
                   type: r.membership.type,
-                  duration: r.membership.duration,
+                  description: r.membership.description ?? null,
                   price: r.membership.price,
-                  coachPrice:
-                    r.membership.features && typeof r.membership.features === "object"
-                      ? (r.membership.features.coachPrice as
-                          | number
-                          | null
-                          | undefined) ?? null
-                      : null,
                 }
               : ({} as ClientMembershipItem["membership"]),
           })),
@@ -102,12 +88,8 @@ export default function ClientMembershipsPage() {
             id: m.id,
             name: m.name,
             type: m.type,
-            duration: m.duration,
+            description: m.description ?? null,
             price: m.price,
-            coachPrice:
-              m.features && typeof m.features === "object"
-                ? (m.features.coachPrice as number | null | undefined) ?? null
-                : null,
           })),
         );
       }
@@ -160,7 +142,6 @@ export default function ClientMembershipsPage() {
       if (paymentMethod === "GCASH" && reference) {
         formData.append("reference", reference);
       }
-      formData.append("variant", coachOption);
       const fileInput = document.getElementById(
         "gcashRefImage",
       ) as HTMLInputElement | null;
@@ -313,11 +294,14 @@ export default function ClientMembershipsPage() {
                     <dd>{item.startDate}</dd>
                     <dt>End</dt>
                     <dd>{item.endDate}</dd>
-                    <dt>Duration</dt>
-                    <dd>{item.membership.duration} days</dd>
                     <dt>Price</dt>
-                  <dd>₱{item.membership.price?.toLocaleString() ?? "—"}</dd>
+                    <dd>₱{item.membership.price?.toLocaleString() ?? "—"}</dd>
                   </dl>
+                  {item.membership.description && (
+                    <p className="mt-2 text-[11px] text-muted-foreground">
+                      {item.membership.description}
+                    </p>
+                  )}
                   {isExpired && (
                     <div className="mt-3 flex justify-end">
                       <Button
@@ -325,10 +309,9 @@ export default function ClientMembershipsPage() {
                         className="h-8 text-xs"
                         disabled={hasPending}
                         onClick={() => {
-                          setSelectedPlan(item.membership);
+                          setSelectedPlan(item.membership as AvailablePlan);
                           setPaymentMethod("CASH");
                           setReference("");
-                          setCoachOption("NO_COACH");
                           setApplyModalOpen(true);
                           // store the clientMembershipId on the window for renew handler
                           (window as any).__renewClientMembershipId = item.id;
@@ -367,16 +350,15 @@ export default function ClientMembershipsPage() {
                   <p className="text-xs text-muted-foreground">
                     {formatType(plan.type)}
                   </p>
-                  <p className="mt-2 text-xs text-muted-foreground">
-                    Price (no coach): ₱{plan.price?.toLocaleString() ?? "—"}
-                  </p>
-                  {plan.coachPrice != null && (
-                    <p className="text-xs text-muted-foreground">
-                      Price (with coach): ₱{plan.coachPrice.toLocaleString()}
+                  {plan.description && (
+                    <p className="mt-1 text-[11px] text-muted-foreground">
+                      {plan.description}
                     </p>
                   )}
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    Duration: {plan.duration} days
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    Price: ₱{plan.price?.toLocaleString() ?? "—"}
+                    {plan.type === "BASIC" && " (no coach)"}
+                    {plan.type === "PREMIUM" && " (includes coach)"}
                   </p>
                   <Button
                     size="sm"
@@ -403,54 +385,16 @@ export default function ClientMembershipsPage() {
                 : "Apply for membership"}
             </h2>
             <p className="mb-2 text-xs text-muted-foreground">
-              {selectedPlan.name} — ₱{selectedPlan.price?.toLocaleString()}
+              {selectedPlan.name} — {selectedPlan.type === "BASIC" ? "No coach" : "Includes coach"}
             </p>
             <p className="mb-2 text-[11px] text-muted-foreground">
-              Current price: ₱
-              {(
-                coachOption === "WITH_COACH" && selectedPlan.coachPrice != null
-                  ? selectedPlan.coachPrice
-                  : selectedPlan.price
-              )?.toLocaleString()}
+              Price: ₱{selectedPlan.price?.toLocaleString()}
             </p>
             <p className="mb-3 text-[11px] text-muted-foreground">
               Your application will be sent to admin. Pay via your chosen method;
               admin will approve after payment.
             </p>
             <form onSubmit={handleApply} className="space-y-3 text-[11px]">
-              <div className="space-y-1">
-                <label className="font-medium">Coach option</label>
-                <div className="flex flex-col gap-1">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="coachOption"
-                      value="NO_COACH"
-                      checked={coachOption === "NO_COACH"}
-                      onChange={() => setCoachOption("NO_COACH")}
-                      className="h-3 w-3"
-                    />
-                    <span>
-                      No coach — ₱{selectedPlan.price.toLocaleString()}
-                    </span>
-                  </label>
-                  {selectedPlan.coachPrice != null && (
-                    <label className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        name="coachOption"
-                        value="WITH_COACH"
-                        checked={coachOption === "WITH_COACH"}
-                        onChange={() => setCoachOption("WITH_COACH")}
-                        className="h-3 w-3"
-                      />
-                      <span>
-                        With coach — ₱{selectedPlan.coachPrice.toLocaleString()}
-                      </span>
-                    </label>
-                  )}
-                </div>
-              </div>
               <div className="space-y-1">
                 <label className="font-medium">Payment method</label>
                 <select

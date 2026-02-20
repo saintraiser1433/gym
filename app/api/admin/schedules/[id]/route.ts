@@ -18,10 +18,17 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     );
   }
 
-  const data: any = { ...parsed.data };
-  if (data.startTime) data.startTime = new Date(data.startTime);
-  if (data.endTime) data.endTime = new Date(data.endTime);
-  if (data.coachId === "") data.coachId = null;
+  const { startTime, endTime, coachId, ...rest } = parsed.data;
+  const data: Record<string, unknown> = {
+    ...rest,
+    ...(startTime !== undefined ? { startTime: new Date(startTime) } : {}),
+    ...(endTime !== undefined ? { endTime: new Date(endTime) } : {}),
+    ...(coachId !== undefined
+      ? coachId
+        ? { coach: { connect: { id: coachId } } }
+        : { coach: { disconnect: true } }
+      : {}),
+  };
 
   try {
     const schedule = await prisma.schedule.update({
