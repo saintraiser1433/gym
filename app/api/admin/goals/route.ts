@@ -25,11 +25,11 @@ export async function GET(req: NextRequest) {
   const { page, pageSize, search } = parsed.data;
   const where = search
     ? {
-        name: { contains: search, mode: "insensitive" },
+        name: { contains: search, mode: "insensitive" as const },
       }
     : {};
 
-  const [total, goals] = await Promise.all([
+  const [total, goalsRows] = await Promise.all([
     prisma.workoutGoal.count({ where }),
     prisma.workoutGoal.findMany({
       where,
@@ -37,11 +37,29 @@ export async function GET(req: NextRequest) {
       skip: (page - 1) * pageSize,
       take: pageSize,
       include: {
-        workouts: { select: { id: true, name: true } },
+        goalWorkouts: {
+          include: {
+            workout: { select: { id: true, name: true } },
+          },
+        },
       },
     }),
   ]);
 
+  const goals = goalsRows.map((g) => ({
+    id: g.id,
+    name: g.name,
+    description: g.description,
+    category: g.category,
+    targetSessions: (g as { targetSessions?: number | null }).targetSessions ?? null,
+    goalWorkouts: g.goalWorkouts.map((gw) => ({
+      id: gw.workout.id,
+      name: gw.workout.name,
+      workoutType: gw.workoutType,
+      targetValue: gw.targetValue,
+    })),
+    workouts: g.goalWorkouts.map((gw) => ({ id: gw.workout.id, name: gw.workout.name })),
+  }));
   return NextResponse.json({ data: goals, page, pageSize, total });
 }
 
@@ -57,25 +75,45 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { workoutIds = [], name, description, category } = parsed.data;
+  const { goalWorkouts: goalWorkoutsInput = [], workoutIds = [], name, description, category, targetSessions } = parsed.data;
 
   const goal = await prisma.workoutGoal.create({
-    data: { name, description: description ?? undefined, category },
+    data: {
+      name,
+      description: description ?? undefined,
+      category,
+      ...(targetSessions != null && { targetSessions }),
+    },
   });
 
-  if (workoutIds.length > 0) {
-    await prisma.workoutGoal.update({
-      where: { id: goal.id },
-      data: {
-        workouts: { set: workoutIds.map((id) => ({ id })) },
-      },
-    });
+  const toInsert =
+    Array.isArray(goalWorkoutsInput) && goalWorkoutsInput.length > 0
+      ? goalWorkoutsInput.map((gw: any) => ({
+          workoutId: gw.workoutId,
+          workoutType: gw.workoutType === "PER_KG" ? "PER_KG" : "PER_PCS",
+          targetValue: gw.targetValue ?? null,
+        }))
+      : (workoutIds as string[]).map((workoutId) => ({ workoutId, workoutType: "PER_PCS" as const, targetValue: null }));
+
+  if (toInsert.length > 0) {
+    const { randomUUID } = await import("crypto");
+    for (const gw of toInsert) {
+      await prisma.$executeRawUnsafe(
+        `INSERT INTO "GoalWorkout" (id, "goalId", "workoutId", "workoutType", "targetValue") VALUES ($1, $2, $3, $4::"WorkoutType", $5)`,
+        randomUUID(),
+        goal.id,
+        gw.workoutId,
+        gw.workoutType,
+        gw.targetValue ?? null,
+      );
+    }
   }
 
-  const withWorkouts = await prisma.workoutGoal.findUnique({
-    where: { id: goal.id },
-    include: { workouts: { select: { id: true, name: true } } },
-  });
-  return NextResponse.json(withWorkouts ?? goal, { status: 201 });
+  const gwRows = await prisma.$queryRawUnsafe<{ workoutId: string; workoutType: string; targetValue: number | null; name: string }[]>(
+    `SELECT gw."workoutId", gw."workoutType", gw."targetValue", w.name FROM "GoalWorkout" gw JOIN "Workout" w ON w.id = gw."workoutId" WHERE gw."goalId" = $1`,
+    goal.id,
+  );
+  const goalWorkouts = gwRows.map((r) => ({ id: r.workoutId, name: r.name, workoutType: r.workoutType, targetValue: r.targetValue }));
+  return NextResponse.json({ ...goal, goalWorkouts, workouts: goalWorkouts.map((w) => ({ id: w.id, name: w.name })) }, { status: 201 });
 }
 

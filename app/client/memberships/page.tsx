@@ -51,6 +51,7 @@ export default function ClientMembershipsPage() {
   const [selectedPlan, setSelectedPlan] = React.useState<AvailablePlan | null>(null);
   const [paymentMethod, setPaymentMethod] = React.useState<"CASH" | "GCASH">("CASH");
   const [reference, setReference] = React.useState("");
+  const [coachOption, setCoachOption] = React.useState<"NO_COACH" | "WITH_COACH">("NO_COACH");
   const [submitting, setSubmitting] = React.useState(false);
 
   const loadData = React.useCallback(async () => {
@@ -139,6 +140,7 @@ export default function ClientMembershipsPage() {
     try {
       const formData = new FormData();
       formData.append("method", paymentMethod);
+      formData.append("variant", coachOption);
       if (paymentMethod === "GCASH" && reference) {
         formData.append("reference", reference);
       }
@@ -312,6 +314,7 @@ export default function ClientMembershipsPage() {
                           setSelectedPlan(item.membership as AvailablePlan);
                           setPaymentMethod("CASH");
                           setReference("");
+                          setCoachOption("NO_COACH");
                           setApplyModalOpen(true);
                           // store the clientMembershipId on the window for renew handler
                           (window as any).__renewClientMembershipId = item.id;

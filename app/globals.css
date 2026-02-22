@@ -124,3 +124,95 @@
     @apply bg-background text-foreground font-sans text-[11px];
   }
 }
+
+/* Calendar: past days (before today) — red (admin, client, coach) */
+.rbc-past-day,
+.rbc-past-disabled {
+  background-color: rgba(239, 68, 68, 0.12) !important;
+}
+.rbc-past-day .rbc-day-bg,
+.rbc-past-disabled .rbc-day-bg {
+  background-color: rgba(239, 68, 68, 0.12) !important;
+}
+.rbc-past-day .rbc-date-cell,
+.rbc-past-disabled .rbc-date-cell,
+.rbc-past-day .rbc-date-cell a,
+.rbc-past-disabled .rbc-date-cell a {
+  color: #b91c1c !important;
+}
+.rbc-past-day .rbc-event .rbc-event-content,
+.rbc-past-disabled .rbc-event .rbc-event-content {
+  background-color: rgba(185, 28, 28, 0.25) !important;
+  border-color: #b91c1c;
+}
+.dark .rbc-past-day .rbc-day-bg,
+.dark .rbc-past-disabled .rbc-day-bg {
+  background-color: rgba(239, 68, 68, 0.18) !important;
+}
+.dark .rbc-past-day .rbc-date-cell,
+.dark .rbc-past-disabled .rbc-date-cell,
+.dark .rbc-past-day .rbc-date-cell a,
+.dark .rbc-past-disabled .rbc-date-cell a {
+  color: #f87171 !important;
+}
+.dark .rbc-past-day .rbc-event .rbc-event-content,
+.dark .rbc-past-disabled .rbc-event .rbc-event-content {
+  background-color: rgba(248, 113, 113, 0.25) !important;
+  border-color: #f87171;
+}
+
+/* react-big-calendar: fix layout and colors */
+.rbc-calendar {
+  box-sizing: border-box;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.rbc-month-view {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.rbc-month-row {
+  flex: 1 1 0;
+  min-height: 80px;
+  overflow: hidden;
+}
+.rbc-month-view .rbc-date-cell {
+  color: var(--foreground);
+  padding: 2px 4px;
+}
+.rbc-month-view .rbc-date-cell a {
+  color: inherit;
+}
+.rbc-month-view .rbc-header {
+  color: var(--foreground);
+  border-bottom: 1px solid var(--border);
+}
+.rbc-month-view .rbc-off-range-bg {
+  background-color: var(--muted);
+}
+.rbc-month-view .rbc-today {
+  background-color: oklch(from var(--primary) l c h / 0.07);
+}
+.rbc-month-view .rbc-event {
+  margin-bottom: 2px;
+}
+.rbc-toolbar button {
+  color: var(--foreground);
+}
+.rbc-toolbar button.rbc-active {
+  background-color: var(--secondary);
+  color: var(--secondary-foreground);
+}
+.rbc-month-view,
+.rbc-time-view,
+.rbc-agenda-view {
+  border-color: var(--border);
+}
+.rbc-month-view .rbc-day-bg + .rbc-day-bg,
+.rbc-month-view .rbc-header + .rbc-header,
+.rbc-month-view .rbc-month-row + .rbc-month-row {
+  border-color: var(--border);
+}

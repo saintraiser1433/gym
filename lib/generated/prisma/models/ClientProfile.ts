@@ -43,6 +43,10 @@ export type ClientProfileMinAggregateOutputType = {
   weight: number | null
   height: number | null
   emergencyContact: string | null
+  address: string | null
+  gender: string | null
+  occupation: string | null
+  gymNotes: string | null
   joinDate: Date | null
   assignedCoachId: string | null
 }
@@ -54,6 +58,10 @@ export type ClientProfileMaxAggregateOutputType = {
   weight: number | null
   height: number | null
   emergencyContact: string | null
+  address: string | null
+  gender: string | null
+  occupation: string | null
+  gymNotes: string | null
   joinDate: Date | null
   assignedCoachId: string | null
 }
@@ -65,6 +73,10 @@ export type ClientProfileCountAggregateOutputType = {
   weight: number
   height: number
   emergencyContact: number
+  address: number
+  gender: number
+  occupation: number
+  gymNotes: number
   joinDate: number
   assignedCoachId: number
   _all: number
@@ -88,6 +100,10 @@ export type ClientProfileMinAggregateInputType = {
   weight?: true
   height?: true
   emergencyContact?: true
+  address?: true
+  gender?: true
+  occupation?: true
+  gymNotes?: true
   joinDate?: true
   assignedCoachId?: true
 }
@@ -99,6 +115,10 @@ export type ClientProfileMaxAggregateInputType = {
   weight?: true
   height?: true
   emergencyContact?: true
+  address?: true
+  gender?: true
+  occupation?: true
+  gymNotes?: true
   joinDate?: true
   assignedCoachId?: true
 }
@@ -110,6 +130,10 @@ export type ClientProfileCountAggregateInputType = {
   weight?: true
   height?: true
   emergencyContact?: true
+  address?: true
+  gender?: true
+  occupation?: true
+  gymNotes?: true
   joinDate?: true
   assignedCoachId?: true
   _all?: true
@@ -208,6 +232,10 @@ export type ClientProfileGroupByOutputType = {
   weight: number | null
   height: number | null
   emergencyContact: string | null
+  address: string | null
+  gender: string | null
+  occupation: string | null
+  gymNotes: string | null
   joinDate: Date
   assignedCoachId: string | null
   _count: ClientProfileCountAggregateOutputType | null
@@ -242,6 +270,10 @@ export type ClientProfileWhereInput = {
   weight?: Prisma.FloatNullableFilter<"ClientProfile"> | number | null
   height?: Prisma.FloatNullableFilter<"ClientProfile"> | number | null
   emergencyContact?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
+  address?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
+  gender?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
+  occupation?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
+  gymNotes?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
   joinDate?: Prisma.DateTimeFilter<"ClientProfile"> | Date | string
   assignedCoachId?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -261,6 +293,10 @@ export type ClientProfileOrderByWithRelationInput = {
   weight?: Prisma.SortOrderInput | Prisma.SortOrder
   height?: Prisma.SortOrderInput | Prisma.SortOrder
   emergencyContact?: Prisma.SortOrderInput | Prisma.SortOrder
+  address?: Prisma.SortOrderInput | Prisma.SortOrder
+  gender?: Prisma.SortOrderInput | Prisma.SortOrder
+  occupation?: Prisma.SortOrderInput | Prisma.SortOrder
+  gymNotes?: Prisma.SortOrderInput | Prisma.SortOrder
   joinDate?: Prisma.SortOrder
   assignedCoachId?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -283,6 +319,10 @@ export type ClientProfileWhereUniqueInput = Prisma.AtLeast<{
   weight?: Prisma.FloatNullableFilter<"ClientProfile"> | number | null
   height?: Prisma.FloatNullableFilter<"ClientProfile"> | number | null
   emergencyContact?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
+  address?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
+  gender?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
+  occupation?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
+  gymNotes?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
   joinDate?: Prisma.DateTimeFilter<"ClientProfile"> | Date | string
   assignedCoachId?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -302,6 +342,10 @@ export type ClientProfileOrderByWithAggregationInput = {
   weight?: Prisma.SortOrderInput | Prisma.SortOrder
   height?: Prisma.SortOrderInput | Prisma.SortOrder
   emergencyContact?: Prisma.SortOrderInput | Prisma.SortOrder
+  address?: Prisma.SortOrderInput | Prisma.SortOrder
+  gender?: Prisma.SortOrderInput | Prisma.SortOrder
+  occupation?: Prisma.SortOrderInput | Prisma.SortOrder
+  gymNotes?: Prisma.SortOrderInput | Prisma.SortOrder
   joinDate?: Prisma.SortOrder
   assignedCoachId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ClientProfileCountOrderByAggregateInput
@@ -321,6 +365,10 @@ export type ClientProfileScalarWhereWithAggregatesInput = {
   weight?: Prisma.FloatNullableWithAggregatesFilter<"ClientProfile"> | number | null
   height?: Prisma.FloatNullableWithAggregatesFilter<"ClientProfile"> | number | null
   emergencyContact?: Prisma.StringNullableWithAggregatesFilter<"ClientProfile"> | string | null
+  address?: Prisma.StringNullableWithAggregatesFilter<"ClientProfile"> | string | null
+  gender?: Prisma.StringNullableWithAggregatesFilter<"ClientProfile"> | string | null
+  occupation?: Prisma.StringNullableWithAggregatesFilter<"ClientProfile"> | string | null
+  gymNotes?: Prisma.StringNullableWithAggregatesFilter<"ClientProfile"> | string | null
   joinDate?: Prisma.DateTimeWithAggregatesFilter<"ClientProfile"> | Date | string
   assignedCoachId?: Prisma.StringNullableWithAggregatesFilter<"ClientProfile"> | string | null
 }
@@ -331,6 +379,10 @@ export type ClientProfileCreateInput = {
   weight?: number | null
   height?: number | null
   emergencyContact?: string | null
+  address?: string | null
+  gender?: string | null
+  occupation?: string | null
+  gymNotes?: string | null
   joinDate?: Date | string
   user: Prisma.UserCreateNestedOneWithoutClientProfileInput
   memberships?: Prisma.ClientMembershipCreateNestedManyWithoutClientInput
@@ -349,6 +401,10 @@ export type ClientProfileUncheckedCreateInput = {
   weight?: number | null
   height?: number | null
   emergencyContact?: string | null
+  address?: string | null
+  gender?: string | null
+  occupation?: string | null
+  gymNotes?: string | null
   joinDate?: Date | string
   assignedCoachId?: string | null
   memberships?: Prisma.ClientMembershipUncheckedCreateNestedManyWithoutClientInput
@@ -365,6 +421,10 @@ export type ClientProfileUpdateInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   emergencyContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gymNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutClientProfileNestedInput
   memberships?: Prisma.ClientMembershipUpdateManyWithoutClientNestedInput
@@ -383,6 +443,10 @@ export type ClientProfileUncheckedUpdateInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   emergencyContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gymNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignedCoachId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memberships?: Prisma.ClientMembershipUncheckedUpdateManyWithoutClientNestedInput
@@ -400,6 +464,10 @@ export type ClientProfileCreateManyInput = {
   weight?: number | null
   height?: number | null
   emergencyContact?: string | null
+  address?: string | null
+  gender?: string | null
+  occupation?: string | null
+  gymNotes?: string | null
   joinDate?: Date | string
   assignedCoachId?: string | null
 }
@@ -410,6 +478,10 @@ export type ClientProfileUpdateManyMutationInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   emergencyContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gymNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -420,6 +492,10 @@ export type ClientProfileUncheckedUpdateManyInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   emergencyContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gymNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignedCoachId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -436,6 +512,10 @@ export type ClientProfileCountOrderByAggregateInput = {
   weight?: Prisma.SortOrder
   height?: Prisma.SortOrder
   emergencyContact?: Prisma.SortOrder
+  address?: Prisma.SortOrder
+  gender?: Prisma.SortOrder
+  occupation?: Prisma.SortOrder
+  gymNotes?: Prisma.SortOrder
   joinDate?: Prisma.SortOrder
   assignedCoachId?: Prisma.SortOrder
 }
@@ -452,6 +532,10 @@ export type ClientProfileMaxOrderByAggregateInput = {
   weight?: Prisma.SortOrder
   height?: Prisma.SortOrder
   emergencyContact?: Prisma.SortOrder
+  address?: Prisma.SortOrder
+  gender?: Prisma.SortOrder
+  occupation?: Prisma.SortOrder
+  gymNotes?: Prisma.SortOrder
   joinDate?: Prisma.SortOrder
   assignedCoachId?: Prisma.SortOrder
 }
@@ -463,6 +547,10 @@ export type ClientProfileMinOrderByAggregateInput = {
   weight?: Prisma.SortOrder
   height?: Prisma.SortOrder
   emergencyContact?: Prisma.SortOrder
+  address?: Prisma.SortOrder
+  gender?: Prisma.SortOrder
+  occupation?: Prisma.SortOrder
+  gymNotes?: Prisma.SortOrder
   joinDate?: Prisma.SortOrder
   assignedCoachId?: Prisma.SortOrder
 }
@@ -663,6 +751,10 @@ export type ClientProfileCreateWithoutUserInput = {
   weight?: number | null
   height?: number | null
   emergencyContact?: string | null
+  address?: string | null
+  gender?: string | null
+  occupation?: string | null
+  gymNotes?: string | null
   joinDate?: Date | string
   memberships?: Prisma.ClientMembershipCreateNestedManyWithoutClientInput
   goals?: Prisma.ClientGoalCreateNestedManyWithoutClientInput
@@ -679,6 +771,10 @@ export type ClientProfileUncheckedCreateWithoutUserInput = {
   weight?: number | null
   height?: number | null
   emergencyContact?: string | null
+  address?: string | null
+  gender?: string | null
+  occupation?: string | null
+  gymNotes?: string | null
   joinDate?: Date | string
   assignedCoachId?: string | null
   memberships?: Prisma.ClientMembershipUncheckedCreateNestedManyWithoutClientInput
@@ -711,6 +807,10 @@ export type ClientProfileUpdateWithoutUserInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   emergencyContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gymNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.ClientMembershipUpdateManyWithoutClientNestedInput
   goals?: Prisma.ClientGoalUpdateManyWithoutClientNestedInput
@@ -727,6 +827,10 @@ export type ClientProfileUncheckedUpdateWithoutUserInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   emergencyContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gymNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignedCoachId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memberships?: Prisma.ClientMembershipUncheckedUpdateManyWithoutClientNestedInput
@@ -743,6 +847,10 @@ export type ClientProfileCreateWithoutAssignedCoachInput = {
   weight?: number | null
   height?: number | null
   emergencyContact?: string | null
+  address?: string | null
+  gender?: string | null
+  occupation?: string | null
+  gymNotes?: string | null
   joinDate?: Date | string
   user: Prisma.UserCreateNestedOneWithoutClientProfileInput
   memberships?: Prisma.ClientMembershipCreateNestedManyWithoutClientInput
@@ -760,6 +868,10 @@ export type ClientProfileUncheckedCreateWithoutAssignedCoachInput = {
   weight?: number | null
   height?: number | null
   emergencyContact?: string | null
+  address?: string | null
+  gender?: string | null
+  occupation?: string | null
+  gymNotes?: string | null
   joinDate?: Date | string
   memberships?: Prisma.ClientMembershipUncheckedCreateNestedManyWithoutClientInput
   goals?: Prisma.ClientGoalUncheckedCreateNestedManyWithoutClientInput
@@ -805,6 +917,10 @@ export type ClientProfileScalarWhereInput = {
   weight?: Prisma.FloatNullableFilter<"ClientProfile"> | number | null
   height?: Prisma.FloatNullableFilter<"ClientProfile"> | number | null
   emergencyContact?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
+  address?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
+  gender?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
+  occupation?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
+  gymNotes?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
   joinDate?: Prisma.DateTimeFilter<"ClientProfile"> | Date | string
   assignedCoachId?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
 }
@@ -815,6 +931,10 @@ export type ClientProfileCreateWithoutMembershipsInput = {
   weight?: number | null
   height?: number | null
   emergencyContact?: string | null
+  address?: string | null
+  gender?: string | null
+  occupation?: string | null
+  gymNotes?: string | null
   joinDate?: Date | string
   user: Prisma.UserCreateNestedOneWithoutClientProfileInput
   goals?: Prisma.ClientGoalCreateNestedManyWithoutClientInput
@@ -832,6 +952,10 @@ export type ClientProfileUncheckedCreateWithoutMembershipsInput = {
   weight?: number | null
   height?: number | null
   emergencyContact?: string | null
+  address?: string | null
+  gender?: string | null
+  occupation?: string | null
+  gymNotes?: string | null
   joinDate?: Date | string
   assignedCoachId?: string | null
   goals?: Prisma.ClientGoalUncheckedCreateNestedManyWithoutClientInput
@@ -863,6 +987,10 @@ export type ClientProfileUpdateWithoutMembershipsInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   emergencyContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gymNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutClientProfileNestedInput
   goals?: Prisma.ClientGoalUpdateManyWithoutClientNestedInput
@@ -880,6 +1008,10 @@ export type ClientProfileUncheckedUpdateWithoutMembershipsInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   emergencyContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gymNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignedCoachId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goals?: Prisma.ClientGoalUncheckedUpdateManyWithoutClientNestedInput
@@ -895,6 +1027,10 @@ export type ClientProfileCreateWithoutGoalsInput = {
   weight?: number | null
   height?: number | null
   emergencyContact?: string | null
+  address?: string | null
+  gender?: string | null
+  occupation?: string | null
+  gymNotes?: string | null
   joinDate?: Date | string
   user: Prisma.UserCreateNestedOneWithoutClientProfileInput
   memberships?: Prisma.ClientMembershipCreateNestedManyWithoutClientInput
@@ -912,6 +1048,10 @@ export type ClientProfileUncheckedCreateWithoutGoalsInput = {
   weight?: number | null
   height?: number | null
   emergencyContact?: string | null
+  address?: string | null
+  gender?: string | null
+  occupation?: string | null
+  gymNotes?: string | null
   joinDate?: Date | string
   assignedCoachId?: string | null
   memberships?: Prisma.ClientMembershipUncheckedCreateNestedManyWithoutClientInput
@@ -943,6 +1083,10 @@ export type ClientProfileUpdateWithoutGoalsInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   emergencyContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gymNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutClientProfileNestedInput
   memberships?: Prisma.ClientMembershipUpdateManyWithoutClientNestedInput
@@ -960,6 +1104,10 @@ export type ClientProfileUncheckedUpdateWithoutGoalsInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   emergencyContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gymNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignedCoachId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memberships?: Prisma.ClientMembershipUncheckedUpdateManyWithoutClientNestedInput
@@ -975,6 +1123,10 @@ export type ClientProfileCreateWithoutWorkoutAssignmentsInput = {
   weight?: number | null
   height?: number | null
   emergencyContact?: string | null
+  address?: string | null
+  gender?: string | null
+  occupation?: string | null
+  gymNotes?: string | null
   joinDate?: Date | string
   user: Prisma.UserCreateNestedOneWithoutClientProfileInput
   memberships?: Prisma.ClientMembershipCreateNestedManyWithoutClientInput
@@ -992,6 +1144,10 @@ export type ClientProfileUncheckedCreateWithoutWorkoutAssignmentsInput = {
   weight?: number | null
   height?: number | null
   emergencyContact?: string | null
+  address?: string | null
+  gender?: string | null
+  occupation?: string | null
+  gymNotes?: string | null
   joinDate?: Date | string
   assignedCoachId?: string | null
   memberships?: Prisma.ClientMembershipUncheckedCreateNestedManyWithoutClientInput
@@ -1023,6 +1179,10 @@ export type ClientProfileUpdateWithoutWorkoutAssignmentsInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   emergencyContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gymNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutClientProfileNestedInput
   memberships?: Prisma.ClientMembershipUpdateManyWithoutClientNestedInput
@@ -1040,6 +1200,10 @@ export type ClientProfileUncheckedUpdateWithoutWorkoutAssignmentsInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   emergencyContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gymNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignedCoachId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memberships?: Prisma.ClientMembershipUncheckedUpdateManyWithoutClientNestedInput
@@ -1055,6 +1219,10 @@ export type ClientProfileCreateWithoutWorkoutProgressInput = {
   weight?: number | null
   height?: number | null
   emergencyContact?: string | null
+  address?: string | null
+  gender?: string | null
+  occupation?: string | null
+  gymNotes?: string | null
   joinDate?: Date | string
   user: Prisma.UserCreateNestedOneWithoutClientProfileInput
   memberships?: Prisma.ClientMembershipCreateNestedManyWithoutClientInput
@@ -1072,6 +1240,10 @@ export type ClientProfileUncheckedCreateWithoutWorkoutProgressInput = {
   weight?: number | null
   height?: number | null
   emergencyContact?: string | null
+  address?: string | null
+  gender?: string | null
+  occupation?: string | null
+  gymNotes?: string | null
   joinDate?: Date | string
   assignedCoachId?: string | null
   memberships?: Prisma.ClientMembershipUncheckedCreateNestedManyWithoutClientInput
@@ -1103,6 +1275,10 @@ export type ClientProfileUpdateWithoutWorkoutProgressInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   emergencyContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gymNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutClientProfileNestedInput
   memberships?: Prisma.ClientMembershipUpdateManyWithoutClientNestedInput
@@ -1120,6 +1296,10 @@ export type ClientProfileUncheckedUpdateWithoutWorkoutProgressInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   emergencyContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gymNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignedCoachId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memberships?: Prisma.ClientMembershipUncheckedUpdateManyWithoutClientNestedInput
@@ -1135,6 +1315,10 @@ export type ClientProfileCreateWithoutAttendancesInput = {
   weight?: number | null
   height?: number | null
   emergencyContact?: string | null
+  address?: string | null
+  gender?: string | null
+  occupation?: string | null
+  gymNotes?: string | null
   joinDate?: Date | string
   user: Prisma.UserCreateNestedOneWithoutClientProfileInput
   memberships?: Prisma.ClientMembershipCreateNestedManyWithoutClientInput
@@ -1152,6 +1336,10 @@ export type ClientProfileUncheckedCreateWithoutAttendancesInput = {
   weight?: number | null
   height?: number | null
   emergencyContact?: string | null
+  address?: string | null
+  gender?: string | null
+  occupation?: string | null
+  gymNotes?: string | null
   joinDate?: Date | string
   assignedCoachId?: string | null
   memberships?: Prisma.ClientMembershipUncheckedCreateNestedManyWithoutClientInput
@@ -1183,6 +1371,10 @@ export type ClientProfileUpdateWithoutAttendancesInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   emergencyContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gymNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutClientProfileNestedInput
   memberships?: Prisma.ClientMembershipUpdateManyWithoutClientNestedInput
@@ -1200,6 +1392,10 @@ export type ClientProfileUncheckedUpdateWithoutAttendancesInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   emergencyContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gymNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignedCoachId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memberships?: Prisma.ClientMembershipUncheckedUpdateManyWithoutClientNestedInput
@@ -1215,6 +1411,10 @@ export type ClientProfileCreateWithoutPaymentsInput = {
   weight?: number | null
   height?: number | null
   emergencyContact?: string | null
+  address?: string | null
+  gender?: string | null
+  occupation?: string | null
+  gymNotes?: string | null
   joinDate?: Date | string
   user: Prisma.UserCreateNestedOneWithoutClientProfileInput
   memberships?: Prisma.ClientMembershipCreateNestedManyWithoutClientInput
@@ -1232,6 +1432,10 @@ export type ClientProfileUncheckedCreateWithoutPaymentsInput = {
   weight?: number | null
   height?: number | null
   emergencyContact?: string | null
+  address?: string | null
+  gender?: string | null
+  occupation?: string | null
+  gymNotes?: string | null
   joinDate?: Date | string
   assignedCoachId?: string | null
   memberships?: Prisma.ClientMembershipUncheckedCreateNestedManyWithoutClientInput
@@ -1263,6 +1467,10 @@ export type ClientProfileUpdateWithoutPaymentsInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   emergencyContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gymNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutClientProfileNestedInput
   memberships?: Prisma.ClientMembershipUpdateManyWithoutClientNestedInput
@@ -1280,6 +1488,10 @@ export type ClientProfileUncheckedUpdateWithoutPaymentsInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   emergencyContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gymNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignedCoachId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memberships?: Prisma.ClientMembershipUncheckedUpdateManyWithoutClientNestedInput
@@ -1296,6 +1508,10 @@ export type ClientProfileCreateManyAssignedCoachInput = {
   weight?: number | null
   height?: number | null
   emergencyContact?: string | null
+  address?: string | null
+  gender?: string | null
+  occupation?: string | null
+  gymNotes?: string | null
   joinDate?: Date | string
 }
 
@@ -1305,6 +1521,10 @@ export type ClientProfileUpdateWithoutAssignedCoachInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   emergencyContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gymNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutClientProfileNestedInput
   memberships?: Prisma.ClientMembershipUpdateManyWithoutClientNestedInput
@@ -1322,6 +1542,10 @@ export type ClientProfileUncheckedUpdateWithoutAssignedCoachInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   emergencyContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gymNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.ClientMembershipUncheckedUpdateManyWithoutClientNestedInput
   goals?: Prisma.ClientGoalUncheckedUpdateManyWithoutClientNestedInput
@@ -1338,6 +1562,10 @@ export type ClientProfileUncheckedUpdateManyWithoutAssignedCoachInput = {
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   height?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   emergencyContact?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  address?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gender?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occupation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gymNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -1424,6 +1652,10 @@ export type ClientProfileSelect<ExtArgs extends runtime.Types.Extensions.Interna
   weight?: boolean
   height?: boolean
   emergencyContact?: boolean
+  address?: boolean
+  gender?: boolean
+  occupation?: boolean
+  gymNotes?: boolean
   joinDate?: boolean
   assignedCoachId?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1444,6 +1676,10 @@ export type ClientProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   weight?: boolean
   height?: boolean
   emergencyContact?: boolean
+  address?: boolean
+  gender?: boolean
+  occupation?: boolean
+  gymNotes?: boolean
   joinDate?: boolean
   assignedCoachId?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1457,6 +1693,10 @@ export type ClientProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   weight?: boolean
   height?: boolean
   emergencyContact?: boolean
+  address?: boolean
+  gender?: boolean
+  occupation?: boolean
+  gymNotes?: boolean
   joinDate?: boolean
   assignedCoachId?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -1470,11 +1710,15 @@ export type ClientProfileSelectScalar = {
   weight?: boolean
   height?: boolean
   emergencyContact?: boolean
+  address?: boolean
+  gender?: boolean
+  occupation?: boolean
+  gymNotes?: boolean
   joinDate?: boolean
   assignedCoachId?: boolean
 }
 
-export type ClientProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "dateOfBirth" | "weight" | "height" | "emergencyContact" | "joinDate" | "assignedCoachId", ExtArgs["result"]["clientProfile"]>
+export type ClientProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "dateOfBirth" | "weight" | "height" | "emergencyContact" | "address" | "gender" | "occupation" | "gymNotes" | "joinDate" | "assignedCoachId", ExtArgs["result"]["clientProfile"]>
 export type ClientProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   memberships?: boolean | Prisma.ClientProfile$membershipsArgs<ExtArgs>
@@ -1514,6 +1758,10 @@ export type $ClientProfilePayload<ExtArgs extends runtime.Types.Extensions.Inter
     weight: number | null
     height: number | null
     emergencyContact: string | null
+    address: string | null
+    gender: string | null
+    occupation: string | null
+    gymNotes: string | null
     joinDate: Date
     assignedCoachId: string | null
   }, ExtArgs["result"]["clientProfile"]>
@@ -1953,6 +2201,10 @@ export interface ClientProfileFieldRefs {
   readonly weight: Prisma.FieldRef<"ClientProfile", 'Float'>
   readonly height: Prisma.FieldRef<"ClientProfile", 'Float'>
   readonly emergencyContact: Prisma.FieldRef<"ClientProfile", 'String'>
+  readonly address: Prisma.FieldRef<"ClientProfile", 'String'>
+  readonly gender: Prisma.FieldRef<"ClientProfile", 'String'>
+  readonly occupation: Prisma.FieldRef<"ClientProfile", 'String'>
+  readonly gymNotes: Prisma.FieldRef<"ClientProfile", 'String'>
   readonly joinDate: Prisma.FieldRef<"ClientProfile", 'DateTime'>
   readonly assignedCoachId: Prisma.FieldRef<"ClientProfile", 'String'>
 }

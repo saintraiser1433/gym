@@ -4,7 +4,7 @@ import * as React from "react";
 import { DataTable, Column } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Pencil, Ban, CheckCircle2, Trash2 } from "lucide-react";
+import { Pencil, Ban, CheckCircle2, Trash2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -39,18 +39,31 @@ export default function AdminAccountsPage() {
   const [formValues, setFormValues] = React.useState({
     name: "",
     email: "",
+    password: "",
+    confirmPassword: "",
     role: "ADMIN",
     status: "ACTIVE",
   });
+  const [showPassword, setShowPassword] = React.useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
+  type TabValue = "pending" | "active" | "rejected";
+  const [tab, setTab] = React.useState<TabValue>("active");
+
+  const statusForTab: Record<TabValue, string> = {
+    pending: "INACTIVE",
+    active: "ACTIVE",
+    rejected: "REJECTED",
+  };
 
   const fetchData = React.useCallback(
-    async (opts?: { page?: number; search?: string }) => {
+    async (opts?: { page?: number; search?: string; tab?: TabValue }) => {
       setLoading(true);
       try {
         const params = new URLSearchParams();
         params.set("page", String(opts?.page ?? page));
         params.set("pageSize", String(pageSize));
+        params.set("status", statusForTab[opts?.tab ?? tab]);
         if (opts?.search ?? search) {
           params.set("search", (opts?.search ?? search) as string);
         }
@@ -65,23 +78,26 @@ export default function AdminAccountsPage() {
           })),
         );
         setTotal(json.total ?? 0);
-        if (opts?.page) setPage(opts.page);
+        if (opts?.page != null) setPage(opts.page);
+        if (opts?.tab != null) setTab(opts.tab);
       } finally {
         setLoading(false);
       }
     },
-    [page, pageSize, search],
+    [page, pageSize, search, tab],
   );
 
   React.useEffect(() => {
     void fetchData();
-  }, []);
+  }, [tab]);
 
   const openNewUserDialog = () => {
     setEditingUser(null);
     setFormValues({
       name: "",
       email: "",
+      password: "",
+      confirmPassword: "",
       role: "ADMIN",
       status: "ACTIVE",
     });
@@ -93,6 +109,8 @@ export default function AdminAccountsPage() {
     setFormValues({
       name: row.name,
       email: row.email,
+      password: "",
+      confirmPassword: "",
       role: row.role,
       status: row.status,
     });
@@ -108,37 +126,45 @@ export default function AdminAccountsPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!editingUser) {
+      if (!formValues.password || formValues.password.length < 6) {
+        toast.error("Password must be at least 6 characters");
+        return;
+      }
+      if (formValues.password !== formValues.confirmPassword) {
+        toast.error("Passwords do not match");
+        return;
+      }
+    }
     setSaving(true);
     try {
-      const payload = {
-        name: formValues.name,
-        email: formValues.email,
-        password: "password123", // default password for new users
-        role: formValues.role,
-        status: formValues.status,
-      };
-
       if (editingUser) {
         await fetch(`/api/admin/users/${editingUser.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            name: payload.name,
-            email: payload.email,
-            role: payload.role,
-            status: payload.status,
+            name: formValues.name,
+            email: formValues.email,
+            role: formValues.role,
+            status: formValues.status,
           }),
         });
       } else {
         await fetch(`/api/admin/users`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
+          body: JSON.stringify({
+            name: formValues.name,
+            email: formValues.email,
+            password: formValues.password,
+            role: formValues.role,
+            status: formValues.status,
+          }),
         });
       }
 
       setDialogOpen(false);
-      await fetchData({ page: 1, search });
+      await fetchData({ page: 1, search, tab });
       toast.success(editingUser ? "User updated" : "User created");
     } finally {
       setSaving(false);
@@ -154,127 +180,227 @@ export default function AdminAccountsPage() {
     {
       key: "id",
       header: "Actions",
-      render: (row) => (
-        <div className="flex items-center gap-1">
-          <Button
-            size="xs"
-            variant="outline"
-            className="h-7 w-7 p-0"
-            aria-label={`Edit ${row.email}`}
-            onClick={() => openEditDialog(row)}
-          >
-            <Pencil className="h-3.5 w-3.5" />
-          </Button>
+      render: (row) => {
+        const isPendingClient = row.role === "CLIENT" && row.status === "INACTIVE";
+        if (isPendingClient) {
+          return (
+            <div className="flex items-center gap-1">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    size="xs"
+                    className="h-7 px-2 text-[11px]"
+                    aria-label={`Approve ${row.email}`}
+                  >
+                    Approve
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-sm">
+                      Approve registration?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      {row.name} ({row.email}) will be able to sign in as a client.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="h-7 px-2 text-[11px]">
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      className="h-7 px-3 text-[11px]"
+                      onClick={async () => {
+                        setLoading(true);
+                        try {
+                          await fetch(`/api/admin/users/${row.id}`, {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ status: "ACTIVE" }),
+                          });
+                      await fetchData({ page, search, tab });
+                      toast.success("Registration approved");
+                        } finally {
+                          setLoading(false);
+                        }
+                      }}
+                    >
+                      Approve
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    size="xs"
+                    variant="outline"
+                    className="h-7 px-2 text-[11px]"
+                    aria-label={`Reject ${row.email}`}
+                  >
+                    Reject
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-sm">
+                      Reject registration?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription>
+                      The account will be marked as rejected and moved to the Rejected tab. You can delete it there to remove permanently.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="h-7 px-2 text-[11px]">
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      className="h-7 px-3 text-[11px] bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      onClick={async () => {
+                        setLoading(true);
+                        try {
+                          await fetch(`/api/admin/users/${row.id}`, {
+                            method: "PATCH",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ status: "REJECTED" }),
+                          });
+                          await fetchData({ page, search, tab });
+                          toast.success("Registration rejected");
+                        } finally {
+                          setLoading(false);
+                        }
+                      }}
+                    >
+                      Reject
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          );
+        }
+        return (
+          <div className="flex items-center gap-1">
+            <Button
+              size="xs"
+              variant="outline"
+              className="h-7 w-7 p-0"
+              aria-label={`Edit ${row.email}`}
+              onClick={() => openEditDialog(row)}
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </Button>
 
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                size="xs"
-                variant="outline"
-                className="h-7 w-7 p-0"
-                aria-label={`Deactivate ${row.email}`}
-              >
-                {row.status === "ACTIVE" ? (
-                  <Ban className="h-3.5 w-3.5" />
-                ) : (
-                  <CheckCircle2 className="h-3.5 w-3.5" />
-                )}
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle className="text-sm">
-                  {row.status === "ACTIVE"
-                    ? "Set user to inactive?"
-                    : "Set user to active?"}
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  {row.status === "ACTIVE"
-                    ? "This will prevent the user from signing in until reactivated."
-                    : "This will allow the user to sign in again."}
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel className="h-7 px-2 text-[11px]">
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  className="h-7 px-3 text-[11px]"
-                  onClick={async () => {
-                    setLoading(true);
-                    try {
-                      await fetch(`/api/admin/users/${row.id}`, {
-                        method: "PATCH",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                          status:
-                            row.status === "ACTIVE" ? "INACTIVE" : "ACTIVE",
-                        }),
-                      });
-                      await fetchData({ page, search });
-                      toast.success(
-                        row.status === "ACTIVE"
-                          ? "User set to inactive"
-                          : "User set to active",
-                      );
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  size="xs"
+                  variant="outline"
+                  className="h-7 w-7 p-0"
+                  aria-label={`Deactivate ${row.email}`}
                 >
-                  {row.status === "ACTIVE" ? "Deactivate" : "Activate"}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+                  {row.status === "ACTIVE" ? (
+                    <Ban className="h-3.5 w-3.5" />
+                  ) : (
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                  )}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-sm">
+                    {row.status === "ACTIVE"
+                      ? "Set user to inactive?"
+                      : "Set user to active?"}
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    {row.status === "ACTIVE"
+                      ? "This will prevent the user from signing in until reactivated."
+                      : "This will allow the user to sign in again."}
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="h-7 px-2 text-[11px]">
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    className="h-7 px-3 text-[11px]"
+                    onClick={async () => {
+                      setLoading(true);
+                      try {
+                        await fetch(`/api/admin/users/${row.id}`, {
+                          method: "PATCH",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({
+                            status:
+                              row.status === "ACTIVE" ? "INACTIVE" : "ACTIVE",
+                          }),
+                        });
+                        await fetchData({ page, search, tab });
+                        toast.success(
+                          row.status === "ACTIVE"
+                            ? "User set to inactive"
+                            : "User set to active",
+                        );
+                      } finally {
+                        setLoading(false);
+                      }
+                    }}
+                  >
+                    {row.status === "ACTIVE" ? "Deactivate" : "Activate"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
 
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button
-                size="xs"
-                variant="outline"
-                className="h-7 w-7 p-0"
-                aria-label={`Delete ${row.email}`}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle className="text-sm">
-                  Delete user?
-                </AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. The user account will be
-                  permanently removed.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel className="h-7 px-2 text-[11px]">
-                  Cancel
-                </AlertDialogCancel>
-                <AlertDialogAction
-                  className="h-7 px-3 text-[11px]"
-                  onClick={async () => {
-                    setLoading(true);
-                    try {
-                      await fetch(`/api/admin/users/${row.id}`, {
-                        method: "DELETE",
-                      });
-                      await fetchData({ page, search });
-                      toast.success("User deleted");
-                    } finally {
-                      setLoading(false);
-                    }
-                  }}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  size="xs"
+                  variant="outline"
+                  className="h-7 w-7 p-0"
+                  aria-label={`Delete ${row.email}`}
                 >
-                  Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </div>
-      ),
+                  <Trash2 className="h-3.5 w-3.5" />
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-sm">
+                    Delete user?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. The user account will be
+                    permanently removed.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="h-7 px-2 text-[11px]">
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    className="h-7 px-3 text-[11px]"
+                    onClick={async () => {
+                      setLoading(true);
+                      try {
+                        await fetch(`/api/admin/users/${row.id}`, {
+                          method: "DELETE",
+                        });
+                        await fetchData({ page, search, tab });
+                        toast.success("User deleted");
+                      } finally {
+                        setLoading(false);
+                      }
+                    }}
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        );
+      },
     },
   ];
 
@@ -296,6 +422,30 @@ export default function AdminAccountsPage() {
         </Button>
       </div>
 
+      <div className="flex gap-1 border-b border-border">
+        {(
+          [
+            { value: "active" as const, label: "Active" },
+            { value: "pending" as const, label: "Pending" },
+            { value: "rejected" as const, label: "Rejected" },
+          ] as const
+        ).map(({ value, label }) => (
+          <Button
+            key={value}
+            size="xs"
+            variant={tab === value ? "secondary" : "ghost"}
+            className="h-8 rounded-b-none px-3 text-[11px]"
+            onClick={() => {
+              setTab(value);
+              setPage(1);
+              void fetchData({ page: 1, tab: value });
+            }}
+          >
+            {label}
+          </Button>
+        ))}
+      </div>
+
       <DataTable
         columns={columns}
         data={rows}
@@ -304,11 +454,12 @@ export default function AdminAccountsPage() {
         total={total}
         isLoading={loading}
         onPageChange={(newPage) => {
-          void fetchData({ page: newPage });
+          setPage(newPage);
+          void fetchData({ page: newPage, tab });
         }}
         onSearchChange={(value) => {
           setSearch(value || undefined);
-          void fetchData({ page: 1, search: value });
+          void fetchData({ page: 1, search: value, tab });
         }}
       />
 
@@ -346,6 +497,74 @@ export default function AdminAccountsPage() {
                   required
                 />
               </div>
+              {!editingUser && (
+                <>
+                  <div className="space-y-1">
+                    <label className="font-medium" htmlFor="password">
+                      Password
+                    </label>
+                    <div className="relative">
+                      <Input
+                        id="password"
+                        name="password"
+                        type={showPassword ? "text" : "password"}
+                        value={formValues.password}
+                        onChange={handleFormChange}
+                        className="h-7 pr-8 text-[11px]"
+                        placeholder="Min 6 characters"
+                        minLength={6}
+                        required
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-7 w-7 px-2 hover:bg-transparent"
+                        aria-label={showPassword ? "Hide password" : "Show password"}
+                        onClick={() => setShowPassword((v) => !v)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />
+                        ) : (
+                          <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-medium" htmlFor="confirmPassword">
+                      Confirm password
+                    </label>
+                    <div className="relative">
+                      <Input
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        type={showConfirmPassword ? "text" : "password"}
+                        value={formValues.confirmPassword}
+                        onChange={handleFormChange}
+                        className="h-7 pr-8 text-[11px]"
+                        placeholder="Re-enter password"
+                        minLength={6}
+                        required
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-7 w-7 px-2 hover:bg-transparent"
+                        aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                        onClick={() => setShowConfirmPassword((v) => !v)}
+                      >
+                        {showConfirmPassword ? (
+                          <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />
+                        ) : (
+                          <Eye className="h-3.5 w-3.5 text-muted-foreground" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </>
+              )}
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="font-medium" htmlFor="role">

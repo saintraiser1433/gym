@@ -460,9 +460,9 @@ export type WorkoutExerciseSumOrderByAggregateInput = {
   order?: Prisma.SortOrder
 }
 
-export type WorkoutExerciseScalarRelationFilter = {
-  is?: Prisma.WorkoutExerciseWhereInput
-  isNot?: Prisma.WorkoutExerciseWhereInput
+export type WorkoutExerciseNullableScalarRelationFilter = {
+  is?: Prisma.WorkoutExerciseWhereInput | null
+  isNot?: Prisma.WorkoutExerciseWhereInput | null
 }
 
 export type WorkoutExerciseCreateNestedManyWithoutExerciseInput = {
@@ -563,10 +563,12 @@ export type WorkoutExerciseCreateNestedOneWithoutProgressEntriesInput = {
   connect?: Prisma.WorkoutExerciseWhereUniqueInput
 }
 
-export type WorkoutExerciseUpdateOneRequiredWithoutProgressEntriesNestedInput = {
+export type WorkoutExerciseUpdateOneWithoutProgressEntriesNestedInput = {
   create?: Prisma.XOR<Prisma.WorkoutExerciseCreateWithoutProgressEntriesInput, Prisma.WorkoutExerciseUncheckedCreateWithoutProgressEntriesInput>
   connectOrCreate?: Prisma.WorkoutExerciseCreateOrConnectWithoutProgressEntriesInput
   upsert?: Prisma.WorkoutExerciseUpsertWithoutProgressEntriesInput
+  disconnect?: Prisma.WorkoutExerciseWhereInput | boolean
+  delete?: Prisma.WorkoutExerciseWhereInput | boolean
   connect?: Prisma.WorkoutExerciseWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.WorkoutExerciseUpdateToOneWithWhereWithoutProgressEntriesInput, Prisma.WorkoutExerciseUpdateWithoutProgressEntriesInput>, Prisma.WorkoutExerciseUncheckedUpdateWithoutProgressEntriesInput>
 }

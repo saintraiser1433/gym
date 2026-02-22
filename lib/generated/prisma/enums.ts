@@ -20,7 +20,8 @@ export type Role = (typeof Role)[keyof typeof Role]
 
 export const UserStatus = {
   ACTIVE: 'ACTIVE',
-  INACTIVE: 'INACTIVE'
+  INACTIVE: 'INACTIVE',
+  REJECTED: 'REJECTED'
 } as const
 
 export type UserStatus = (typeof UserStatus)[keyof typeof UserStatus]
@@ -28,8 +29,7 @@ export type UserStatus = (typeof UserStatus)[keyof typeof UserStatus]
 
 export const MembershipType = {
   BASIC: 'BASIC',
-  PREMIUM: 'PREMIUM',
-  VIP: 'VIP'
+  PREMIUM: 'PREMIUM'
 } as const
 
 export type MembershipType = (typeof MembershipType)[keyof typeof MembershipType]
@@ -50,6 +50,14 @@ export const MembershipInstanceStatus = {
 } as const
 
 export type MembershipInstanceStatus = (typeof MembershipInstanceStatus)[keyof typeof MembershipInstanceStatus]
+
+
+export const WorkoutType = {
+  PER_PCS: 'PER_PCS',
+  PER_KG: 'PER_KG'
+} as const
+
+export type WorkoutType = (typeof WorkoutType)[keyof typeof WorkoutType]
 
 
 export const WorkoutGoalCategory = {

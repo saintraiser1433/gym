@@ -34,23 +34,69 @@ export async function GET(req: NextRequest) {
 
   const filterGoalIds = goalId && goalIds.includes(goalId) ? [goalId] : goalIds;
 
-  const workouts = await prisma.workout.findMany({
-    where: {
-      goals: {
-        some: { id: { in: filterGoalIds } },
-      },
-    },
-    select: {
-      id: true,
-      name: true,
-      description: true,
-      duration: true,
-      difficulty: true,
-      demoMediaUrl: true,
-      goals: { select: { id: true, name: true } },
-    },
-    orderBy: { name: "asc" },
+  // Use GoalWorkout join table (database has this; no _WorkoutToWorkoutGoal)
+  const links = await prisma.goalWorkout.findMany({
+    where: { goalId: { in: filterGoalIds } },
+    select: { workoutId: true, goal: { select: { id: true, name: true } } },
   });
+  const workoutIds = [...new Set(links.map((l) => l.workoutId))];
+  if (workoutIds.length === 0) {
+    return NextResponse.json({ data: [] });
+  }
 
-  return NextResponse.json({ data: workouts });
+  const [workouts, equipmentRows] = await Promise.all([
+    prisma.workout.findMany({
+      where: { id: { in: workoutIds } },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        duration: true,
+        difficulty: true,
+        demoMediaUrl: true,
+      },
+      orderBy: { name: "asc" },
+    }),
+    prisma.workoutEquipment.findMany({
+      where: { workoutId: { in: workoutIds } },
+      select: {
+        workoutId: true,
+        quantity: true,
+        targetKg: true,
+        targetPcs: true,
+        equipment: { select: { name: true } },
+      },
+    }),
+  ]);
+
+  const goalsByWorkoutId = links.reduce(
+    (acc, l) => {
+      if (!acc[l.workoutId]) acc[l.workoutId] = [];
+      acc[l.workoutId].push(l.goal);
+      return acc;
+    },
+    {} as Record<string, { id: string; name: string }[]>,
+  );
+
+  const equipmentByWorkoutId = equipmentRows.reduce(
+    (acc, row) => {
+      if (!acc[row.workoutId]) acc[row.workoutId] = [];
+      acc[row.workoutId].push({
+        equipmentName: row.equipment.name,
+        quantity: row.quantity,
+        targetKg: row.targetKg ?? undefined,
+        targetPcs: row.targetPcs ?? undefined,
+      });
+      return acc;
+    },
+    {} as Record<string, { equipmentName: string; quantity: number; targetKg?: number; targetPcs?: number }[]>,
+  );
+
+  const data = workouts.map((w) => ({
+    ...w,
+    goals: goalsByWorkoutId[w.id] ?? [],
+    equipment: equipmentByWorkoutId[w.id] ?? [],
+  }));
+
+  return NextResponse.json({ data });
 }

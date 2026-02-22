@@ -16,6 +16,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { PaymentReceipt, printReceipt, type ReceiptPayment } from "@/components/payment-receipt";
 
 type PaymentRow = {
   id: string;
@@ -39,6 +40,8 @@ export default function AdminPaymentsPage() {
   const [statusFilter, setStatusFilter] = React.useState<
     "ALL" | "PENDING" | "COMPLETED" | "FAILED"
   >("ALL");
+  const [receiptData, setReceiptData] = React.useState<ReceiptPayment | null>(null);
+  const [receiptLoadingId, setReceiptLoadingId] = React.useState<string | null>(null);
 
   const fetchData = React.useCallback(
     async (opts?: { page?: number; search?: string }) => {
@@ -100,6 +103,33 @@ export default function AdminPaymentsPage() {
     void fetchData();
   }, []);
 
+  const openReceipt = React.useCallback(async (id: string) => {
+    setReceiptLoadingId(id);
+    try {
+      const res = await fetch(`/api/admin/payments/${id}`, { cache: "no-store" });
+      if (!res.ok) {
+        toast.error("Could not load receipt");
+        return;
+      }
+      const data = await res.json();
+      setReceiptData({
+        id: data.id,
+        amount: data.amount,
+        type: data.type,
+        status: data.status,
+        method: data.method,
+        referenceId: data.referenceId,
+        date: data.date,
+        clientName: data.clientName,
+        clientEmail: data.clientEmail,
+      });
+    } catch {
+      toast.error("Could not load receipt");
+    } finally {
+      setReceiptLoadingId(null);
+    }
+  }, []);
+
   const handleApprove = async (id: string) => {
     try {
       const res = await fetch(`/api/admin/payments/${id}/approve`, {
@@ -112,6 +142,7 @@ export default function AdminPaymentsPage() {
       }
       await fetchData({ page, search });
       toast.success("Payment approved. The membership will appear in Client Memberships.");
+      await openReceipt(id);
     } catch {
       toast.error("Failed to approve");
     }
@@ -168,88 +199,98 @@ export default function AdminPaymentsPage() {
     {
       key: "id",
       header: "Actions",
-      render: (row) =>
-        row.status === "PENDING" &&
-        (row.type === "MEMBERSHIP" || row.type === "RENEWAL") ? (
-          <div className="flex items-center gap-1">
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  size="xs"
-                  variant="outline"
-                  className="h-7 px-2 text-[11px]"
-                >
-                  Approve
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="text-sm">
-                    Approve payment?
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will approve the{" "}
-                    {row.type === "RENEWAL" ? "renewal" : "membership"} payment
-                    for {row.clientName} (₱{row.amount.toLocaleString()},{" "}
-                    {row.method ?? "—"}).{" "}
-                    {row.type === "RENEWAL"
-                      ? "The existing membership dates will be extended."
-                      : "The client will be assigned the membership and it will appear in Client Memberships."}
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel className="h-7 px-2 text-[11px]">
-                    Cancel
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    className="h-7 px-3 text-[11px]"
-                    onClick={() => handleApprove(row.id)}
-                  >
-                    Approve
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button
-                  size="xs"
-                  variant="outline"
-                  className="h-7 px-2 text-[11px]"
-                >
-                  Reject
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle className="text-sm">
-                    Reject payment?
-                  </AlertDialogTitle>
-                  <AlertDialogDescription>
-                    This will reject the{" "}
-                    {row.type === "RENEWAL" ? "renewal request" : "membership application"}{" "}
-                    for {row.clientName}. The payment will be marked as rejected
-                    and the client will not receive the{" "}
-                    {row.type === "RENEWAL" ? "renewal" : "membership"}.
-                  </AlertDialogDescription>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel className="h-7 px-2 text-[11px]">
-                    Cancel
-                  </AlertDialogCancel>
-                  <AlertDialogAction
-                    className="h-7 px-3 text-[11px] bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    onClick={() => handleReject(row.id)}
-                  >
-                    Reject
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </div>
-        ) : (
-          "—"
-        ),
+      render: (row) => (
+        <div className="flex items-center gap-1">
+          {row.status === "PENDING" &&
+            (row.type === "MEMBERSHIP" || row.type === "RENEWAL") && (
+              <>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      size="xs"
+                      variant="outline"
+                      className="h-7 px-2 text-[11px]"
+                    >
+                      Approve
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="text-sm">
+                        Approve payment?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will approve the{" "}
+                        {row.type === "RENEWAL" ? "renewal" : "membership"} payment
+                        for {row.clientName} (₱{row.amount.toLocaleString()},{" "}
+                        {row.method ?? "—"}).{" "}
+                        {row.type === "RENEWAL"
+                          ? "The existing membership dates will be extended."
+                          : "The client will be assigned the membership and it will appear in Client Memberships."}
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="h-7 px-2 text-[11px]">
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        className="h-7 px-3 text-[11px]"
+                        onClick={() => handleApprove(row.id)}
+                      >
+                        Approve
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      size="xs"
+                      variant="outline"
+                      className="h-7 px-2 text-[11px]"
+                    >
+                      Reject
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle className="text-sm">
+                        Reject payment?
+                      </AlertDialogTitle>
+                      <AlertDialogDescription>
+                        This will reject the{" "}
+                        {row.type === "RENEWAL" ? "renewal request" : "membership application"}{" "}
+                        for {row.clientName}. The payment will be marked as rejected
+                        and the client will not receive the{" "}
+                        {row.type === "RENEWAL" ? "renewal" : "membership"}.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel className="h-7 px-2 text-[11px]">
+                        Cancel
+                      </AlertDialogCancel>
+                      <AlertDialogAction
+                        className="h-7 px-3 text-[11px] bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        onClick={() => handleReject(row.id)}
+                      >
+                        Reject
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </>
+            )}
+          <Button
+            size="xs"
+            variant="outline"
+            className="h-7 px-2 text-[11px]"
+            disabled={receiptLoadingId === row.id}
+            onClick={() => openReceipt(row.id)}
+          >
+            {receiptLoadingId === row.id ? "…" : "Receipt"}
+          </Button>
+        </div>
+      ),
     },
   ];
 
@@ -332,6 +373,30 @@ export default function AdminPaymentsPage() {
           }}
         />
       </Card>
+
+      {receiptData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="flex max-h-[90vh] flex-col gap-3 rounded-lg bg-background p-4 shadow-lg">
+            <PaymentReceipt payment={receiptData} />
+            <div className="flex justify-end gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => printReceipt(receiptData)}
+              >
+                Print
+              </Button>
+              <Button
+                size="sm"
+                variant="secondary"
+                onClick={() => setReceiptData(null)}
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -53,6 +53,11 @@ export type MembershipRenewal = Prisma.MembershipRenewalModel
  */
 export type WorkoutGoal = Prisma.WorkoutGoalModel
 /**
+ * Model GoalWorkout
+ * 
+ */
+export type GoalWorkout = Prisma.GoalWorkoutModel
+/**
  * Model ClientGoal
  * 
  */
@@ -92,6 +97,11 @@ export type Schedule = Prisma.ScheduleModel
  * 
  */
 export type Attendance = Prisma.AttendanceModel
+/**
+ * Model WorkoutEquipment
+ * 
+ */
+export type WorkoutEquipment = Prisma.WorkoutEquipmentModel
 /**
  * Model Equipment
  * 

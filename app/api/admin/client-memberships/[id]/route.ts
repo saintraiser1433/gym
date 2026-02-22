@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
+import type { Prisma } from "@/lib/generated/prisma/client";
 import { updateClientMembershipSchema } from "@/lib/validators/admin";
 import { createNotification } from "@/lib/notifications";
 
@@ -19,10 +20,10 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     );
   }
 
-  const data: { startDate?: Date; endDate?: Date; status?: string } = {};
+  const data: Prisma.ClientMembershipUpdateInput = {};
   if (parsed.data.startDate) data.startDate = new Date(parsed.data.startDate);
   if (parsed.data.endDate) data.endDate = new Date(parsed.data.endDate);
-  if (parsed.data.status) data.status = parsed.data.status;
+  if (parsed.data.status) data.status = parsed.data.status as "ACTIVE" | "EXPIRED" | "CANCELLED";
 
   try {
     const clientMembership = await prisma.clientMembership.update({
@@ -33,12 +34,14 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         membership: { select: { name: true } },
       },
     });
-    if (data.status === "EXPIRED" && clientMembership.client?.userId) {
+    const clientUserId = clientMembership.client && "userId" in clientMembership.client ? clientMembership.client.userId : null;
+    const membershipName = clientMembership.membership && "name" in clientMembership.membership ? clientMembership.membership.name : null;
+    if (data.status === "EXPIRED" && clientUserId) {
       await createNotification(
-        clientMembership.client.userId,
+        clientUserId,
         "MEMBERSHIP_EXPIRED",
         "Membership expired",
-        `Your membership (${clientMembership.membership?.name ?? "plan"}) has been marked as expired. You can renew from the Memberships page.`,
+        `Your membership (${membershipName ?? "plan"}) has been marked as expired. You can renew from the Memberships page.`,
         { clientMembershipId: id },
       );
     }

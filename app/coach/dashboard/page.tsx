@@ -57,7 +57,7 @@ export default function CoachDashboardPage() {
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis dataKey="weekStart" tick={{ fontSize: 10 }} />
               <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
-              <Tooltip formatter={(value: number) => [value, "Sessions"]} />
+              <Tooltip formatter={(value: number | undefined) => [value ?? 0, "Sessions"]} />
               <Bar dataKey="count" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -68,7 +68,7 @@ export default function CoachDashboardPage() {
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis dataKey="weekStart" tick={{ fontSize: 10 }} />
               <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
-              <Tooltip formatter={(value: number) => [value, "Check-ins"]} />
+              <Tooltip formatter={(value: number | undefined) => [value ?? 0, "Check-ins"]} />
               <Bar dataKey="count" fill="var(--chart-2)" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>

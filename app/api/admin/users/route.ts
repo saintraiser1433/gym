@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { hash } from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
+import type { Prisma } from "@/lib/generated/prisma/client";
 import {
   createUserSchema,
   paginationSchema,
@@ -10,6 +11,7 @@ import {
 export async function GET(req: NextRequest) {
   await requireAdmin();
   const url = new URL(req.url);
+  const statusParam = url.searchParams.get("status");
   const parsed = paginationSchema.safeParse({
     page: url.searchParams.get("page"),
     pageSize: url.searchParams.get("pageSize"),
@@ -24,14 +26,19 @@ export async function GET(req: NextRequest) {
   }
 
   const { page, pageSize, search } = parsed.data;
-  const where = search
-    ? {
-        OR: [
-          { name: { contains: search, mode: "insensitive" } },
-          { email: { contains: search, mode: "insensitive" } },
-        ],
-      }
-    : {};
+  const statusFilter =
+    statusParam === "ACTIVE" || statusParam === "INACTIVE" || statusParam === "REJECTED"
+      ? statusParam
+      : undefined;
+
+  const where: Prisma.UserWhereInput = {};
+  if (statusFilter) where.status = statusFilter;
+  if (search) {
+    where.OR = [
+      { name: { contains: search, mode: "insensitive" } },
+      { email: { contains: search, mode: "insensitive" } },
+    ];
+  }
 
   const [total, users] = await Promise.all([
     prisma.user.count({ where }),
@@ -82,6 +89,13 @@ export async function POST(req: NextRequest) {
         password: passwordHash,
         role,
         phone,
+        ...(role === "CLIENT"
+          ? {
+              clientProfile: {
+                create: {},
+              },
+            }
+          : {}),
       },
       select: {
         id: true,

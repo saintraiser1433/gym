@@ -16,7 +16,17 @@ export async function GET() {
   }
 
   const clients = await prisma.clientProfile.findMany({
-    where: { assignedCoachId: coach.id },
+    where: {
+      assignedCoachId: coach.id,
+      memberships: {
+        some: {
+          status: "ACTIVE",
+          membership: {
+            OR: [{ type: "PREMIUM" }, { hasCoach: true }],
+          },
+        },
+      },
+    },
     include: { user: true },
   });
 

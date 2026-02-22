@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
+import type { Prisma } from "@/lib/generated/prisma/client";
 import { updateClientGoalSchema } from "@/lib/validators/admin";
 
 type Params = { params: Promise<{ id: string }> };
@@ -18,18 +19,13 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     );
   }
 
-  const data: {
-    targetValue?: number | null;
-    currentValue?: number | null;
-    deadline?: Date | null;
-    status?: string;
-  } = {};
+  const data: Prisma.ClientGoalUpdateInput = {};
   if (parsed.data.targetValue !== undefined) data.targetValue = parsed.data.targetValue;
   if (parsed.data.currentValue !== undefined) data.currentValue = parsed.data.currentValue;
   if (parsed.data.deadline !== undefined) {
     data.deadline = parsed.data.deadline ? new Date(parsed.data.deadline) : null;
   }
-  if (parsed.data.status) data.status = parsed.data.status;
+  if (parsed.data.status) data.status = parsed.data.status as "ACTIVE" | "COMPLETED" | "CANCELLED";
 
   try {
     const clientGoal = await prisma.clientGoal.update({

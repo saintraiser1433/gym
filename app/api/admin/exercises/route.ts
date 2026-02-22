@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   const { page, pageSize, search } = parsed.data;
   const where = search
     ? {
-        name: { contains: search, mode: "insensitive" },
+        name: { contains: search, mode: "insensitive" as const },
       }
     : {};
 

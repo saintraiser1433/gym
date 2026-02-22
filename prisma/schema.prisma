@@ -37,6 +37,10 @@ model ClientProfile {
   weight           Float?
   height           Float?
   emergencyContact String?
+  address          String?
+  gender           String?
+  occupation       String?
+  gymNotes         String?   // other gym-related details (goals, medical, etc.)
   joinDate         DateTime  @default(now())
 
   user               User               @relation(fields: [userId], references: [id])
@@ -106,23 +110,38 @@ model MembershipRenewal {
 }
 
 model WorkoutGoal {
-  id          String             @id @default(cuid())
-  name        String
-  description String?
-  category    WorkoutGoalCategory
+  id              String       @id @default(cuid())
+  name            String
+  description     String?
+  category        WorkoutGoalCategory
+  targetSessions  Int?         // number of sessions to complete (set by admin); used when client adds this goal
 
-  clientGoals ClientGoal[]
-  workouts    Workout[]
+  clientGoals  ClientGoal[]
+  goalWorkouts GoalWorkout[]
+}
+
+model GoalWorkout {
+  id           String     @id @default(cuid())
+  goalId       String
+  workoutId    String
+  workoutType  WorkoutType // PER_PCS or PER_KG - must match workout's types
+  targetValue  Float?      // required input for the selected type (e.g. kg or pcs)
+
+  goal    WorkoutGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  workout Workout     @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+
+  @@unique([goalId, workoutId])
 }
 
 model ClientGoal {
-  id           String      @id @default(cuid())
-  clientId     String
-  goalId       String
-  targetValue  Float?
-  currentValue Float?
-  deadline     DateTime?
-  status       GoalStatus  @default(ACTIVE)
+  id             String      @id @default(cuid())
+  clientId       String
+  goalId         String
+  targetValue    Float?
+  targetSessions Int?        // optional: number of sessions to complete this goal
+  currentValue   Float?
+  deadline       DateTime?
+  status         GoalStatus  @default(ACTIVE)
 
   client ClientProfile @relation(fields: [clientId], references: [id])
   goal   WorkoutGoal   @relation(fields: [goalId], references: [id])
@@ -151,11 +170,14 @@ model Workout {
   duration       Int?     // minutes
   difficulty     String?
   demoMediaUrl   String?  // GIF or video URL for how to perform the workout
+  types          String[] @default([]) // e.g. ["PER_PCS", "PER_KG"] - combine with checkboxes
 
-  createdBy   CoachProfile?     @relation(fields: [createdById], references: [id])
-  exercises   WorkoutExercise[]
-  assignments WorkoutAssignment[]
-  goals       WorkoutGoal[]
+  createdBy    CoachProfile?       @relation(fields: [createdById], references: [id])
+  exercises    WorkoutExercise[]
+  assignments  WorkoutAssignment[]
+  goalWorkouts GoalWorkout[]
+  equipmentUsed WorkoutEquipment[]
+  progressEntries WorkoutProgress[]
 }
 
 model WorkoutExercise {
@@ -191,16 +213,18 @@ model WorkoutAssignment {
 model WorkoutProgress {
   id                String   @id @default(cuid())
   clientId          String
-  workoutExerciseId String
+  workoutExerciseId String?
+  workoutId         String?
   completedDate     DateTime @default(now())
   actualSets        Int?
-  actualReps        Int?
-  weight            Float?
-  notes             String?
-  rating            Int?
+  actualReps       Int?
+  weight           Float?
+  notes            String?
+  rating           Int?
 
-  client          ClientProfile  @relation(fields: [clientId], references: [id])
-  workoutExercise WorkoutExercise @relation(fields: [workoutExerciseId], references: [id])
+  client          ClientProfile   @relation(fields: [clientId], references: [id])
+  workoutExercise WorkoutExercise? @relation(fields: [workoutExerciseId], references: [id])
+  workout         Workout?        @relation(fields: [workoutId], references: [id])
 
   @@index([clientId, completedDate])
 }
@@ -235,16 +259,33 @@ model Attendance {
   @@index([clientId, checkInTime])
 }
 
+model WorkoutEquipment {
+  id          String   @id @default(cuid())
+  workoutId   String
+  equipmentId String
+  quantity    Int      @default(1) // pieces used for this workout
+  targetKg    Float?   // target in kg (when equipment has per kg option)
+  targetPcs   Float?   // target in pieces (when equipment has per pieces option)
+
+  workout   Workout   @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  equipment Equipment @relation(fields: [equipmentId], references: [id], onDelete: Cascade)
+
+  @@unique([workoutId, equipmentId])
+}
+
 model Equipment {
-  id              String          @id @default(cuid())
-  name            String
-  type            String?
-  brand           String?
-  purchaseDate    DateTime?
+  id            String             @id @default(cuid())
+  name          String
+  type          String?
+  brand         String?
+  purchaseDate  DateTime?
   lastMaintenance DateTime?
   nextMaintenance DateTime?
-  status          EquipmentStatus @default(AVAILABLE)
-  quantity        Int             @default(1)
+  status       EquipmentStatus    @default(AVAILABLE)
+  quantity     Int                @default(1)
+  measureTypes String[]           @default(["PER_PCS"]) // ["PER_KG"], ["PER_PCS"], or both - options for how to measure
+
+  workoutUsage WorkoutEquipment[]
 }
 
 model Payment {
@@ -286,6 +327,7 @@ enum Role {
 enum UserStatus {
   ACTIVE
   INACTIVE
+  REJECTED
 }
 
 enum MembershipType {
@@ -302,6 +344,11 @@ enum MembershipInstanceStatus {
   ACTIVE
   EXPIRED
   CANCELLED
+}
+
+enum WorkoutType {
+  PER_PCS
+  PER_KG
 }
 
 enum WorkoutGoalCategory {

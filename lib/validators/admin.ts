@@ -12,7 +12,7 @@ export const createUserSchema = z.object({
   password: z.string().min(6),
   role: z.enum(["ADMIN", "CLIENT", "COACH"]),
   phone: z.string().optional(),
-  status: z.enum(["ACTIVE", "INACTIVE"]).default("ACTIVE"),
+  status: z.enum(["ACTIVE", "INACTIVE", "REJECTED"]).default("ACTIVE"),
 });
 
 export const updateUserSchema = createUserSchema
@@ -69,7 +69,18 @@ export const createGoalSchema = z.object({
     "FLEXIBILITY",
     "GENERAL_FITNESS",
   ]),
+  targetSessions: z.number().int().min(1).optional().nullable(),
   workoutIds: z.array(z.string().min(1)).optional().default([]),
+  goalWorkouts: z
+    .array(
+      z.object({
+        workoutId: z.string().min(1),
+        workoutType: z.enum(["PER_PCS", "PER_KG"]),
+        targetValue: z.number().nullable().optional(),
+      }),
+    )
+    .optional()
+    .default([]),
 });
 
 export const updateGoalSchema = createGoalSchema.partial();
@@ -154,6 +165,7 @@ export const createEquipmentSchema = z.object({
   purchaseDate: z.string().datetime().optional(),
   status: z.enum(["AVAILABLE", "MAINTENANCE", "BROKEN"]).default("AVAILABLE"),
   quantity: z.number().int().min(1).default(1),
+  measureTypes: z.array(z.enum(["PER_PCS", "PER_KG"])).optional().default(["PER_PCS"]),
 });
 
 export const updateEquipmentSchema = createEquipmentSchema.partial();

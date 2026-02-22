@@ -68,6 +68,7 @@ export type EquipmentCountAggregateOutputType = {
   nextMaintenance: number
   status: number
   quantity: number
+  measureTypes: number
   _all: number
 }
 
@@ -114,6 +115,7 @@ export type EquipmentCountAggregateInputType = {
   nextMaintenance?: true
   status?: true
   quantity?: true
+  measureTypes?: true
   _all?: true
 }
 
@@ -213,6 +215,7 @@ export type EquipmentGroupByOutputType = {
   nextMaintenance: Date | null
   status: $Enums.EquipmentStatus
   quantity: number
+  measureTypes: string[]
   _count: EquipmentCountAggregateOutputType | null
   _avg: EquipmentAvgAggregateOutputType | null
   _sum: EquipmentSumAggregateOutputType | null
@@ -248,6 +251,8 @@ export type EquipmentWhereInput = {
   nextMaintenance?: Prisma.DateTimeNullableFilter<"Equipment"> | Date | string | null
   status?: Prisma.EnumEquipmentStatusFilter<"Equipment"> | $Enums.EquipmentStatus
   quantity?: Prisma.IntFilter<"Equipment"> | number
+  measureTypes?: Prisma.StringNullableListFilter<"Equipment">
+  workoutUsage?: Prisma.WorkoutEquipmentListRelationFilter
 }
 
 export type EquipmentOrderByWithRelationInput = {
@@ -260,6 +265,8 @@ export type EquipmentOrderByWithRelationInput = {
   nextMaintenance?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  measureTypes?: Prisma.SortOrder
+  workoutUsage?: Prisma.WorkoutEquipmentOrderByRelationAggregateInput
 }
 
 export type EquipmentWhereUniqueInput = Prisma.AtLeast<{
@@ -275,6 +282,8 @@ export type EquipmentWhereUniqueInput = Prisma.AtLeast<{
   nextMaintenance?: Prisma.DateTimeNullableFilter<"Equipment"> | Date | string | null
   status?: Prisma.EnumEquipmentStatusFilter<"Equipment"> | $Enums.EquipmentStatus
   quantity?: Prisma.IntFilter<"Equipment"> | number
+  measureTypes?: Prisma.StringNullableListFilter<"Equipment">
+  workoutUsage?: Prisma.WorkoutEquipmentListRelationFilter
 }, "id">
 
 export type EquipmentOrderByWithAggregationInput = {
@@ -287,6 +296,7 @@ export type EquipmentOrderByWithAggregationInput = {
   nextMaintenance?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  measureTypes?: Prisma.SortOrder
   _count?: Prisma.EquipmentCountOrderByAggregateInput
   _avg?: Prisma.EquipmentAvgOrderByAggregateInput
   _max?: Prisma.EquipmentMaxOrderByAggregateInput
@@ -307,6 +317,7 @@ export type EquipmentScalarWhereWithAggregatesInput = {
   nextMaintenance?: Prisma.DateTimeNullableWithAggregatesFilter<"Equipment"> | Date | string | null
   status?: Prisma.EnumEquipmentStatusWithAggregatesFilter<"Equipment"> | $Enums.EquipmentStatus
   quantity?: Prisma.IntWithAggregatesFilter<"Equipment"> | number
+  measureTypes?: Prisma.StringNullableListFilter<"Equipment">
 }
 
 export type EquipmentCreateInput = {
@@ -319,6 +330,8 @@ export type EquipmentCreateInput = {
   nextMaintenance?: Date | string | null
   status?: $Enums.EquipmentStatus
   quantity?: number
+  measureTypes?: Prisma.EquipmentCreatemeasureTypesInput | string[]
+  workoutUsage?: Prisma.WorkoutEquipmentCreateNestedManyWithoutEquipmentInput
 }
 
 export type EquipmentUncheckedCreateInput = {
@@ -331,6 +344,8 @@ export type EquipmentUncheckedCreateInput = {
   nextMaintenance?: Date | string | null
   status?: $Enums.EquipmentStatus
   quantity?: number
+  measureTypes?: Prisma.EquipmentCreatemeasureTypesInput | string[]
+  workoutUsage?: Prisma.WorkoutEquipmentUncheckedCreateNestedManyWithoutEquipmentInput
 }
 
 export type EquipmentUpdateInput = {
@@ -343,6 +358,8 @@ export type EquipmentUpdateInput = {
   nextMaintenance?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumEquipmentStatusFieldUpdateOperationsInput | $Enums.EquipmentStatus
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  measureTypes?: Prisma.EquipmentUpdatemeasureTypesInput | string[]
+  workoutUsage?: Prisma.WorkoutEquipmentUpdateManyWithoutEquipmentNestedInput
 }
 
 export type EquipmentUncheckedUpdateInput = {
@@ -355,6 +372,8 @@ export type EquipmentUncheckedUpdateInput = {
   nextMaintenance?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumEquipmentStatusFieldUpdateOperationsInput | $Enums.EquipmentStatus
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  measureTypes?: Prisma.EquipmentUpdatemeasureTypesInput | string[]
+  workoutUsage?: Prisma.WorkoutEquipmentUncheckedUpdateManyWithoutEquipmentNestedInput
 }
 
 export type EquipmentCreateManyInput = {
@@ -367,6 +386,7 @@ export type EquipmentCreateManyInput = {
   nextMaintenance?: Date | string | null
   status?: $Enums.EquipmentStatus
   quantity?: number
+  measureTypes?: Prisma.EquipmentCreatemeasureTypesInput | string[]
 }
 
 export type EquipmentUpdateManyMutationInput = {
@@ -379,6 +399,7 @@ export type EquipmentUpdateManyMutationInput = {
   nextMaintenance?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumEquipmentStatusFieldUpdateOperationsInput | $Enums.EquipmentStatus
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  measureTypes?: Prisma.EquipmentUpdatemeasureTypesInput | string[]
 }
 
 export type EquipmentUncheckedUpdateManyInput = {
@@ -391,6 +412,12 @@ export type EquipmentUncheckedUpdateManyInput = {
   nextMaintenance?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumEquipmentStatusFieldUpdateOperationsInput | $Enums.EquipmentStatus
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  measureTypes?: Prisma.EquipmentUpdatemeasureTypesInput | string[]
+}
+
+export type EquipmentScalarRelationFilter = {
+  is?: Prisma.EquipmentWhereInput
+  isNot?: Prisma.EquipmentWhereInput
 }
 
 export type EquipmentCountOrderByAggregateInput = {
@@ -403,6 +430,7 @@ export type EquipmentCountOrderByAggregateInput = {
   nextMaintenance?: Prisma.SortOrder
   status?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
+  measureTypes?: Prisma.SortOrder
 }
 
 export type EquipmentAvgOrderByAggregateInput = {
@@ -437,10 +465,130 @@ export type EquipmentSumOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
 }
 
+export type EquipmentCreateNestedOneWithoutWorkoutUsageInput = {
+  create?: Prisma.XOR<Prisma.EquipmentCreateWithoutWorkoutUsageInput, Prisma.EquipmentUncheckedCreateWithoutWorkoutUsageInput>
+  connectOrCreate?: Prisma.EquipmentCreateOrConnectWithoutWorkoutUsageInput
+  connect?: Prisma.EquipmentWhereUniqueInput
+}
+
+export type EquipmentUpdateOneRequiredWithoutWorkoutUsageNestedInput = {
+  create?: Prisma.XOR<Prisma.EquipmentCreateWithoutWorkoutUsageInput, Prisma.EquipmentUncheckedCreateWithoutWorkoutUsageInput>
+  connectOrCreate?: Prisma.EquipmentCreateOrConnectWithoutWorkoutUsageInput
+  upsert?: Prisma.EquipmentUpsertWithoutWorkoutUsageInput
+  connect?: Prisma.EquipmentWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.EquipmentUpdateToOneWithWhereWithoutWorkoutUsageInput, Prisma.EquipmentUpdateWithoutWorkoutUsageInput>, Prisma.EquipmentUncheckedUpdateWithoutWorkoutUsageInput>
+}
+
+export type EquipmentCreatemeasureTypesInput = {
+  set: string[]
+}
+
 export type EnumEquipmentStatusFieldUpdateOperationsInput = {
   set?: $Enums.EquipmentStatus
 }
 
+export type EquipmentUpdatemeasureTypesInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
+export type EquipmentCreateWithoutWorkoutUsageInput = {
+  id?: string
+  name: string
+  type?: string | null
+  brand?: string | null
+  purchaseDate?: Date | string | null
+  lastMaintenance?: Date | string | null
+  nextMaintenance?: Date | string | null
+  status?: $Enums.EquipmentStatus
+  quantity?: number
+  measureTypes?: Prisma.EquipmentCreatemeasureTypesInput | string[]
+}
+
+export type EquipmentUncheckedCreateWithoutWorkoutUsageInput = {
+  id?: string
+  name: string
+  type?: string | null
+  brand?: string | null
+  purchaseDate?: Date | string | null
+  lastMaintenance?: Date | string | null
+  nextMaintenance?: Date | string | null
+  status?: $Enums.EquipmentStatus
+  quantity?: number
+  measureTypes?: Prisma.EquipmentCreatemeasureTypesInput | string[]
+}
+
+export type EquipmentCreateOrConnectWithoutWorkoutUsageInput = {
+  where: Prisma.EquipmentWhereUniqueInput
+  create: Prisma.XOR<Prisma.EquipmentCreateWithoutWorkoutUsageInput, Prisma.EquipmentUncheckedCreateWithoutWorkoutUsageInput>
+}
+
+export type EquipmentUpsertWithoutWorkoutUsageInput = {
+  update: Prisma.XOR<Prisma.EquipmentUpdateWithoutWorkoutUsageInput, Prisma.EquipmentUncheckedUpdateWithoutWorkoutUsageInput>
+  create: Prisma.XOR<Prisma.EquipmentCreateWithoutWorkoutUsageInput, Prisma.EquipmentUncheckedCreateWithoutWorkoutUsageInput>
+  where?: Prisma.EquipmentWhereInput
+}
+
+export type EquipmentUpdateToOneWithWhereWithoutWorkoutUsageInput = {
+  where?: Prisma.EquipmentWhereInput
+  data: Prisma.XOR<Prisma.EquipmentUpdateWithoutWorkoutUsageInput, Prisma.EquipmentUncheckedUpdateWithoutWorkoutUsageInput>
+}
+
+export type EquipmentUpdateWithoutWorkoutUsageInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastMaintenance?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextMaintenance?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.EnumEquipmentStatusFieldUpdateOperationsInput | $Enums.EquipmentStatus
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  measureTypes?: Prisma.EquipmentUpdatemeasureTypesInput | string[]
+}
+
+export type EquipmentUncheckedUpdateWithoutWorkoutUsageInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  type?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  lastMaintenance?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  nextMaintenance?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.EnumEquipmentStatusFieldUpdateOperationsInput | $Enums.EquipmentStatus
+  quantity?: Prisma.IntFieldUpdateOperationsInput | number
+  measureTypes?: Prisma.EquipmentUpdatemeasureTypesInput | string[]
+}
+
+
+/**
+ * Count Type EquipmentCountOutputType
+ */
+
+export type EquipmentCountOutputType = {
+  workoutUsage: number
+}
+
+export type EquipmentCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  workoutUsage?: boolean | EquipmentCountOutputTypeCountWorkoutUsageArgs
+}
+
+/**
+ * EquipmentCountOutputType without action
+ */
+export type EquipmentCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the EquipmentCountOutputType
+   */
+  select?: Prisma.EquipmentCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * EquipmentCountOutputType without action
+ */
+export type EquipmentCountOutputTypeCountWorkoutUsageArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.WorkoutEquipmentWhereInput
+}
 
 
 export type EquipmentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -453,6 +601,9 @@ export type EquipmentSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   nextMaintenance?: boolean
   status?: boolean
   quantity?: boolean
+  measureTypes?: boolean
+  workoutUsage?: boolean | Prisma.Equipment$workoutUsageArgs<ExtArgs>
+  _count?: boolean | Prisma.EquipmentCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["equipment"]>
 
 export type EquipmentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -465,6 +616,7 @@ export type EquipmentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   nextMaintenance?: boolean
   status?: boolean
   quantity?: boolean
+  measureTypes?: boolean
 }, ExtArgs["result"]["equipment"]>
 
 export type EquipmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -477,6 +629,7 @@ export type EquipmentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   nextMaintenance?: boolean
   status?: boolean
   quantity?: boolean
+  measureTypes?: boolean
 }, ExtArgs["result"]["equipment"]>
 
 export type EquipmentSelectScalar = {
@@ -489,13 +642,22 @@ export type EquipmentSelectScalar = {
   nextMaintenance?: boolean
   status?: boolean
   quantity?: boolean
+  measureTypes?: boolean
 }
 
-export type EquipmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "type" | "brand" | "purchaseDate" | "lastMaintenance" | "nextMaintenance" | "status" | "quantity", ExtArgs["result"]["equipment"]>
+export type EquipmentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "type" | "brand" | "purchaseDate" | "lastMaintenance" | "nextMaintenance" | "status" | "quantity" | "measureTypes", ExtArgs["result"]["equipment"]>
+export type EquipmentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  workoutUsage?: boolean | Prisma.Equipment$workoutUsageArgs<ExtArgs>
+  _count?: boolean | Prisma.EquipmentCountOutputTypeDefaultArgs<ExtArgs>
+}
+export type EquipmentIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type EquipmentIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
 
 export type $EquipmentPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Equipment"
-  objects: {}
+  objects: {
+    workoutUsage: Prisma.$WorkoutEquipmentPayload<ExtArgs>[]
+  }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
@@ -506,6 +668,7 @@ export type $EquipmentPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     nextMaintenance: Date | null
     status: $Enums.EquipmentStatus
     quantity: number
+    measureTypes: string[]
   }, ExtArgs["result"]["equipment"]>
   composites: {}
 }
@@ -900,6 +1063,7 @@ readonly fields: EquipmentFieldRefs;
  */
 export interface Prisma__EquipmentClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  workoutUsage<T extends Prisma.Equipment$workoutUsageArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Equipment$workoutUsageArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkoutEquipmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -938,6 +1102,7 @@ export interface EquipmentFieldRefs {
   readonly nextMaintenance: Prisma.FieldRef<"Equipment", 'DateTime'>
   readonly status: Prisma.FieldRef<"Equipment", 'EquipmentStatus'>
   readonly quantity: Prisma.FieldRef<"Equipment", 'Int'>
+  readonly measureTypes: Prisma.FieldRef<"Equipment", 'String[]'>
 }
     
 
@@ -954,6 +1119,10 @@ export type EquipmentFindUniqueArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Omit specific fields from the Equipment
    */
   omit?: Prisma.EquipmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EquipmentInclude<ExtArgs> | null
   /**
    * Filter, which Equipment to fetch.
    */
@@ -973,6 +1142,10 @@ export type EquipmentFindUniqueOrThrowArgs<ExtArgs extends runtime.Types.Extensi
    */
   omit?: Prisma.EquipmentOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EquipmentInclude<ExtArgs> | null
+  /**
    * Filter, which Equipment to fetch.
    */
   where: Prisma.EquipmentWhereUniqueInput
@@ -990,6 +1163,10 @@ export type EquipmentFindFirstArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Omit specific fields from the Equipment
    */
   omit?: Prisma.EquipmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EquipmentInclude<ExtArgs> | null
   /**
    * Filter, which Equipment to fetch.
    */
@@ -1039,6 +1216,10 @@ export type EquipmentFindFirstOrThrowArgs<ExtArgs extends runtime.Types.Extensio
    */
   omit?: Prisma.EquipmentOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EquipmentInclude<ExtArgs> | null
+  /**
    * Filter, which Equipment to fetch.
    */
   where?: Prisma.EquipmentWhereInput
@@ -1087,6 +1268,10 @@ export type EquipmentFindManyArgs<ExtArgs extends runtime.Types.Extensions.Inter
    */
   omit?: Prisma.EquipmentOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EquipmentInclude<ExtArgs> | null
+  /**
    * Filter, which Equipment to fetch.
    */
   where?: Prisma.EquipmentWhereInput
@@ -1129,6 +1314,10 @@ export type EquipmentCreateArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Omit specific fields from the Equipment
    */
   omit?: Prisma.EquipmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EquipmentInclude<ExtArgs> | null
   /**
    * The data needed to create a Equipment.
    */
@@ -1177,6 +1366,10 @@ export type EquipmentUpdateArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Omit specific fields from the Equipment
    */
   omit?: Prisma.EquipmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EquipmentInclude<ExtArgs> | null
   /**
    * The data needed to update a Equipment.
    */
@@ -1244,6 +1437,10 @@ export type EquipmentUpsertArgs<ExtArgs extends runtime.Types.Extensions.Interna
    */
   omit?: Prisma.EquipmentOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EquipmentInclude<ExtArgs> | null
+  /**
    * The filter to search for the Equipment to update in case it exists.
    */
   where: Prisma.EquipmentWhereUniqueInput
@@ -1270,6 +1467,10 @@ export type EquipmentDeleteArgs<ExtArgs extends runtime.Types.Extensions.Interna
    */
   omit?: Prisma.EquipmentOmit<ExtArgs> | null
   /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EquipmentInclude<ExtArgs> | null
+  /**
    * Filter which Equipment to delete.
    */
   where: Prisma.EquipmentWhereUniqueInput
@@ -1290,6 +1491,30 @@ export type EquipmentDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Int
 }
 
 /**
+ * Equipment.workoutUsage
+ */
+export type Equipment$workoutUsageArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the WorkoutEquipment
+   */
+  select?: Prisma.WorkoutEquipmentSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the WorkoutEquipment
+   */
+  omit?: Prisma.WorkoutEquipmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.WorkoutEquipmentInclude<ExtArgs> | null
+  where?: Prisma.WorkoutEquipmentWhereInput
+  orderBy?: Prisma.WorkoutEquipmentOrderByWithRelationInput | Prisma.WorkoutEquipmentOrderByWithRelationInput[]
+  cursor?: Prisma.WorkoutEquipmentWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.WorkoutEquipmentScalarFieldEnum | Prisma.WorkoutEquipmentScalarFieldEnum[]
+}
+
+/**
  * Equipment without action
  */
 export type EquipmentDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1301,4 +1526,8 @@ export type EquipmentDefaultArgs<ExtArgs extends runtime.Types.Extensions.Intern
    * Omit specific fields from the Equipment
    */
   omit?: Prisma.EquipmentOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.EquipmentInclude<ExtArgs> | null
 }

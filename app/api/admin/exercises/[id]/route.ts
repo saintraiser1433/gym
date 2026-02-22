@@ -3,10 +3,11 @@ import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 import { updateExerciseSchema } from "@/lib/validators/admin";
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 export async function PATCH(req: NextRequest, { params }: Params) {
   await requireAdmin();
+  const { id } = await params;
   const json = await req.json();
   const parsed = updateExerciseSchema.safeParse(json);
 
@@ -19,7 +20,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
   try {
     const exercise = await prisma.exercise.update({
-      where: { id: params.id },
+      where: { id },
       data: parsed.data,
     });
     return NextResponse.json(exercise);
@@ -33,10 +34,11 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
 export async function DELETE(_req: NextRequest, { params }: Params) {
   await requireAdmin();
+  const { id } = await params;
 
   try {
     await prisma.exercise.delete({
-      where: { id: params.id },
+      where: { id },
     });
     return NextResponse.json({ success: true });
   } catch {

@@ -27,7 +27,7 @@ import {
 
 type NavItem = React.ComponentProps<typeof NavMain>["items"][number]
 
-function getNavItems(role?: string): NavItem[] {
+function getNavItems(role?: string, hasActiveMembership?: boolean): NavItem[] {
   if (role === "ADMIN") {
     return [
       {
@@ -59,6 +59,11 @@ function getNavItems(role?: string): NavItem[] {
       {
         title: "Client Memberships",
         url: "/admin/client-memberships",
+        icon: Users,
+      },
+      {
+        title: "Coach Assignments",
+        url: "/admin/coach-assignments",
         icon: Users,
       },
       {
@@ -103,7 +108,7 @@ function getNavItems(role?: string): NavItem[] {
   }
 
   if (role === "CLIENT") {
-    return [
+    const items: NavItem[] = [
       {
         title: "Client",
         url: "/client/dashboard",
@@ -111,12 +116,16 @@ function getNavItems(role?: string): NavItem[] {
         isActive: true,
       },
       { title: "Memberships", url: "/client/memberships", icon: CreditCard },
-      { title: "Goals", url: "/client/goals", icon: Activity },
-      { title: "Schedules", url: "/client/schedules", icon: CalendarClock },
-      { title: "Check-in", url: "/client/checkin", icon: CalendarClock },
-      { title: "Attendance", url: "/client/attendance", icon: CalendarClock },
-      { title: "Payments", url: "/client/payments", icon: CreditCard },
-    ]
+    ];
+    if (hasActiveMembership) {
+      items.push(
+        { title: "Goals", url: "/client/goals", icon: Activity },
+        { title: "Schedules", url: "/client/schedules", icon: CalendarClock },
+        { title: "Attendance", url: "/client/attendance", icon: CalendarClock },
+      );
+    }
+    items.push({ title: "Payments", url: "/client/payments", icon: CreditCard });
+    return items;
   }
 
   // Guest / fallback
@@ -134,10 +143,33 @@ function getNavItems(role?: string): NavItem[] {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { data: session } = useSession()
-  const role = (session?.user as any)?.role as string | undefined
+  const { data: session } = useSession();
+  const role = (session?.user as any)?.role as string | undefined;
+  const [hasActiveMembership, setHasActiveMembership] = React.useState<boolean | undefined>(undefined);
 
-  const navItems = React.useMemo(() => getNavItems(role), [role])
+  React.useEffect(() => {
+    if (role !== "CLIENT") {
+      setHasActiveMembership(undefined);
+      return;
+    }
+    let cancelled = false;
+    fetch("/api/client/me/membership", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((data) => {
+        if (!cancelled) setHasActiveMembership(!!data.hasActiveMembership);
+      })
+      .catch(() => {
+        if (!cancelled) setHasActiveMembership(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [role]);
+
+  const navItems = React.useMemo(
+    () => getNavItems(role, role === "CLIENT" ? hasActiveMembership : undefined),
+    [role, hasActiveMembership],
+  );
 
   const user = {
     name: session?.user?.name ?? "Guest",

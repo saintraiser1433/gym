@@ -1,15 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
-import {
-  createScheduleSchema,
-  paginationSchema,
-} from "@/lib/validators/admin";
+import { z } from "zod";
+import { createScheduleSchema } from "@/lib/validators/admin";
+
+const schedulesPaginationSchema = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(500).default(100),
+  search: z.string().trim().optional(),
+});
 
 export async function GET(req: NextRequest) {
   await requireAdmin();
   const url = new URL(req.url);
-  const parsed = paginationSchema.safeParse({
+  const parsed = schedulesPaginationSchema.safeParse({
     page: url.searchParams.get("page"),
     pageSize: url.searchParams.get("pageSize"),
     search: url.searchParams.get("search") ?? undefined,
@@ -25,7 +29,7 @@ export async function GET(req: NextRequest) {
   const { page, pageSize, search } = parsed.data;
   const where = search
     ? {
-        title: { contains: search, mode: "insensitive" },
+        title: { contains: search, mode: "insensitive" as const },
       }
     : {};
 

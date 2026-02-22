@@ -6,6 +6,13 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Pencil, Trash2 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -19,6 +26,17 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+type EquipmentOption = { id: string; name: string; measureTypes?: string[] };
+
+type WorkoutEquipment = {
+  equipmentId: string;
+  equipmentName?: string;
+  quantity: number;
+  measureTypes?: string[];
+  targetKg?: number | null;
+  targetPcs?: number | null;
+};
+
 type WorkoutRow = {
   id: string;
   name: string;
@@ -26,6 +44,7 @@ type WorkoutRow = {
   duration?: number | null;
   difficulty?: string | null;
   demoMediaUrl?: string | null;
+  equipment?: WorkoutEquipment[];
 };
 
 const DIFFICULTY_OPTIONS = ["Beginner", "Intermediate", "Hard"] as const;
@@ -44,6 +63,8 @@ export default function AdminWorkoutsPage() {
     difficulty: "",
     demoMediaUrl: "",
   });
+  const [equipmentEntries, setEquipmentEntries] = React.useState<Record<string, { quantity: number; targetKg: number | null; targetPcs: number | null }>>({});
+  const [equipmentList, setEquipmentList] = React.useState<EquipmentOption[]>([]);
   const [saving, setSaving] = React.useState(false);
   const [uploading, setUploading] = React.useState(false);
 
@@ -55,7 +76,7 @@ export default function AdminWorkoutsPage() {
         credentials: "include",
       });
       const text = await res.text();
-      let json: { data?: WorkoutRow[]; error?: string } | null = null;
+      let json: { data?: WorkoutRow[]; equipment?: { id: string; name: string; measureTypes?: string[] }[]; error?: string } | null = null;
       if (text) {
         try {
           json = JSON.parse(text);
@@ -69,6 +90,9 @@ export default function AdminWorkoutsPage() {
         return;
       }
       setRows(json?.data ?? []);
+      if (Array.isArray(json?.equipment)) {
+        setEquipmentList(json.equipment.map((e) => ({ id: e.id, name: e.name, measureTypes: e.measureTypes ?? ["PER_PCS"] })));
+      }
     } finally {
       setLoading(false);
     }
@@ -77,6 +101,26 @@ export default function AdminWorkoutsPage() {
   React.useEffect(() => {
     void fetchData();
   }, [fetchData]);
+
+  const fetchEquipment = React.useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/equipment?page=1&pageSize=500", {
+        cache: "no-store",
+        credentials: "include",
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) return;
+      const data = Array.isArray(json.data) ? json.data : [];
+      setEquipmentList(data.map((e: { id: string; name: string; measureTypes?: string[] }) => ({ id: e.id, name: e.name, measureTypes: e.measureTypes ?? ["PER_PCS"] })));
+    } catch {
+      // Keep existing list (e.g. from workouts API) so we don't clear after navigation
+    }
+  }, []);
+
+  // Preload equipment on mount so the list is ready when opening New/Edit workout
+  React.useEffect(() => {
+    void fetchEquipment();
+  }, [fetchEquipment]);
 
   const openNewDialog = () => {
     setEditingRow(null);
@@ -87,7 +131,9 @@ export default function AdminWorkoutsPage() {
       difficulty: "",
       demoMediaUrl: "",
     });
+    setEquipmentEntries({});
     setDialogOpen(true);
+    void fetchEquipment();
   };
 
   const openEditDialog = (row: WorkoutRow) => {
@@ -99,7 +145,50 @@ export default function AdminWorkoutsPage() {
       difficulty: row.difficulty ?? "",
       demoMediaUrl: row.demoMediaUrl ?? "",
     });
+    const entries: Record<string, { quantity: number; targetKg: number | null; targetPcs: number | null }> = {};
+    (row.equipment ?? []).forEach((e) => {
+      entries[e.equipmentId] = {
+        quantity: e.quantity >= 1 ? e.quantity : 1,
+        targetKg: e.targetKg ?? null,
+        targetPcs: e.targetPcs ?? null,
+      };
+    });
+    setEquipmentEntries(entries);
     setDialogOpen(true);
+    void fetchEquipment();
+  };
+
+  const setEquipmentChecked = (equipmentId: string, checked: boolean) => {
+    if (checked) {
+      setEquipmentEntries((prev) => ({ ...prev, [equipmentId]: { quantity: 1, targetKg: null, targetPcs: null } }));
+    } else {
+      setEquipmentEntries((prev) => {
+        const next = { ...prev };
+        delete next[equipmentId];
+        return next;
+      });
+    }
+  };
+
+  const setEquipmentQuantity = (equipmentId: string, quantity: number) => {
+    setEquipmentEntries((prev) => ({
+      ...prev,
+      [equipmentId]: { ...(prev[equipmentId] ?? { quantity: 1, targetKg: null, targetPcs: null }), quantity: quantity < 1 ? 1 : quantity },
+    }));
+  };
+
+  const setEquipmentTargetKg = (equipmentId: string, targetKg: number | null) => {
+    setEquipmentEntries((prev) => ({
+      ...prev,
+      [equipmentId]: { ...(prev[equipmentId] ?? { quantity: 1, targetKg: null, targetPcs: null }), targetKg },
+    }));
+  };
+
+  const setEquipmentTargetPcs = (equipmentId: string, targetPcs: number | null) => {
+    setEquipmentEntries((prev) => ({
+      ...prev,
+      [equipmentId]: { ...(prev[equipmentId] ?? { quantity: 1, targetKg: null, targetPcs: null }), targetPcs },
+    }));
   };
 
   const handleDemoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -137,12 +226,21 @@ export default function AdminWorkoutsPage() {
     e.preventDefault();
     setSaving(true);
     try {
+      const equipmentPayload = Object.entries(equipmentEntries)
+        .filter(([, v]) => v.quantity >= 1)
+        .map(([equipmentId, v]) => ({
+          equipmentId,
+          quantity: Math.max(1, v.quantity),
+          targetKg: v.targetKg,
+          targetPcs: v.targetPcs,
+        }));
       const payload = {
         name: formValues.name.trim(),
         description: formValues.description.trim() || undefined,
         duration: formValues.duration ? Number(formValues.duration) : undefined,
         difficulty: formValues.difficulty.trim() || undefined,
         demoMediaUrl: formValues.demoMediaUrl.trim() || undefined,
+        equipment: equipmentPayload,
       };
       const url = editingRow
         ? `/api/admin/workouts/${editingRow.id}`
@@ -302,12 +400,13 @@ export default function AdminWorkoutsPage() {
       </Card>
 
       {dialogOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="w-full max-w-sm rounded-md bg-card p-4 shadow-lg">
-            <h2 className="mb-3 text-sm font-semibold">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="flex max-h-[90vh] w-full max-w-sm flex-col rounded-md bg-card shadow-lg">
+            <h2 className="shrink-0 border-b px-4 py-3 text-sm font-semibold">
               {editingRow ? "Edit Workout" : "New Workout"}
             </h2>
-            <form onSubmit={handleSubmit} className="space-y-3 text-[11px]">
+            <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col overflow-hidden">
+              <div className="min-h-0 flex-1 space-y-3 overflow-y-auto p-4 text-[11px]">
               <div className="space-y-1">
                 <label className="font-medium" htmlFor="name">
                   Name
@@ -352,24 +451,128 @@ export default function AdminWorkoutsPage() {
                   <label className="font-medium" htmlFor="difficulty">
                     Difficulty
                   </label>
-                  <select
-                    id="difficulty"
-                    name="difficulty"
+                  <Select
                     value={formValues.difficulty}
-                    onChange={(e) =>
-                      setFormValues((prev) => ({
-                        ...prev,
-                        difficulty: e.target.value,
-                      }))
+                    onValueChange={(val) =>
+                      setFormValues((prev) => ({ ...prev, difficulty: val }))
                     }
-                    className="h-7 w-full rounded-md border bg-transparent px-2 text-[11px]"
                   >
-                    <option value="">Select...</option>
-                    <option value="Beginner">Beginner</option>
-                    <option value="Intermediate">Intermediate</option>
-                    <option value="Hard">Hard</option>
-                  </select>
+                    <SelectTrigger id="difficulty" size="sm" className="text-[11px]">
+                      <SelectValue placeholder="Select..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Beginner">Beginner</SelectItem>
+                      <SelectItem value="Intermediate">Intermediate</SelectItem>
+                      <SelectItem value="Hard">Hard</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
+              </div>
+              <div className="space-y-2">
+                <label className="font-medium">Equipment used</label>
+                <p className="text-[10px] text-muted-foreground">
+                  Select equipment. KG / PCS fields appear based on options set in Equipment.
+                </p>
+                {equipmentList.length === 0 ? (
+                  <p className="text-[10px] text-muted-foreground">No equipment in the system. Add some in Admin → Equipment.</p>
+                ) : (
+                  <div className="max-h-48 overflow-y-auto space-y-2 rounded-md border bg-muted/20 p-2">
+                    {equipmentList.map((eq) => {
+                      const entry = equipmentEntries[eq.id];
+                      const checked = !!entry && entry.quantity >= 1;
+                      const types = eq.measureTypes ?? ["PER_PCS"];
+                      const hasKg = types.includes("PER_KG");
+                      const hasPcs = types.includes("PER_PCS");
+                      return (
+                        <div key={eq.id} className="space-y-1.5 rounded border p-2 text-[11px]">
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              id={`eq-${eq.id}`}
+                              checked={checked}
+                              onChange={(e) => setEquipmentChecked(eq.id, e.target.checked)}
+                              className="h-3.5 w-3.5 rounded border-input"
+                            />
+                            <label htmlFor={`eq-${eq.id}`} className="font-medium">
+                              {eq.name}
+                            </label>
+                          </div>
+                          {checked && (
+                            <div className="flex flex-wrap items-center gap-3 pl-5">
+                              {/* Pieces quantity: only when equipment has both KG and PCS (not when per-piece or per-kg only) */}
+                              {hasKg && hasPcs && (
+                                <label className="flex items-center gap-1">
+                                  <span className="text-[10px] text-muted-foreground">Pieces:</span>
+                                  <Input
+                                    type="number"
+                                    min={1}
+                                    value={entry?.quantity ?? 1}
+                                    onChange={(e) => {
+                                      const v = parseInt(e.target.value, 10);
+                                      setEquipmentQuantity(eq.id, isNaN(v) || v < 1 ? 1 : v);
+                                    }}
+                                    className="h-6 w-14 px-1 text-[11px]"
+                                  />
+                                </label>
+                              )}
+                              {hasKg && (
+                                <>
+                                  <label className="flex items-center gap-1">
+                                    <span className="text-[10px] text-muted-foreground">KG</span>
+                                    <Input
+                                      type="number"
+                                      step="any"
+                                      min={0}
+                                      value={entry?.targetKg ?? ""}
+                                      onChange={(e) => {
+                                        const v = e.target.value === "" ? null : parseFloat(e.target.value);
+                                        setEquipmentTargetKg(eq.id, v === null ? null : (isNaN(v) ? null : v));
+                                      }}
+                                      placeholder="kg"
+                                      className="h-6 w-16 px-1 text-[11px]"
+                                    />
+                                  </label>
+                                  <label className="flex items-center gap-1">
+                                    <span className="text-[10px] text-muted-foreground">PCS</span>
+                                    <Input
+                                      type="number"
+                                      step="any"
+                                      min={0}
+                                      value={entry?.targetPcs ?? ""}
+                                      onChange={(e) => {
+                                        const v = e.target.value === "" ? null : parseFloat(e.target.value);
+                                        setEquipmentTargetPcs(eq.id, v === null ? null : (isNaN(v) ? null : v));
+                                      }}
+                                      placeholder="pcs"
+                                      className="h-6 w-16 px-1 text-[11px]"
+                                    />
+                                  </label>
+                                </>
+                              )}
+                              {hasPcs && !hasKg && (
+                                <label className="flex items-center gap-1">
+                                  <span className="text-[10px] text-muted-foreground">PCS</span>
+                                  <Input
+                                    type="number"
+                                    step="any"
+                                    min={0}
+                                    value={entry?.targetPcs ?? ""}
+                                    onChange={(e) => {
+                                      const v = e.target.value === "" ? null : parseFloat(e.target.value);
+                                      setEquipmentTargetPcs(eq.id, v === null ? null : (isNaN(v) ? null : v));
+                                    }}
+                                    placeholder="pcs"
+                                    className="h-6 w-16 px-1 text-[11px]"
+                                  />
+                                </label>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
               <div className="space-y-1">
                 <label className="font-medium">How to perform (GIF or video)</label>
@@ -413,7 +616,8 @@ export default function AdminWorkoutsPage() {
                   </div>
                 )}
               </div>
-              <div className="flex justify-end gap-2 pt-2">
+              </div>
+              <div className="shrink-0 flex justify-end gap-2 border-t px-4 py-3">
                 <Button
                   type="button"
                   size="xs"

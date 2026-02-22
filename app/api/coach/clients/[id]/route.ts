@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireCoach } from "@/lib/auth";
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_req: Request, { params }: Params) {
+  const { id } = await params;
   const session = await requireCoach();
   const userId = (session.user as any).id as string;
 
@@ -21,10 +22,14 @@ export async function GET(_req: Request, { params }: Params) {
   }
 
   const client = await prisma.clientProfile.findFirst({
-    where: { id: params.id, assignedCoachId: coach.id },
+    where: { id, assignedCoachId: coach.id },
     include: {
       user: true,
-      goals: { include: { goal: true } },
+      goals: { include: { goal: true }, orderBy: { deadline: "asc" } },
+      workoutAssignments: {
+        include: { workout: { select: { id: true, name: true } } },
+        orderBy: { startDate: "desc" },
+      },
       memberships: {
         include: { membership: true },
         orderBy: { startDate: "desc" },

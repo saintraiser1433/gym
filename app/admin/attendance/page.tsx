@@ -19,15 +19,27 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
+function formatHrsMins(minutes: number): string {
+  if (minutes <= 0) return "—";
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h === 0) return `${m}m`;
+  return `${h}h ${m}m`;
+}
+
 type AttendanceRow = {
   id: string;
   clientName: string;
   clientEmail: string;
   scheduleTitle: string | null;
+  scheduleStart: string | null;
+  scheduleEnd: string | null;
   checkInTime: string;
   checkOutTime: string | null;
   checkOutTimeRaw: string | null;
   method: string;
+  lateMinutes: number;
+  undertimeMinutes: number | null;
 };
 
 type ClientOption = { id: string; name: string; email: string };
@@ -53,6 +65,7 @@ export default function AdminAttendancePage() {
   });
   const [checkOutTime, setCheckOutTime] = React.useState("");
   const [saving, setSaving] = React.useState(false);
+  const [flushing, setFlushing] = React.useState(false);
 
   const fetchData = React.useCallback(
     async (opts?: { page?: number; search?: string }) => {
@@ -75,6 +88,12 @@ export default function AdminAttendancePage() {
             clientName: r.client?.user?.name ?? "Unknown",
             clientEmail: r.client?.user?.email ?? "",
             scheduleTitle: r.schedule?.title ?? null,
+            scheduleStart: r.scheduleStart
+              ? new Date(r.scheduleStart).toLocaleTimeString()
+              : null,
+            scheduleEnd: r.scheduleEnd
+              ? new Date(r.scheduleEnd).toLocaleTimeString()
+              : null,
             checkInTime: new Date(r.checkInTime).toLocaleString(),
             checkOutTime: r.checkOutTime
               ? new Date(r.checkOutTime).toLocaleString()
@@ -83,6 +102,8 @@ export default function AdminAttendancePage() {
               ? new Date(r.checkOutTime).toISOString().slice(0, 16)
               : null,
             method: r.method ?? "QR",
+            lateMinutes: r.lateMinutes ?? 0,
+            undertimeMinutes: r.undertimeMinutes ?? null,
           })),
         );
         setTotal(json.total ?? 0);
@@ -207,11 +228,32 @@ export default function AdminAttendancePage() {
       header: "Schedule",
       render: (row) => row.scheduleTitle ?? "—",
     },
+    {
+      key: "scheduleStart",
+      header: "Sched. start",
+      render: (row) => row.scheduleStart ?? "—",
+    },
+    {
+      key: "scheduleEnd",
+      header: "Sched. end",
+      render: (row) => row.scheduleEnd ?? "—",
+    },
     { key: "checkInTime", header: "Check-in" },
     {
       key: "checkOutTime",
       header: "Check-out",
       render: (row) => row.checkOutTime ?? "—",
+    },
+    {
+      key: "lateMinutes",
+      header: "Late",
+      render: (row) => formatHrsMins(row.lateMinutes),
+    },
+    {
+      key: "undertimeMinutes",
+      header: "Undertime",
+      render: (row) =>
+        row.undertimeMinutes != null ? formatHrsMins(row.undertimeMinutes) : "—",
     },
     { key: "method", header: "Method" },
     {
@@ -288,13 +330,64 @@ export default function AdminAttendancePage() {
             check-out time.
           </p>
         </div>
-        <Button
-          size="xs"
-          className="h-7 px-2 text-[11px]"
-          onClick={openNewDialog}
-        >
-          New Attendance
-        </Button>
+        <div className="flex items-center gap-2">
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                size="xs"
+                variant="outline"
+                className="h-7 px-2 text-[11px]"
+                disabled={flushing || total === 0}
+              >
+                {flushing ? "Flushing…" : "Flush all"}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-sm">
+                  Flush all attendance?
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete all {total} attendance record(s). This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="h-7 px-2 text-[11px]">
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  className="h-7 px-3 text-[11px] bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  onClick={async () => {
+                    setFlushing(true);
+                    try {
+                      const res = await fetch("/api/admin/attendance", {
+                        method: "DELETE",
+                      });
+                      const json = await res.json();
+                      if (!res.ok) {
+                        toast.error(json.error ?? "Failed to flush attendance");
+                        return;
+                      }
+                      toast.success(json.message ?? `Flushed ${json.deleted ?? 0} record(s).`);
+                      void fetchData({ page: 1, search });
+                    } finally {
+                      setFlushing(false);
+                    }
+                  }}
+                >
+                  Flush all
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          <Button
+            size="xs"
+            className="h-7 px-2 text-[11px]"
+            onClick={openNewDialog}
+          >
+            New Attendance
+          </Button>
+        </div>
       </div>
 
       <Card className="p-3">
