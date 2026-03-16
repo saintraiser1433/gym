@@ -20,8 +20,18 @@ export type WorkoutGoalModel = runtime.Types.Result.DefaultSelection<Prisma.$Wor
 
 export type AggregateWorkoutGoal = {
   _count: WorkoutGoalCountAggregateOutputType | null
+  _avg: WorkoutGoalAvgAggregateOutputType | null
+  _sum: WorkoutGoalSumAggregateOutputType | null
   _min: WorkoutGoalMinAggregateOutputType | null
   _max: WorkoutGoalMaxAggregateOutputType | null
+}
+
+export type WorkoutGoalAvgAggregateOutputType = {
+  targetSessions: number | null
+}
+
+export type WorkoutGoalSumAggregateOutputType = {
+  targetSessions: number | null
 }
 
 export type WorkoutGoalMinAggregateOutputType = {
@@ -29,6 +39,7 @@ export type WorkoutGoalMinAggregateOutputType = {
   name: string | null
   description: string | null
   category: $Enums.WorkoutGoalCategory | null
+  targetSessions: number | null
 }
 
 export type WorkoutGoalMaxAggregateOutputType = {
@@ -36,6 +47,7 @@ export type WorkoutGoalMaxAggregateOutputType = {
   name: string | null
   description: string | null
   category: $Enums.WorkoutGoalCategory | null
+  targetSessions: number | null
 }
 
 export type WorkoutGoalCountAggregateOutputType = {
@@ -43,15 +55,25 @@ export type WorkoutGoalCountAggregateOutputType = {
   name: number
   description: number
   category: number
+  targetSessions: number
   _all: number
 }
 
+
+export type WorkoutGoalAvgAggregateInputType = {
+  targetSessions?: true
+}
+
+export type WorkoutGoalSumAggregateInputType = {
+  targetSessions?: true
+}
 
 export type WorkoutGoalMinAggregateInputType = {
   id?: true
   name?: true
   description?: true
   category?: true
+  targetSessions?: true
 }
 
 export type WorkoutGoalMaxAggregateInputType = {
@@ -59,6 +81,7 @@ export type WorkoutGoalMaxAggregateInputType = {
   name?: true
   description?: true
   category?: true
+  targetSessions?: true
 }
 
 export type WorkoutGoalCountAggregateInputType = {
@@ -66,6 +89,7 @@ export type WorkoutGoalCountAggregateInputType = {
   name?: true
   description?: true
   category?: true
+  targetSessions?: true
   _all?: true
 }
 
@@ -107,6 +131,18 @@ export type WorkoutGoalAggregateArgs<ExtArgs extends runtime.Types.Extensions.In
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: WorkoutGoalAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: WorkoutGoalSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: WorkoutGoalMinAggregateInputType
@@ -137,6 +173,8 @@ export type WorkoutGoalGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   _count?: WorkoutGoalCountAggregateInputType | true
+  _avg?: WorkoutGoalAvgAggregateInputType
+  _sum?: WorkoutGoalSumAggregateInputType
   _min?: WorkoutGoalMinAggregateInputType
   _max?: WorkoutGoalMaxAggregateInputType
 }
@@ -146,7 +184,10 @@ export type WorkoutGoalGroupByOutputType = {
   name: string
   description: string | null
   category: $Enums.WorkoutGoalCategory
+  targetSessions: number | null
   _count: WorkoutGoalCountAggregateOutputType | null
+  _avg: WorkoutGoalAvgAggregateOutputType | null
+  _sum: WorkoutGoalSumAggregateOutputType | null
   _min: WorkoutGoalMinAggregateOutputType | null
   _max: WorkoutGoalMaxAggregateOutputType | null
 }
@@ -174,8 +215,9 @@ export type WorkoutGoalWhereInput = {
   name?: Prisma.StringFilter<"WorkoutGoal"> | string
   description?: Prisma.StringNullableFilter<"WorkoutGoal"> | string | null
   category?: Prisma.EnumWorkoutGoalCategoryFilter<"WorkoutGoal"> | $Enums.WorkoutGoalCategory
+  targetSessions?: Prisma.IntNullableFilter<"WorkoutGoal"> | number | null
   clientGoals?: Prisma.ClientGoalListRelationFilter
-  workouts?: Prisma.WorkoutListRelationFilter
+  goalWorkouts?: Prisma.GoalWorkoutListRelationFilter
 }
 
 export type WorkoutGoalOrderByWithRelationInput = {
@@ -183,8 +225,9 @@ export type WorkoutGoalOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   category?: Prisma.SortOrder
+  targetSessions?: Prisma.SortOrderInput | Prisma.SortOrder
   clientGoals?: Prisma.ClientGoalOrderByRelationAggregateInput
-  workouts?: Prisma.WorkoutOrderByRelationAggregateInput
+  goalWorkouts?: Prisma.GoalWorkoutOrderByRelationAggregateInput
 }
 
 export type WorkoutGoalWhereUniqueInput = Prisma.AtLeast<{
@@ -195,8 +238,9 @@ export type WorkoutGoalWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"WorkoutGoal"> | string
   description?: Prisma.StringNullableFilter<"WorkoutGoal"> | string | null
   category?: Prisma.EnumWorkoutGoalCategoryFilter<"WorkoutGoal"> | $Enums.WorkoutGoalCategory
+  targetSessions?: Prisma.IntNullableFilter<"WorkoutGoal"> | number | null
   clientGoals?: Prisma.ClientGoalListRelationFilter
-  workouts?: Prisma.WorkoutListRelationFilter
+  goalWorkouts?: Prisma.GoalWorkoutListRelationFilter
 }, "id">
 
 export type WorkoutGoalOrderByWithAggregationInput = {
@@ -204,9 +248,12 @@ export type WorkoutGoalOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   category?: Prisma.SortOrder
+  targetSessions?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.WorkoutGoalCountOrderByAggregateInput
+  _avg?: Prisma.WorkoutGoalAvgOrderByAggregateInput
   _max?: Prisma.WorkoutGoalMaxOrderByAggregateInput
   _min?: Prisma.WorkoutGoalMinOrderByAggregateInput
+  _sum?: Prisma.WorkoutGoalSumOrderByAggregateInput
 }
 
 export type WorkoutGoalScalarWhereWithAggregatesInput = {
@@ -217,6 +264,7 @@ export type WorkoutGoalScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"WorkoutGoal"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"WorkoutGoal"> | string | null
   category?: Prisma.EnumWorkoutGoalCategoryWithAggregatesFilter<"WorkoutGoal"> | $Enums.WorkoutGoalCategory
+  targetSessions?: Prisma.IntNullableWithAggregatesFilter<"WorkoutGoal"> | number | null
 }
 
 export type WorkoutGoalCreateInput = {
@@ -224,8 +272,9 @@ export type WorkoutGoalCreateInput = {
   name: string
   description?: string | null
   category: $Enums.WorkoutGoalCategory
+  targetSessions?: number | null
   clientGoals?: Prisma.ClientGoalCreateNestedManyWithoutGoalInput
-  workouts?: Prisma.WorkoutCreateNestedManyWithoutGoalsInput
+  goalWorkouts?: Prisma.GoalWorkoutCreateNestedManyWithoutGoalInput
 }
 
 export type WorkoutGoalUncheckedCreateInput = {
@@ -233,8 +282,9 @@ export type WorkoutGoalUncheckedCreateInput = {
   name: string
   description?: string | null
   category: $Enums.WorkoutGoalCategory
+  targetSessions?: number | null
   clientGoals?: Prisma.ClientGoalUncheckedCreateNestedManyWithoutGoalInput
-  workouts?: Prisma.WorkoutUncheckedCreateNestedManyWithoutGoalsInput
+  goalWorkouts?: Prisma.GoalWorkoutUncheckedCreateNestedManyWithoutGoalInput
 }
 
 export type WorkoutGoalUpdateInput = {
@@ -242,8 +292,9 @@ export type WorkoutGoalUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.EnumWorkoutGoalCategoryFieldUpdateOperationsInput | $Enums.WorkoutGoalCategory
+  targetSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   clientGoals?: Prisma.ClientGoalUpdateManyWithoutGoalNestedInput
-  workouts?: Prisma.WorkoutUpdateManyWithoutGoalsNestedInput
+  goalWorkouts?: Prisma.GoalWorkoutUpdateManyWithoutGoalNestedInput
 }
 
 export type WorkoutGoalUncheckedUpdateInput = {
@@ -251,8 +302,9 @@ export type WorkoutGoalUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.EnumWorkoutGoalCategoryFieldUpdateOperationsInput | $Enums.WorkoutGoalCategory
+  targetSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   clientGoals?: Prisma.ClientGoalUncheckedUpdateManyWithoutGoalNestedInput
-  workouts?: Prisma.WorkoutUncheckedUpdateManyWithoutGoalsNestedInput
+  goalWorkouts?: Prisma.GoalWorkoutUncheckedUpdateManyWithoutGoalNestedInput
 }
 
 export type WorkoutGoalCreateManyInput = {
@@ -260,6 +312,7 @@ export type WorkoutGoalCreateManyInput = {
   name: string
   description?: string | null
   category: $Enums.WorkoutGoalCategory
+  targetSessions?: number | null
 }
 
 export type WorkoutGoalUpdateManyMutationInput = {
@@ -267,6 +320,7 @@ export type WorkoutGoalUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.EnumWorkoutGoalCategoryFieldUpdateOperationsInput | $Enums.WorkoutGoalCategory
+  targetSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type WorkoutGoalUncheckedUpdateManyInput = {
@@ -274,6 +328,7 @@ export type WorkoutGoalUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.EnumWorkoutGoalCategoryFieldUpdateOperationsInput | $Enums.WorkoutGoalCategory
+  targetSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
 }
 
 export type WorkoutGoalCountOrderByAggregateInput = {
@@ -281,6 +336,11 @@ export type WorkoutGoalCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  targetSessions?: Prisma.SortOrder
+}
+
+export type WorkoutGoalAvgOrderByAggregateInput = {
+  targetSessions?: Prisma.SortOrder
 }
 
 export type WorkoutGoalMaxOrderByAggregateInput = {
@@ -288,6 +348,7 @@ export type WorkoutGoalMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  targetSessions?: Prisma.SortOrder
 }
 
 export type WorkoutGoalMinOrderByAggregateInput = {
@@ -295,6 +356,11 @@ export type WorkoutGoalMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   category?: Prisma.SortOrder
+  targetSessions?: Prisma.SortOrder
+}
+
+export type WorkoutGoalSumOrderByAggregateInput = {
+  targetSessions?: Prisma.SortOrder
 }
 
 export type WorkoutGoalScalarRelationFilter = {
@@ -302,18 +368,22 @@ export type WorkoutGoalScalarRelationFilter = {
   isNot?: Prisma.WorkoutGoalWhereInput
 }
 
-export type WorkoutGoalListRelationFilter = {
-  every?: Prisma.WorkoutGoalWhereInput
-  some?: Prisma.WorkoutGoalWhereInput
-  none?: Prisma.WorkoutGoalWhereInput
-}
-
-export type WorkoutGoalOrderByRelationAggregateInput = {
-  _count?: Prisma.SortOrder
-}
-
 export type EnumWorkoutGoalCategoryFieldUpdateOperationsInput = {
   set?: $Enums.WorkoutGoalCategory
+}
+
+export type WorkoutGoalCreateNestedOneWithoutGoalWorkoutsInput = {
+  create?: Prisma.XOR<Prisma.WorkoutGoalCreateWithoutGoalWorkoutsInput, Prisma.WorkoutGoalUncheckedCreateWithoutGoalWorkoutsInput>
+  connectOrCreate?: Prisma.WorkoutGoalCreateOrConnectWithoutGoalWorkoutsInput
+  connect?: Prisma.WorkoutGoalWhereUniqueInput
+}
+
+export type WorkoutGoalUpdateOneRequiredWithoutGoalWorkoutsNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkoutGoalCreateWithoutGoalWorkoutsInput, Prisma.WorkoutGoalUncheckedCreateWithoutGoalWorkoutsInput>
+  connectOrCreate?: Prisma.WorkoutGoalCreateOrConnectWithoutGoalWorkoutsInput
+  upsert?: Prisma.WorkoutGoalUpsertWithoutGoalWorkoutsInput
+  connect?: Prisma.WorkoutGoalWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WorkoutGoalUpdateToOneWithWhereWithoutGoalWorkoutsInput, Prisma.WorkoutGoalUpdateWithoutGoalWorkoutsInput>, Prisma.WorkoutGoalUncheckedUpdateWithoutGoalWorkoutsInput>
 }
 
 export type WorkoutGoalCreateNestedOneWithoutClientGoalsInput = {
@@ -330,42 +400,56 @@ export type WorkoutGoalUpdateOneRequiredWithoutClientGoalsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.WorkoutGoalUpdateToOneWithWhereWithoutClientGoalsInput, Prisma.WorkoutGoalUpdateWithoutClientGoalsInput>, Prisma.WorkoutGoalUncheckedUpdateWithoutClientGoalsInput>
 }
 
-export type WorkoutGoalCreateNestedManyWithoutWorkoutsInput = {
-  create?: Prisma.XOR<Prisma.WorkoutGoalCreateWithoutWorkoutsInput, Prisma.WorkoutGoalUncheckedCreateWithoutWorkoutsInput> | Prisma.WorkoutGoalCreateWithoutWorkoutsInput[] | Prisma.WorkoutGoalUncheckedCreateWithoutWorkoutsInput[]
-  connectOrCreate?: Prisma.WorkoutGoalCreateOrConnectWithoutWorkoutsInput | Prisma.WorkoutGoalCreateOrConnectWithoutWorkoutsInput[]
-  connect?: Prisma.WorkoutGoalWhereUniqueInput | Prisma.WorkoutGoalWhereUniqueInput[]
+export type WorkoutGoalCreateWithoutGoalWorkoutsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  category: $Enums.WorkoutGoalCategory
+  targetSessions?: number | null
+  clientGoals?: Prisma.ClientGoalCreateNestedManyWithoutGoalInput
 }
 
-export type WorkoutGoalUncheckedCreateNestedManyWithoutWorkoutsInput = {
-  create?: Prisma.XOR<Prisma.WorkoutGoalCreateWithoutWorkoutsInput, Prisma.WorkoutGoalUncheckedCreateWithoutWorkoutsInput> | Prisma.WorkoutGoalCreateWithoutWorkoutsInput[] | Prisma.WorkoutGoalUncheckedCreateWithoutWorkoutsInput[]
-  connectOrCreate?: Prisma.WorkoutGoalCreateOrConnectWithoutWorkoutsInput | Prisma.WorkoutGoalCreateOrConnectWithoutWorkoutsInput[]
-  connect?: Prisma.WorkoutGoalWhereUniqueInput | Prisma.WorkoutGoalWhereUniqueInput[]
+export type WorkoutGoalUncheckedCreateWithoutGoalWorkoutsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  category: $Enums.WorkoutGoalCategory
+  targetSessions?: number | null
+  clientGoals?: Prisma.ClientGoalUncheckedCreateNestedManyWithoutGoalInput
 }
 
-export type WorkoutGoalUpdateManyWithoutWorkoutsNestedInput = {
-  create?: Prisma.XOR<Prisma.WorkoutGoalCreateWithoutWorkoutsInput, Prisma.WorkoutGoalUncheckedCreateWithoutWorkoutsInput> | Prisma.WorkoutGoalCreateWithoutWorkoutsInput[] | Prisma.WorkoutGoalUncheckedCreateWithoutWorkoutsInput[]
-  connectOrCreate?: Prisma.WorkoutGoalCreateOrConnectWithoutWorkoutsInput | Prisma.WorkoutGoalCreateOrConnectWithoutWorkoutsInput[]
-  upsert?: Prisma.WorkoutGoalUpsertWithWhereUniqueWithoutWorkoutsInput | Prisma.WorkoutGoalUpsertWithWhereUniqueWithoutWorkoutsInput[]
-  set?: Prisma.WorkoutGoalWhereUniqueInput | Prisma.WorkoutGoalWhereUniqueInput[]
-  disconnect?: Prisma.WorkoutGoalWhereUniqueInput | Prisma.WorkoutGoalWhereUniqueInput[]
-  delete?: Prisma.WorkoutGoalWhereUniqueInput | Prisma.WorkoutGoalWhereUniqueInput[]
-  connect?: Prisma.WorkoutGoalWhereUniqueInput | Prisma.WorkoutGoalWhereUniqueInput[]
-  update?: Prisma.WorkoutGoalUpdateWithWhereUniqueWithoutWorkoutsInput | Prisma.WorkoutGoalUpdateWithWhereUniqueWithoutWorkoutsInput[]
-  updateMany?: Prisma.WorkoutGoalUpdateManyWithWhereWithoutWorkoutsInput | Prisma.WorkoutGoalUpdateManyWithWhereWithoutWorkoutsInput[]
-  deleteMany?: Prisma.WorkoutGoalScalarWhereInput | Prisma.WorkoutGoalScalarWhereInput[]
+export type WorkoutGoalCreateOrConnectWithoutGoalWorkoutsInput = {
+  where: Prisma.WorkoutGoalWhereUniqueInput
+  create: Prisma.XOR<Prisma.WorkoutGoalCreateWithoutGoalWorkoutsInput, Prisma.WorkoutGoalUncheckedCreateWithoutGoalWorkoutsInput>
 }
 
-export type WorkoutGoalUncheckedUpdateManyWithoutWorkoutsNestedInput = {
-  create?: Prisma.XOR<Prisma.WorkoutGoalCreateWithoutWorkoutsInput, Prisma.WorkoutGoalUncheckedCreateWithoutWorkoutsInput> | Prisma.WorkoutGoalCreateWithoutWorkoutsInput[] | Prisma.WorkoutGoalUncheckedCreateWithoutWorkoutsInput[]
-  connectOrCreate?: Prisma.WorkoutGoalCreateOrConnectWithoutWorkoutsInput | Prisma.WorkoutGoalCreateOrConnectWithoutWorkoutsInput[]
-  upsert?: Prisma.WorkoutGoalUpsertWithWhereUniqueWithoutWorkoutsInput | Prisma.WorkoutGoalUpsertWithWhereUniqueWithoutWorkoutsInput[]
-  set?: Prisma.WorkoutGoalWhereUniqueInput | Prisma.WorkoutGoalWhereUniqueInput[]
-  disconnect?: Prisma.WorkoutGoalWhereUniqueInput | Prisma.WorkoutGoalWhereUniqueInput[]
-  delete?: Prisma.WorkoutGoalWhereUniqueInput | Prisma.WorkoutGoalWhereUniqueInput[]
-  connect?: Prisma.WorkoutGoalWhereUniqueInput | Prisma.WorkoutGoalWhereUniqueInput[]
-  update?: Prisma.WorkoutGoalUpdateWithWhereUniqueWithoutWorkoutsInput | Prisma.WorkoutGoalUpdateWithWhereUniqueWithoutWorkoutsInput[]
-  updateMany?: Prisma.WorkoutGoalUpdateManyWithWhereWithoutWorkoutsInput | Prisma.WorkoutGoalUpdateManyWithWhereWithoutWorkoutsInput[]
-  deleteMany?: Prisma.WorkoutGoalScalarWhereInput | Prisma.WorkoutGoalScalarWhereInput[]
+export type WorkoutGoalUpsertWithoutGoalWorkoutsInput = {
+  update: Prisma.XOR<Prisma.WorkoutGoalUpdateWithoutGoalWorkoutsInput, Prisma.WorkoutGoalUncheckedUpdateWithoutGoalWorkoutsInput>
+  create: Prisma.XOR<Prisma.WorkoutGoalCreateWithoutGoalWorkoutsInput, Prisma.WorkoutGoalUncheckedCreateWithoutGoalWorkoutsInput>
+  where?: Prisma.WorkoutGoalWhereInput
+}
+
+export type WorkoutGoalUpdateToOneWithWhereWithoutGoalWorkoutsInput = {
+  where?: Prisma.WorkoutGoalWhereInput
+  data: Prisma.XOR<Prisma.WorkoutGoalUpdateWithoutGoalWorkoutsInput, Prisma.WorkoutGoalUncheckedUpdateWithoutGoalWorkoutsInput>
+}
+
+export type WorkoutGoalUpdateWithoutGoalWorkoutsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  category?: Prisma.EnumWorkoutGoalCategoryFieldUpdateOperationsInput | $Enums.WorkoutGoalCategory
+  targetSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  clientGoals?: Prisma.ClientGoalUpdateManyWithoutGoalNestedInput
+}
+
+export type WorkoutGoalUncheckedUpdateWithoutGoalWorkoutsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  category?: Prisma.EnumWorkoutGoalCategoryFieldUpdateOperationsInput | $Enums.WorkoutGoalCategory
+  targetSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  clientGoals?: Prisma.ClientGoalUncheckedUpdateManyWithoutGoalNestedInput
 }
 
 export type WorkoutGoalCreateWithoutClientGoalsInput = {
@@ -373,7 +457,8 @@ export type WorkoutGoalCreateWithoutClientGoalsInput = {
   name: string
   description?: string | null
   category: $Enums.WorkoutGoalCategory
-  workouts?: Prisma.WorkoutCreateNestedManyWithoutGoalsInput
+  targetSessions?: number | null
+  goalWorkouts?: Prisma.GoalWorkoutCreateNestedManyWithoutGoalInput
 }
 
 export type WorkoutGoalUncheckedCreateWithoutClientGoalsInput = {
@@ -381,7 +466,8 @@ export type WorkoutGoalUncheckedCreateWithoutClientGoalsInput = {
   name: string
   description?: string | null
   category: $Enums.WorkoutGoalCategory
-  workouts?: Prisma.WorkoutUncheckedCreateNestedManyWithoutGoalsInput
+  targetSessions?: number | null
+  goalWorkouts?: Prisma.GoalWorkoutUncheckedCreateNestedManyWithoutGoalInput
 }
 
 export type WorkoutGoalCreateOrConnectWithoutClientGoalsInput = {
@@ -405,7 +491,8 @@ export type WorkoutGoalUpdateWithoutClientGoalsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.EnumWorkoutGoalCategoryFieldUpdateOperationsInput | $Enums.WorkoutGoalCategory
-  workouts?: Prisma.WorkoutUpdateManyWithoutGoalsNestedInput
+  targetSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  goalWorkouts?: Prisma.GoalWorkoutUpdateManyWithoutGoalNestedInput
 }
 
 export type WorkoutGoalUncheckedUpdateWithoutClientGoalsInput = {
@@ -413,77 +500,8 @@ export type WorkoutGoalUncheckedUpdateWithoutClientGoalsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   category?: Prisma.EnumWorkoutGoalCategoryFieldUpdateOperationsInput | $Enums.WorkoutGoalCategory
-  workouts?: Prisma.WorkoutUncheckedUpdateManyWithoutGoalsNestedInput
-}
-
-export type WorkoutGoalCreateWithoutWorkoutsInput = {
-  id?: string
-  name: string
-  description?: string | null
-  category: $Enums.WorkoutGoalCategory
-  clientGoals?: Prisma.ClientGoalCreateNestedManyWithoutGoalInput
-}
-
-export type WorkoutGoalUncheckedCreateWithoutWorkoutsInput = {
-  id?: string
-  name: string
-  description?: string | null
-  category: $Enums.WorkoutGoalCategory
-  clientGoals?: Prisma.ClientGoalUncheckedCreateNestedManyWithoutGoalInput
-}
-
-export type WorkoutGoalCreateOrConnectWithoutWorkoutsInput = {
-  where: Prisma.WorkoutGoalWhereUniqueInput
-  create: Prisma.XOR<Prisma.WorkoutGoalCreateWithoutWorkoutsInput, Prisma.WorkoutGoalUncheckedCreateWithoutWorkoutsInput>
-}
-
-export type WorkoutGoalUpsertWithWhereUniqueWithoutWorkoutsInput = {
-  where: Prisma.WorkoutGoalWhereUniqueInput
-  update: Prisma.XOR<Prisma.WorkoutGoalUpdateWithoutWorkoutsInput, Prisma.WorkoutGoalUncheckedUpdateWithoutWorkoutsInput>
-  create: Prisma.XOR<Prisma.WorkoutGoalCreateWithoutWorkoutsInput, Prisma.WorkoutGoalUncheckedCreateWithoutWorkoutsInput>
-}
-
-export type WorkoutGoalUpdateWithWhereUniqueWithoutWorkoutsInput = {
-  where: Prisma.WorkoutGoalWhereUniqueInput
-  data: Prisma.XOR<Prisma.WorkoutGoalUpdateWithoutWorkoutsInput, Prisma.WorkoutGoalUncheckedUpdateWithoutWorkoutsInput>
-}
-
-export type WorkoutGoalUpdateManyWithWhereWithoutWorkoutsInput = {
-  where: Prisma.WorkoutGoalScalarWhereInput
-  data: Prisma.XOR<Prisma.WorkoutGoalUpdateManyMutationInput, Prisma.WorkoutGoalUncheckedUpdateManyWithoutWorkoutsInput>
-}
-
-export type WorkoutGoalScalarWhereInput = {
-  AND?: Prisma.WorkoutGoalScalarWhereInput | Prisma.WorkoutGoalScalarWhereInput[]
-  OR?: Prisma.WorkoutGoalScalarWhereInput[]
-  NOT?: Prisma.WorkoutGoalScalarWhereInput | Prisma.WorkoutGoalScalarWhereInput[]
-  id?: Prisma.StringFilter<"WorkoutGoal"> | string
-  name?: Prisma.StringFilter<"WorkoutGoal"> | string
-  description?: Prisma.StringNullableFilter<"WorkoutGoal"> | string | null
-  category?: Prisma.EnumWorkoutGoalCategoryFilter<"WorkoutGoal"> | $Enums.WorkoutGoalCategory
-}
-
-export type WorkoutGoalUpdateWithoutWorkoutsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.EnumWorkoutGoalCategoryFieldUpdateOperationsInput | $Enums.WorkoutGoalCategory
-  clientGoals?: Prisma.ClientGoalUpdateManyWithoutGoalNestedInput
-}
-
-export type WorkoutGoalUncheckedUpdateWithoutWorkoutsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.EnumWorkoutGoalCategoryFieldUpdateOperationsInput | $Enums.WorkoutGoalCategory
-  clientGoals?: Prisma.ClientGoalUncheckedUpdateManyWithoutGoalNestedInput
-}
-
-export type WorkoutGoalUncheckedUpdateManyWithoutWorkoutsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  name?: Prisma.StringFieldUpdateOperationsInput | string
-  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
-  category?: Prisma.EnumWorkoutGoalCategoryFieldUpdateOperationsInput | $Enums.WorkoutGoalCategory
+  targetSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  goalWorkouts?: Prisma.GoalWorkoutUncheckedUpdateManyWithoutGoalNestedInput
 }
 
 
@@ -493,12 +511,12 @@ export type WorkoutGoalUncheckedUpdateManyWithoutWorkoutsInput = {
 
 export type WorkoutGoalCountOutputType = {
   clientGoals: number
-  workouts: number
+  goalWorkouts: number
 }
 
 export type WorkoutGoalCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   clientGoals?: boolean | WorkoutGoalCountOutputTypeCountClientGoalsArgs
-  workouts?: boolean | WorkoutGoalCountOutputTypeCountWorkoutsArgs
+  goalWorkouts?: boolean | WorkoutGoalCountOutputTypeCountGoalWorkoutsArgs
 }
 
 /**
@@ -521,8 +539,8 @@ export type WorkoutGoalCountOutputTypeCountClientGoalsArgs<ExtArgs extends runti
 /**
  * WorkoutGoalCountOutputType without action
  */
-export type WorkoutGoalCountOutputTypeCountWorkoutsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.WorkoutWhereInput
+export type WorkoutGoalCountOutputTypeCountGoalWorkoutsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.GoalWorkoutWhereInput
 }
 
 
@@ -531,8 +549,9 @@ export type WorkoutGoalSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   name?: boolean
   description?: boolean
   category?: boolean
+  targetSessions?: boolean
   clientGoals?: boolean | Prisma.WorkoutGoal$clientGoalsArgs<ExtArgs>
-  workouts?: boolean | Prisma.WorkoutGoal$workoutsArgs<ExtArgs>
+  goalWorkouts?: boolean | Prisma.WorkoutGoal$goalWorkoutsArgs<ExtArgs>
   _count?: boolean | Prisma.WorkoutGoalCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["workoutGoal"]>
 
@@ -541,6 +560,7 @@ export type WorkoutGoalSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   name?: boolean
   description?: boolean
   category?: boolean
+  targetSessions?: boolean
 }, ExtArgs["result"]["workoutGoal"]>
 
 export type WorkoutGoalSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -548,6 +568,7 @@ export type WorkoutGoalSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   name?: boolean
   description?: boolean
   category?: boolean
+  targetSessions?: boolean
 }, ExtArgs["result"]["workoutGoal"]>
 
 export type WorkoutGoalSelectScalar = {
@@ -555,12 +576,13 @@ export type WorkoutGoalSelectScalar = {
   name?: boolean
   description?: boolean
   category?: boolean
+  targetSessions?: boolean
 }
 
-export type WorkoutGoalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "category", ExtArgs["result"]["workoutGoal"]>
+export type WorkoutGoalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "category" | "targetSessions", ExtArgs["result"]["workoutGoal"]>
 export type WorkoutGoalInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   clientGoals?: boolean | Prisma.WorkoutGoal$clientGoalsArgs<ExtArgs>
-  workouts?: boolean | Prisma.WorkoutGoal$workoutsArgs<ExtArgs>
+  goalWorkouts?: boolean | Prisma.WorkoutGoal$goalWorkoutsArgs<ExtArgs>
   _count?: boolean | Prisma.WorkoutGoalCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type WorkoutGoalIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -570,13 +592,14 @@ export type $WorkoutGoalPayload<ExtArgs extends runtime.Types.Extensions.Interna
   name: "WorkoutGoal"
   objects: {
     clientGoals: Prisma.$ClientGoalPayload<ExtArgs>[]
-    workouts: Prisma.$WorkoutPayload<ExtArgs>[]
+    goalWorkouts: Prisma.$GoalWorkoutPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
     description: string | null
     category: $Enums.WorkoutGoalCategory
+    targetSessions: number | null
   }, ExtArgs["result"]["workoutGoal"]>
   composites: {}
 }
@@ -972,7 +995,7 @@ readonly fields: WorkoutGoalFieldRefs;
 export interface Prisma__WorkoutGoalClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   clientGoals<T extends Prisma.WorkoutGoal$clientGoalsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WorkoutGoal$clientGoalsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClientGoalPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  workouts<T extends Prisma.WorkoutGoal$workoutsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WorkoutGoal$workoutsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkoutPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  goalWorkouts<T extends Prisma.WorkoutGoal$goalWorkoutsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WorkoutGoal$goalWorkoutsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GoalWorkoutPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1006,6 +1029,7 @@ export interface WorkoutGoalFieldRefs {
   readonly name: Prisma.FieldRef<"WorkoutGoal", 'String'>
   readonly description: Prisma.FieldRef<"WorkoutGoal", 'String'>
   readonly category: Prisma.FieldRef<"WorkoutGoal", 'WorkoutGoalCategory'>
+  readonly targetSessions: Prisma.FieldRef<"WorkoutGoal", 'Int'>
 }
     
 
@@ -1418,27 +1442,27 @@ export type WorkoutGoal$clientGoalsArgs<ExtArgs extends runtime.Types.Extensions
 }
 
 /**
- * WorkoutGoal.workouts
+ * WorkoutGoal.goalWorkouts
  */
-export type WorkoutGoal$workoutsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type WorkoutGoal$goalWorkoutsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the Workout
+   * Select specific fields to fetch from the GoalWorkout
    */
-  select?: Prisma.WorkoutSelect<ExtArgs> | null
+  select?: Prisma.GoalWorkoutSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the Workout
+   * Omit specific fields from the GoalWorkout
    */
-  omit?: Prisma.WorkoutOmit<ExtArgs> | null
+  omit?: Prisma.GoalWorkoutOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.WorkoutInclude<ExtArgs> | null
-  where?: Prisma.WorkoutWhereInput
-  orderBy?: Prisma.WorkoutOrderByWithRelationInput | Prisma.WorkoutOrderByWithRelationInput[]
-  cursor?: Prisma.WorkoutWhereUniqueInput
+  include?: Prisma.GoalWorkoutInclude<ExtArgs> | null
+  where?: Prisma.GoalWorkoutWhereInput
+  orderBy?: Prisma.GoalWorkoutOrderByWithRelationInput | Prisma.GoalWorkoutOrderByWithRelationInput[]
+  cursor?: Prisma.GoalWorkoutWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.WorkoutScalarFieldEnum | Prisma.WorkoutScalarFieldEnum[]
+  distinct?: Prisma.GoalWorkoutScalarFieldEnum | Prisma.GoalWorkoutScalarFieldEnum[]
 }
 
 /**

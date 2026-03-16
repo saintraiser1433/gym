@@ -391,6 +391,7 @@ export const ModelName = {
   ClientMembership: 'ClientMembership',
   MembershipRenewal: 'MembershipRenewal',
   WorkoutGoal: 'WorkoutGoal',
+  GoalWorkout: 'GoalWorkout',
   ClientGoal: 'ClientGoal',
   Exercise: 'Exercise',
   Workout: 'Workout',
@@ -399,6 +400,7 @@ export const ModelName = {
   WorkoutProgress: 'WorkoutProgress',
   Schedule: 'Schedule',
   Attendance: 'Attendance',
+  WorkoutEquipment: 'WorkoutEquipment',
   Equipment: 'Equipment',
   Payment: 'Payment',
   Notification: 'Notification'
@@ -417,7 +419,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "clientProfile" | "coachProfile" | "membership" | "clientMembership" | "membershipRenewal" | "workoutGoal" | "clientGoal" | "exercise" | "workout" | "workoutExercise" | "workoutAssignment" | "workoutProgress" | "schedule" | "attendance" | "equipment" | "payment" | "notification"
+    modelProps: "user" | "clientProfile" | "coachProfile" | "membership" | "clientMembership" | "membershipRenewal" | "workoutGoal" | "goalWorkout" | "clientGoal" | "exercise" | "workout" | "workoutExercise" | "workoutAssignment" | "workoutProgress" | "schedule" | "attendance" | "workoutEquipment" | "equipment" | "payment" | "notification"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -936,6 +938,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.WorkoutGoalCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.WorkoutGoalCountAggregateOutputType> | number
+        }
+      }
+    }
+    GoalWorkout: {
+      payload: Prisma.$GoalWorkoutPayload<ExtArgs>
+      fields: Prisma.GoalWorkoutFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.GoalWorkoutFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoalWorkoutPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.GoalWorkoutFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoalWorkoutPayload>
+        }
+        findFirst: {
+          args: Prisma.GoalWorkoutFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoalWorkoutPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.GoalWorkoutFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoalWorkoutPayload>
+        }
+        findMany: {
+          args: Prisma.GoalWorkoutFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoalWorkoutPayload>[]
+        }
+        create: {
+          args: Prisma.GoalWorkoutCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoalWorkoutPayload>
+        }
+        createMany: {
+          args: Prisma.GoalWorkoutCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.GoalWorkoutCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoalWorkoutPayload>[]
+        }
+        delete: {
+          args: Prisma.GoalWorkoutDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoalWorkoutPayload>
+        }
+        update: {
+          args: Prisma.GoalWorkoutUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoalWorkoutPayload>
+        }
+        deleteMany: {
+          args: Prisma.GoalWorkoutDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.GoalWorkoutUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.GoalWorkoutUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoalWorkoutPayload>[]
+        }
+        upsert: {
+          args: Prisma.GoalWorkoutUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$GoalWorkoutPayload>
+        }
+        aggregate: {
+          args: Prisma.GoalWorkoutAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateGoalWorkout>
+        }
+        groupBy: {
+          args: Prisma.GoalWorkoutGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GoalWorkoutGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.GoalWorkoutCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.GoalWorkoutCountAggregateOutputType> | number
         }
       }
     }
@@ -1531,6 +1607,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    WorkoutEquipment: {
+      payload: Prisma.$WorkoutEquipmentPayload<ExtArgs>
+      fields: Prisma.WorkoutEquipmentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.WorkoutEquipmentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkoutEquipmentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.WorkoutEquipmentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkoutEquipmentPayload>
+        }
+        findFirst: {
+          args: Prisma.WorkoutEquipmentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkoutEquipmentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.WorkoutEquipmentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkoutEquipmentPayload>
+        }
+        findMany: {
+          args: Prisma.WorkoutEquipmentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkoutEquipmentPayload>[]
+        }
+        create: {
+          args: Prisma.WorkoutEquipmentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkoutEquipmentPayload>
+        }
+        createMany: {
+          args: Prisma.WorkoutEquipmentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.WorkoutEquipmentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkoutEquipmentPayload>[]
+        }
+        delete: {
+          args: Prisma.WorkoutEquipmentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkoutEquipmentPayload>
+        }
+        update: {
+          args: Prisma.WorkoutEquipmentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkoutEquipmentPayload>
+        }
+        deleteMany: {
+          args: Prisma.WorkoutEquipmentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.WorkoutEquipmentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.WorkoutEquipmentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkoutEquipmentPayload>[]
+        }
+        upsert: {
+          args: Prisma.WorkoutEquipmentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$WorkoutEquipmentPayload>
+        }
+        aggregate: {
+          args: Prisma.WorkoutEquipmentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateWorkoutEquipment>
+        }
+        groupBy: {
+          args: Prisma.WorkoutEquipmentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WorkoutEquipmentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.WorkoutEquipmentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.WorkoutEquipmentCountAggregateOutputType> | number
+        }
+      }
+    }
     Equipment: {
       payload: Prisma.$EquipmentPayload<ExtArgs>
       fields: Prisma.EquipmentFieldRefs
@@ -1815,6 +1965,10 @@ export const ClientProfileScalarFieldEnum = {
   weight: 'weight',
   height: 'height',
   emergencyContact: 'emergencyContact',
+  address: 'address',
+  gender: 'gender',
+  occupation: 'occupation',
+  gymNotes: 'gymNotes',
   joinDate: 'joinDate',
   assignedCoachId: 'assignedCoachId'
 } as const
@@ -1876,10 +2030,22 @@ export const WorkoutGoalScalarFieldEnum = {
   id: 'id',
   name: 'name',
   description: 'description',
-  category: 'category'
+  category: 'category',
+  targetSessions: 'targetSessions'
 } as const
 
 export type WorkoutGoalScalarFieldEnum = (typeof WorkoutGoalScalarFieldEnum)[keyof typeof WorkoutGoalScalarFieldEnum]
+
+
+export const GoalWorkoutScalarFieldEnum = {
+  id: 'id',
+  goalId: 'goalId',
+  workoutId: 'workoutId',
+  workoutType: 'workoutType',
+  targetValue: 'targetValue'
+} as const
+
+export type GoalWorkoutScalarFieldEnum = (typeof GoalWorkoutScalarFieldEnum)[keyof typeof GoalWorkoutScalarFieldEnum]
 
 
 export const ClientGoalScalarFieldEnum = {
@@ -1887,6 +2053,7 @@ export const ClientGoalScalarFieldEnum = {
   clientId: 'clientId',
   goalId: 'goalId',
   targetValue: 'targetValue',
+  targetSessions: 'targetSessions',
   currentValue: 'currentValue',
   deadline: 'deadline',
   status: 'status'
@@ -1918,7 +2085,8 @@ export const WorkoutScalarFieldEnum = {
   targetGoals: 'targetGoals',
   duration: 'duration',
   difficulty: 'difficulty',
-  demoMediaUrl: 'demoMediaUrl'
+  demoMediaUrl: 'demoMediaUrl',
+  types: 'types'
 } as const
 
 export type WorkoutScalarFieldEnum = (typeof WorkoutScalarFieldEnum)[keyof typeof WorkoutScalarFieldEnum]
@@ -1956,6 +2124,7 @@ export const WorkoutProgressScalarFieldEnum = {
   id: 'id',
   clientId: 'clientId',
   workoutExerciseId: 'workoutExerciseId',
+  workoutId: 'workoutId',
   completedDate: 'completedDate',
   actualSets: 'actualSets',
   actualReps: 'actualReps',
@@ -1995,6 +2164,18 @@ export const AttendanceScalarFieldEnum = {
 export type AttendanceScalarFieldEnum = (typeof AttendanceScalarFieldEnum)[keyof typeof AttendanceScalarFieldEnum]
 
 
+export const WorkoutEquipmentScalarFieldEnum = {
+  id: 'id',
+  workoutId: 'workoutId',
+  equipmentId: 'equipmentId',
+  quantity: 'quantity',
+  targetKg: 'targetKg',
+  targetPcs: 'targetPcs'
+} as const
+
+export type WorkoutEquipmentScalarFieldEnum = (typeof WorkoutEquipmentScalarFieldEnum)[keyof typeof WorkoutEquipmentScalarFieldEnum]
+
+
 export const EquipmentScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -2004,7 +2185,8 @@ export const EquipmentScalarFieldEnum = {
   lastMaintenance: 'lastMaintenance',
   nextMaintenance: 'nextMaintenance',
   status: 'status',
-  quantity: 'quantity'
+  quantity: 'quantity',
+  measureTypes: 'measureTypes'
 } as const
 
 export type EquipmentScalarFieldEnum = (typeof EquipmentScalarFieldEnum)[keyof typeof EquipmentScalarFieldEnum]
@@ -2247,6 +2429,20 @@ export type ListEnumWorkoutGoalCategoryFieldRefInput<$PrismaModel> = FieldRefInp
 
 
 /**
+ * Reference to a field of type 'WorkoutType'
+ */
+export type EnumWorkoutTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WorkoutType'>
+    
+
+
+/**
+ * Reference to a field of type 'WorkoutType[]'
+ */
+export type ListEnumWorkoutTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WorkoutType[]'>
+    
+
+
+/**
  * Reference to a field of type 'GoalStatus'
  */
 export type EnumGoalStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GoalStatus'>
@@ -2445,6 +2641,7 @@ export type GlobalOmitConfig = {
   clientMembership?: Prisma.ClientMembershipOmit
   membershipRenewal?: Prisma.MembershipRenewalOmit
   workoutGoal?: Prisma.WorkoutGoalOmit
+  goalWorkout?: Prisma.GoalWorkoutOmit
   clientGoal?: Prisma.ClientGoalOmit
   exercise?: Prisma.ExerciseOmit
   workout?: Prisma.WorkoutOmit
@@ -2453,6 +2650,7 @@ export type GlobalOmitConfig = {
   workoutProgress?: Prisma.WorkoutProgressOmit
   schedule?: Prisma.ScheduleOmit
   attendance?: Prisma.AttendanceOmit
+  workoutEquipment?: Prisma.WorkoutEquipmentOmit
   equipment?: Prisma.EquipmentOmit
   payment?: Prisma.PaymentOmit
   notification?: Prisma.NotificationOmit

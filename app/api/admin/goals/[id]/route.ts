@@ -18,23 +18,75 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     );
   }
 
-  const { workoutIds, ...rest } = parsed.data;
+  const body = parsed.data as {
+    name?: string;
+    description?: string;
+    category?: string;
+    targetSessions?: number | null;
+    workoutIds?: string[];
+    goalWorkouts?: { workoutId: string; workoutType: string; targetValue?: number | null }[];
+  };
+  const { workoutIds, goalWorkouts: goalWorkoutsInput, ...rest } = body;
+  const hasWorkoutIds = Object.prototype.hasOwnProperty.call(json, "workoutIds");
+  const hasGoalWorkouts = Object.prototype.hasOwnProperty.call(json, "goalWorkouts");
 
   try {
-    const updateData: Parameters<typeof prisma.workoutGoal.update>[0]["data"] = {
-      ...rest,
-    };
-    if (workoutIds !== undefined) {
-      updateData.workouts = {
-        set: (workoutIds as string[]).map((workoutId) => ({ id: workoutId })),
-      };
-    }
+    const updateData: Record<string, unknown> = { ...rest };
     const goal = await prisma.workoutGoal.update({
       where: { id },
       data: updateData,
-      include: { workouts: { select: { id: true, name: true } } },
     });
-    return NextResponse.json(goal);
+
+    // Sync goal workouts when the request included workoutIds or goalWorkouts (use raw key so we never skip)
+    if (hasGoalWorkouts && goalWorkoutsInput !== undefined) {
+      await prisma.goalWorkout.deleteMany({ where: { goalId: id } });
+      if (Array.isArray(goalWorkoutsInput) && goalWorkoutsInput.length > 0) {
+        const workoutType = (t: string) => (t === "PER_KG" ? "PER_KG" as const : "PER_PCS" as const);
+        await prisma.goalWorkout.createMany({
+          data: goalWorkoutsInput
+            .filter((gw) => gw.workoutId && gw.workoutType)
+            .map((gw) => ({
+              goalId: id,
+              workoutId: gw.workoutId,
+              workoutType: workoutType(gw.workoutType),
+              targetValue: gw.targetValue ?? null,
+            })),
+        });
+      }
+    } else if (hasWorkoutIds) {
+      const ids = Array.isArray(workoutIds) ? workoutIds : [];
+      await prisma.goalWorkout.deleteMany({ where: { goalId: id } });
+      if (ids.length > 0) {
+        await prisma.goalWorkout.createMany({
+          data: ids.map((workoutId) => ({
+            goalId: id,
+            workoutId,
+            workoutType: "PER_PCS" as const,
+            targetValue: null,
+          })),
+        });
+      }
+    }
+
+    const goalWithWorkouts = await prisma.workoutGoal.findUnique({
+      where: { id },
+      include: {
+        goalWorkouts: {
+          include: { workout: { select: { id: true, name: true } } },
+        },
+      },
+    });
+    const goalWorkouts = (goalWithWorkouts?.goalWorkouts ?? []).map((gw) => ({
+      id: gw.workout.id,
+      name: gw.workout.name,
+      workoutType: gw.workoutType,
+      targetValue: gw.targetValue,
+    }));
+    return NextResponse.json({
+      ...goal,
+      goalWorkouts,
+      workouts: goalWorkouts.map((w) => ({ id: w.id, name: w.name })),
+    });
   } catch {
     return NextResponse.json(
       { error: "Goal not found" },

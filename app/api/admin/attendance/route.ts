@@ -30,9 +30,9 @@ export async function GET(req: NextRequest) {
     search && search.trim().length > 0
       ? {
           OR: [
-            { client: { user: { name: { contains: search, mode: "insensitive" } } } },
-            { client: { user: { email: { contains: search, mode: "insensitive" } } } },
-            { schedule: { title: { contains: search, mode: "insensitive" } } },
+            { client: { user: { name: { contains: search, mode: "insensitive" as const } } } },
+            { client: { user: { email: { contains: search, mode: "insensitive" as const } } } },
+            { schedule: { title: { contains: search, mode: "insensitive" as const } } },
           ],
         }
       : {};
@@ -51,8 +51,31 @@ export async function GET(req: NextRequest) {
     }),
   ]);
 
+  const data = records.map((r) => {
+    const checkIn = new Date(r.checkInTime);
+    const schedule = r.schedule;
+    const scheduleStart = schedule ? new Date(schedule.startTime) : null;
+    const scheduleEnd = schedule ? new Date(schedule.endTime) : null;
+    const checkOut = r.checkOutTime ? new Date(r.checkOutTime) : null;
+    const lateMinutes =
+      scheduleStart && checkIn > scheduleStart
+        ? Math.round((checkIn.getTime() - scheduleStart.getTime()) / 60000)
+        : 0;
+    const undertimeMinutes =
+      scheduleEnd && checkOut && checkOut < scheduleEnd
+        ? Math.round((scheduleEnd.getTime() - checkOut.getTime()) / 60000)
+        : null;
+    return {
+      ...r,
+      scheduleStart: scheduleStart?.toISOString() ?? null,
+      scheduleEnd: scheduleEnd?.toISOString() ?? null,
+      lateMinutes,
+      undertimeMinutes,
+    };
+  });
+
   return NextResponse.json({
-    data: records,
+    data,
     page,
     pageSize,
     total,
@@ -184,5 +207,16 @@ export async function POST(req: NextRequest) {
   }
 
   return NextResponse.json(attendance, { status: 201 });
+}
+
+/** Delete all attendance records (admin only). */
+export async function DELETE() {
+  await requireAdmin();
+
+  const result = await prisma.attendance.deleteMany({});
+  return NextResponse.json({
+    deleted: result.count,
+    message: `Flushed ${result.count} attendance record(s).`,
+  });
 }
 

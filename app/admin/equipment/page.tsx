@@ -25,6 +25,7 @@ type EquipmentRow = {
   type?: string | null;
   status: string;
   quantity: number;
+  measureTypes?: string[] | null;
 };
 
 export default function AdminEquipmentPage() {
@@ -38,12 +39,7 @@ export default function AdminEquipmentPage() {
   const [editingEquipment, setEditingEquipment] = React.useState<EquipmentRow | null>(
     null,
   );
-  const [formValues, setFormValues] = React.useState({
-    name: "",
-    type: "",
-    status: "AVAILABLE",
-    quantity: "1",
-  });
+  const [formValues, setFormValues] = React.useState({ name: "", perKg: false, perPcs: true });
   const [saving, setSaving] = React.useState(false);
 
   const fetchData = React.useCallback(
@@ -58,6 +54,7 @@ export default function AdminEquipmentPage() {
         }
         const res = await fetch(`/api/admin/equipment?${params.toString()}`, {
           cache: "no-store",
+          credentials: "include",
         });
         const json = await res.json();
         setRows(json.data ?? []);
@@ -76,22 +73,19 @@ export default function AdminEquipmentPage() {
 
   const openNewDialog = () => {
     setEditingEquipment(null);
-    setFormValues({
-      name: "",
-      type: "",
-      status: "AVAILABLE",
-      quantity: "1",
-    });
+    setFormValues({ name: "", perKg: false, perPcs: true });
     setDialogOpen(true);
   };
 
   const openEditDialog = (row: EquipmentRow) => {
     setEditingEquipment(row);
+    const types = row.measureTypes ?? ["PER_PCS"];
+    const hasKg = types.includes("PER_KG");
+    const hasPcs = types.includes("PER_PCS");
     setFormValues({
       name: row.name,
-      type: row.type ?? "",
-      status: row.status,
-      quantity: String(row.quantity),
+      perKg: hasKg && !hasPcs,
+      perPcs: hasPcs || !hasKg,
     });
     setDialogOpen(true);
   };
@@ -107,26 +101,40 @@ export default function AdminEquipmentPage() {
     e.preventDefault();
     setSaving(true);
     try {
+      const measureTypes: string[] = [];
+      if (formValues.perKg) measureTypes.push("PER_KG");
+      if (formValues.perPcs) measureTypes.push("PER_PCS");
+      if (measureTypes.length === 0) measureTypes.push("PER_PCS");
       const payload = {
-        name: formValues.name,
-        type: formValues.type || null,
-        status: formValues.status,
-        quantity: parseInt(formValues.quantity, 10) || 1,
+        name: formValues.name.trim(),
+        measureTypes,
       };
 
       if (editingEquipment) {
-        await fetch(`/api/admin/equipment/${editingEquipment.id}`, {
+        const res = await fetch(`/api/admin/equipment/${editingEquipment.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
+          credentials: "include",
         });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          toast.error(err?.error ?? "Failed to update equipment");
+          return;
+        }
         toast.success("Equipment updated");
       } else {
-        await fetch("/api/admin/equipment", {
+        const res = await fetch("/api/admin/equipment", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
+          credentials: "include",
         });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          toast.error(err?.error ?? "Failed to create equipment");
+          return;
+        }
         toast.success("Equipment created");
       }
       setDialogOpen(false);
@@ -140,9 +148,6 @@ export default function AdminEquipmentPage() {
 
   const columns: Column<EquipmentRow>[] = [
     { key: "name", header: "Name" },
-    { key: "type", header: "Type" },
-    { key: "status", header: "Status" },
-    { key: "quantity", header: "Qty" },
     {
       key: "id",
       header: "Actions",
@@ -187,9 +192,15 @@ export default function AdminEquipmentPage() {
                   onClick={async () => {
                     setLoading(true);
                     try {
-                      await fetch(`/api/admin/equipment/${row.id}`, {
+                      const res = await fetch(`/api/admin/equipment/${row.id}`, {
                         method: "DELETE",
+                        credentials: "include",
                       });
+                      if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        toast.error(err?.error ?? "Failed to delete equipment");
+                        return;
+                      }
                       await fetchData({ page, search });
                       toast.success("Equipment deleted");
                     } finally {
@@ -252,7 +263,7 @@ export default function AdminEquipmentPage() {
             <form onSubmit={handleSubmit} className="space-y-3 text-[11px]">
               <div className="space-y-1">
                 <label className="font-medium" htmlFor="name">
-                  Name
+                  Equipment name
                 </label>
                 <Input
                   id="name"
@@ -260,53 +271,36 @@ export default function AdminEquipmentPage() {
                   value={formValues.name}
                   onChange={handleFormChange}
                   className="h-7 text-[11px]"
+                  placeholder="e.g. Treadmill, Bench"
                   required
                 />
               </div>
-              <div className="space-y-1">
-                <label className="font-medium" htmlFor="type">
-                  Type
-                </label>
-                <Input
-                  id="type"
-                  name="type"
-                  value={formValues.type}
-                  onChange={handleFormChange}
-                  className="h-7 text-[11px]"
-                  placeholder="e.g. Treadmill, Bench"
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <label className="font-medium" htmlFor="status">
-                    Status
+              <div className="space-y-2">
+                <label className="font-medium">Options</label>
+                <p className="text-[10px] text-muted-foreground">
+                  Select how this equipment can be measured in workouts (choose one).
+                </p>
+                <div className="flex flex-wrap gap-4">
+                  <label className="flex items-center gap-2 text-[11px]">
+                    <input
+                      type="radio"
+                      name="measureType"
+                      checked={formValues.perKg}
+                      onChange={() => setFormValues((prev) => ({ ...prev, perKg: true, perPcs: false }))}
+                      className="h-3.5 w-3.5 rounded-full border-input"
+                    />
+                    Per kg
                   </label>
-                  <select
-                    id="status"
-                    name="status"
-                    value={formValues.status}
-                    onChange={handleFormChange}
-                    className="h-7 w-full rounded-md border bg-transparent px-2 text-[11px]"
-                  >
-                    <option value="AVAILABLE">Available</option>
-                    <option value="MAINTENANCE">Maintenance</option>
-                    <option value="BROKEN">Broken</option>
-                  </select>
-                </div>
-                <div className="space-y-1">
-                  <label className="font-medium" htmlFor="quantity">
-                    Quantity
+                  <label className="flex items-center gap-2 text-[11px]">
+                    <input
+                      type="radio"
+                      name="measureType"
+                      checked={formValues.perPcs}
+                      onChange={() => setFormValues((prev) => ({ ...prev, perKg: false, perPcs: true }))}
+                      className="h-3.5 w-3.5 rounded-full border-input"
+                    />
+                    Per pieces
                   </label>
-                  <Input
-                    id="quantity"
-                    name="quantity"
-                    type="number"
-                    min={1}
-                    value={formValues.quantity}
-                    onChange={handleFormChange}
-                    className="h-7 text-[11px]"
-                    required
-                  />
                 </div>
               </div>
               <div className="flex justify-end gap-2 pt-2">

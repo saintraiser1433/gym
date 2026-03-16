@@ -1,0 +1,3 @@
+-- Migration directory was missing migration.sql (recreated as no-op).
+-- User status REJECTED is added in migration 20260220110000_add_user_status_rejected.
+-- This file exists only to satisfy Prisma; no schema changes here.

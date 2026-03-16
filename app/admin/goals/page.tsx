@@ -26,6 +26,7 @@ type GoalRow = {
   name: string;
   description?: string | null;
   category: string;
+  targetSessions?: number | null;
   workouts?: { id: string; name: string }[];
 };
 
@@ -42,13 +43,14 @@ export default function AdminGoalsPage() {
     name: "",
     description: "",
     category: "GENERAL_FITNESS",
+    targetSessions: "" as string,
     workoutIds: [] as string[],
   });
   const [workouts, setWorkouts] = React.useState<WorkoutOption[]>([]);
   const [saving, setSaving] = React.useState(false);
 
   const fetchData = React.useCallback(
-    async (opts?: { page?: number; search?: string }) => {
+    async (opts?: { page?: number; search?: string; cacheBust?: boolean }) => {
       setLoading(true);
       try {
         const params = new URLSearchParams();
@@ -57,6 +59,7 @@ export default function AdminGoalsPage() {
         if (opts?.search ?? search) {
           params.set("search", (opts?.search ?? search) as string);
         }
+        if (opts?.cacheBust) params.set("_", String(Date.now()));
         const res = await fetch(`/api/admin/goals?${params.toString()}`, {
           cache: "no-store",
         });
@@ -76,7 +79,8 @@ export default function AdminGoalsPage() {
             name: g.name,
             description: g.description,
             category: g.category,
-            workouts: g.workouts ?? [],
+            targetSessions: g.targetSessions ?? null,
+            workouts: g.workouts ?? g.goalWorkouts?.map((gw: any) => ({ id: gw.id ?? gw.workoutId, name: gw.name })) ?? [],
           })),
         );
         setTotal(json?.total ?? 0);
@@ -117,6 +121,7 @@ export default function AdminGoalsPage() {
       name: "",
       description: "",
       category: "GENERAL_FITNESS",
+      targetSessions: "",
       workoutIds: [],
     });
     setDialogOpen(true);
@@ -128,6 +133,7 @@ export default function AdminGoalsPage() {
       name: row.name,
       description: row.description ?? "",
       category: row.category,
+      targetSessions: row.targetSessions != null ? String(row.targetSessions) : "",
       workoutIds: row.workouts?.map((w) => w.id) ?? [],
     });
     setDialogOpen(true);
@@ -156,26 +162,56 @@ export default function AdminGoalsPage() {
         name: formValues.name,
         description: formValues.description || undefined,
         category: formValues.category,
+        targetSessions: formValues.targetSessions ? Number(formValues.targetSessions) : undefined,
         workoutIds: formValues.workoutIds,
       };
 
+      let res: Response;
       if (editingGoal) {
-        await fetch(`/api/admin/goals/${editingGoal.id}`, {
+        res = await fetch(`/api/admin/goals/${editingGoal.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
       } else {
-        await fetch(`/api/admin/goals`, {
+        res = await fetch(`/api/admin/goals`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
       }
 
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        toast.error(err?.error ?? "Failed to save goal");
+        return;
+      }
+
+      const updated = await res.json().catch(() => null);
       setDialogOpen(false);
-      await fetchData({ page: 1, search });
+      setEditingGoal(null);
+
+      // Update the row from PATCH/POST response so the table shows new workouts immediately
+      if (updated?.workouts && Array.isArray(updated.workouts)) {
+        const workouts = updated.workouts as { id: string; name: string }[];
+        if (editingGoal) {
+          setRows((prev) =>
+            prev.map((r) =>
+              r.id === editingGoal.id
+                ? { ...r, name: updated.name ?? r.name, description: updated.description ?? r.description, category: updated.category ?? r.category, targetSessions: updated.targetSessions ?? r.targetSessions, workouts }
+                : r
+            )
+          );
+        } else if (updated.id) {
+          setRows((prev) => [{ id: updated.id, name: updated.name ?? "", description: updated.description ?? null, category: updated.category ?? "", targetSessions: updated.targetSessions ?? null, workouts }, ...prev]);
+          setTotal((t) => t + 1);
+        }
+      }
+
+      await fetchData({ page: 1, search, cacheBust: true });
       toast.success(editingGoal ? "Goal updated" : "Goal created");
+    } catch (err) {
+      toast.error("Something went wrong");
     } finally {
       setSaving(false);
     }
@@ -194,12 +230,16 @@ export default function AdminGoalsPage() {
           .join(" "),
     },
     {
+      key: "targetSessions",
+      header: "Sessions",
+      render: (row) =>
+        row.targetSessions != null ? String(row.targetSessions) : "—",
+    },
+    {
       key: "workouts",
       header: "Workouts",
       render: (row) =>
-        row.workouts?.length
-          ? row.workouts.map((w) => w.name).join(", ")
-          : "—",
+        row.workouts?.length ? row.workouts.map((w) => w.name).join(", ") : "—",
     },
     {
       key: "id",
@@ -352,9 +392,27 @@ export default function AdminGoalsPage() {
                 </select>
               </div>
               <div className="space-y-1">
+                <label className="font-medium" htmlFor="targetSessions">
+                  Number of sessions (optional)
+                </label>
+                <Input
+                  id="targetSessions"
+                  name="targetSessions"
+                  type="number"
+                  min={1}
+                  className="h-7 text-[11px]"
+                  value={formValues.targetSessions}
+                  onChange={handleFormChange}
+                  placeholder="e.g. 12"
+                />
+                <p className="text-[10px] text-muted-foreground">
+                  Sessions required to complete this goal. Set by admin; clients see this when they add the goal.
+                </p>
+              </div>
+              <div className="space-y-1">
                 <label className="font-medium">Workouts</label>
                 <p className="text-[10px] text-muted-foreground">
-                  Select workouts to link to this goal (from workout module).
+                  Select workouts to link to this goal.
                 </p>
                 {workouts.length === 0 ? (
                   <p className="py-2 text-[11px] text-muted-foreground">

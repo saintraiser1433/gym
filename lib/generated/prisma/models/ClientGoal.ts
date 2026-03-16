@@ -28,11 +28,13 @@ export type AggregateClientGoal = {
 
 export type ClientGoalAvgAggregateOutputType = {
   targetValue: number | null
+  targetSessions: number | null
   currentValue: number | null
 }
 
 export type ClientGoalSumAggregateOutputType = {
   targetValue: number | null
+  targetSessions: number | null
   currentValue: number | null
 }
 
@@ -41,6 +43,7 @@ export type ClientGoalMinAggregateOutputType = {
   clientId: string | null
   goalId: string | null
   targetValue: number | null
+  targetSessions: number | null
   currentValue: number | null
   deadline: Date | null
   status: $Enums.GoalStatus | null
@@ -51,6 +54,7 @@ export type ClientGoalMaxAggregateOutputType = {
   clientId: string | null
   goalId: string | null
   targetValue: number | null
+  targetSessions: number | null
   currentValue: number | null
   deadline: Date | null
   status: $Enums.GoalStatus | null
@@ -61,6 +65,7 @@ export type ClientGoalCountAggregateOutputType = {
   clientId: number
   goalId: number
   targetValue: number
+  targetSessions: number
   currentValue: number
   deadline: number
   status: number
@@ -70,11 +75,13 @@ export type ClientGoalCountAggregateOutputType = {
 
 export type ClientGoalAvgAggregateInputType = {
   targetValue?: true
+  targetSessions?: true
   currentValue?: true
 }
 
 export type ClientGoalSumAggregateInputType = {
   targetValue?: true
+  targetSessions?: true
   currentValue?: true
 }
 
@@ -83,6 +90,7 @@ export type ClientGoalMinAggregateInputType = {
   clientId?: true
   goalId?: true
   targetValue?: true
+  targetSessions?: true
   currentValue?: true
   deadline?: true
   status?: true
@@ -93,6 +101,7 @@ export type ClientGoalMaxAggregateInputType = {
   clientId?: true
   goalId?: true
   targetValue?: true
+  targetSessions?: true
   currentValue?: true
   deadline?: true
   status?: true
@@ -103,6 +112,7 @@ export type ClientGoalCountAggregateInputType = {
   clientId?: true
   goalId?: true
   targetValue?: true
+  targetSessions?: true
   currentValue?: true
   deadline?: true
   status?: true
@@ -200,6 +210,7 @@ export type ClientGoalGroupByOutputType = {
   clientId: string
   goalId: string
   targetValue: number | null
+  targetSessions: number | null
   currentValue: number | null
   deadline: Date | null
   status: $Enums.GoalStatus
@@ -233,6 +244,7 @@ export type ClientGoalWhereInput = {
   clientId?: Prisma.StringFilter<"ClientGoal"> | string
   goalId?: Prisma.StringFilter<"ClientGoal"> | string
   targetValue?: Prisma.FloatNullableFilter<"ClientGoal"> | number | null
+  targetSessions?: Prisma.IntNullableFilter<"ClientGoal"> | number | null
   currentValue?: Prisma.FloatNullableFilter<"ClientGoal"> | number | null
   deadline?: Prisma.DateTimeNullableFilter<"ClientGoal"> | Date | string | null
   status?: Prisma.EnumGoalStatusFilter<"ClientGoal"> | $Enums.GoalStatus
@@ -245,6 +257,7 @@ export type ClientGoalOrderByWithRelationInput = {
   clientId?: Prisma.SortOrder
   goalId?: Prisma.SortOrder
   targetValue?: Prisma.SortOrderInput | Prisma.SortOrder
+  targetSessions?: Prisma.SortOrderInput | Prisma.SortOrder
   currentValue?: Prisma.SortOrderInput | Prisma.SortOrder
   deadline?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -260,6 +273,7 @@ export type ClientGoalWhereUniqueInput = Prisma.AtLeast<{
   clientId?: Prisma.StringFilter<"ClientGoal"> | string
   goalId?: Prisma.StringFilter<"ClientGoal"> | string
   targetValue?: Prisma.FloatNullableFilter<"ClientGoal"> | number | null
+  targetSessions?: Prisma.IntNullableFilter<"ClientGoal"> | number | null
   currentValue?: Prisma.FloatNullableFilter<"ClientGoal"> | number | null
   deadline?: Prisma.DateTimeNullableFilter<"ClientGoal"> | Date | string | null
   status?: Prisma.EnumGoalStatusFilter<"ClientGoal"> | $Enums.GoalStatus
@@ -272,6 +286,7 @@ export type ClientGoalOrderByWithAggregationInput = {
   clientId?: Prisma.SortOrder
   goalId?: Prisma.SortOrder
   targetValue?: Prisma.SortOrderInput | Prisma.SortOrder
+  targetSessions?: Prisma.SortOrderInput | Prisma.SortOrder
   currentValue?: Prisma.SortOrderInput | Prisma.SortOrder
   deadline?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -290,6 +305,7 @@ export type ClientGoalScalarWhereWithAggregatesInput = {
   clientId?: Prisma.StringWithAggregatesFilter<"ClientGoal"> | string
   goalId?: Prisma.StringWithAggregatesFilter<"ClientGoal"> | string
   targetValue?: Prisma.FloatNullableWithAggregatesFilter<"ClientGoal"> | number | null
+  targetSessions?: Prisma.IntNullableWithAggregatesFilter<"ClientGoal"> | number | null
   currentValue?: Prisma.FloatNullableWithAggregatesFilter<"ClientGoal"> | number | null
   deadline?: Prisma.DateTimeNullableWithAggregatesFilter<"ClientGoal"> | Date | string | null
   status?: Prisma.EnumGoalStatusWithAggregatesFilter<"ClientGoal"> | $Enums.GoalStatus
@@ -298,6 +314,7 @@ export type ClientGoalScalarWhereWithAggregatesInput = {
 export type ClientGoalCreateInput = {
   id?: string
   targetValue?: number | null
+  targetSessions?: number | null
   currentValue?: number | null
   deadline?: Date | string | null
   status?: $Enums.GoalStatus
@@ -310,6 +327,7 @@ export type ClientGoalUncheckedCreateInput = {
   clientId: string
   goalId: string
   targetValue?: number | null
+  targetSessions?: number | null
   currentValue?: number | null
   deadline?: Date | string | null
   status?: $Enums.GoalStatus
@@ -318,6 +336,7 @@ export type ClientGoalUncheckedCreateInput = {
 export type ClientGoalUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  targetSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumGoalStatusFieldUpdateOperationsInput | $Enums.GoalStatus
@@ -330,6 +349,7 @@ export type ClientGoalUncheckedUpdateInput = {
   clientId?: Prisma.StringFieldUpdateOperationsInput | string
   goalId?: Prisma.StringFieldUpdateOperationsInput | string
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  targetSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumGoalStatusFieldUpdateOperationsInput | $Enums.GoalStatus
@@ -340,6 +360,7 @@ export type ClientGoalCreateManyInput = {
   clientId: string
   goalId: string
   targetValue?: number | null
+  targetSessions?: number | null
   currentValue?: number | null
   deadline?: Date | string | null
   status?: $Enums.GoalStatus
@@ -348,6 +369,7 @@ export type ClientGoalCreateManyInput = {
 export type ClientGoalUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  targetSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumGoalStatusFieldUpdateOperationsInput | $Enums.GoalStatus
@@ -358,6 +380,7 @@ export type ClientGoalUncheckedUpdateManyInput = {
   clientId?: Prisma.StringFieldUpdateOperationsInput | string
   goalId?: Prisma.StringFieldUpdateOperationsInput | string
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  targetSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumGoalStatusFieldUpdateOperationsInput | $Enums.GoalStatus
@@ -378,6 +401,7 @@ export type ClientGoalCountOrderByAggregateInput = {
   clientId?: Prisma.SortOrder
   goalId?: Prisma.SortOrder
   targetValue?: Prisma.SortOrder
+  targetSessions?: Prisma.SortOrder
   currentValue?: Prisma.SortOrder
   deadline?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -385,6 +409,7 @@ export type ClientGoalCountOrderByAggregateInput = {
 
 export type ClientGoalAvgOrderByAggregateInput = {
   targetValue?: Prisma.SortOrder
+  targetSessions?: Prisma.SortOrder
   currentValue?: Prisma.SortOrder
 }
 
@@ -393,6 +418,7 @@ export type ClientGoalMaxOrderByAggregateInput = {
   clientId?: Prisma.SortOrder
   goalId?: Prisma.SortOrder
   targetValue?: Prisma.SortOrder
+  targetSessions?: Prisma.SortOrder
   currentValue?: Prisma.SortOrder
   deadline?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -403,6 +429,7 @@ export type ClientGoalMinOrderByAggregateInput = {
   clientId?: Prisma.SortOrder
   goalId?: Prisma.SortOrder
   targetValue?: Prisma.SortOrder
+  targetSessions?: Prisma.SortOrder
   currentValue?: Prisma.SortOrder
   deadline?: Prisma.SortOrder
   status?: Prisma.SortOrder
@@ -410,6 +437,7 @@ export type ClientGoalMinOrderByAggregateInput = {
 
 export type ClientGoalSumOrderByAggregateInput = {
   targetValue?: Prisma.SortOrder
+  targetSessions?: Prisma.SortOrder
   currentValue?: Prisma.SortOrder
 }
 
@@ -504,6 +532,7 @@ export type EnumGoalStatusFieldUpdateOperationsInput = {
 export type ClientGoalCreateWithoutClientInput = {
   id?: string
   targetValue?: number | null
+  targetSessions?: number | null
   currentValue?: number | null
   deadline?: Date | string | null
   status?: $Enums.GoalStatus
@@ -514,6 +543,7 @@ export type ClientGoalUncheckedCreateWithoutClientInput = {
   id?: string
   goalId: string
   targetValue?: number | null
+  targetSessions?: number | null
   currentValue?: number | null
   deadline?: Date | string | null
   status?: $Enums.GoalStatus
@@ -553,6 +583,7 @@ export type ClientGoalScalarWhereInput = {
   clientId?: Prisma.StringFilter<"ClientGoal"> | string
   goalId?: Prisma.StringFilter<"ClientGoal"> | string
   targetValue?: Prisma.FloatNullableFilter<"ClientGoal"> | number | null
+  targetSessions?: Prisma.IntNullableFilter<"ClientGoal"> | number | null
   currentValue?: Prisma.FloatNullableFilter<"ClientGoal"> | number | null
   deadline?: Prisma.DateTimeNullableFilter<"ClientGoal"> | Date | string | null
   status?: Prisma.EnumGoalStatusFilter<"ClientGoal"> | $Enums.GoalStatus
@@ -561,6 +592,7 @@ export type ClientGoalScalarWhereInput = {
 export type ClientGoalCreateWithoutGoalInput = {
   id?: string
   targetValue?: number | null
+  targetSessions?: number | null
   currentValue?: number | null
   deadline?: Date | string | null
   status?: $Enums.GoalStatus
@@ -571,6 +603,7 @@ export type ClientGoalUncheckedCreateWithoutGoalInput = {
   id?: string
   clientId: string
   targetValue?: number | null
+  targetSessions?: number | null
   currentValue?: number | null
   deadline?: Date | string | null
   status?: $Enums.GoalStatus
@@ -606,6 +639,7 @@ export type ClientGoalCreateManyClientInput = {
   id?: string
   goalId: string
   targetValue?: number | null
+  targetSessions?: number | null
   currentValue?: number | null
   deadline?: Date | string | null
   status?: $Enums.GoalStatus
@@ -614,6 +648,7 @@ export type ClientGoalCreateManyClientInput = {
 export type ClientGoalUpdateWithoutClientInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  targetSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumGoalStatusFieldUpdateOperationsInput | $Enums.GoalStatus
@@ -624,6 +659,7 @@ export type ClientGoalUncheckedUpdateWithoutClientInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   goalId?: Prisma.StringFieldUpdateOperationsInput | string
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  targetSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumGoalStatusFieldUpdateOperationsInput | $Enums.GoalStatus
@@ -633,6 +669,7 @@ export type ClientGoalUncheckedUpdateManyWithoutClientInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   goalId?: Prisma.StringFieldUpdateOperationsInput | string
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  targetSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumGoalStatusFieldUpdateOperationsInput | $Enums.GoalStatus
@@ -642,6 +679,7 @@ export type ClientGoalCreateManyGoalInput = {
   id?: string
   clientId: string
   targetValue?: number | null
+  targetSessions?: number | null
   currentValue?: number | null
   deadline?: Date | string | null
   status?: $Enums.GoalStatus
@@ -650,6 +688,7 @@ export type ClientGoalCreateManyGoalInput = {
 export type ClientGoalUpdateWithoutGoalInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  targetSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumGoalStatusFieldUpdateOperationsInput | $Enums.GoalStatus
@@ -660,6 +699,7 @@ export type ClientGoalUncheckedUpdateWithoutGoalInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   clientId?: Prisma.StringFieldUpdateOperationsInput | string
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  targetSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumGoalStatusFieldUpdateOperationsInput | $Enums.GoalStatus
@@ -669,6 +709,7 @@ export type ClientGoalUncheckedUpdateManyWithoutGoalInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   clientId?: Prisma.StringFieldUpdateOperationsInput | string
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  targetSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumGoalStatusFieldUpdateOperationsInput | $Enums.GoalStatus
@@ -681,6 +722,7 @@ export type ClientGoalSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   clientId?: boolean
   goalId?: boolean
   targetValue?: boolean
+  targetSessions?: boolean
   currentValue?: boolean
   deadline?: boolean
   status?: boolean
@@ -693,6 +735,7 @@ export type ClientGoalSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   clientId?: boolean
   goalId?: boolean
   targetValue?: boolean
+  targetSessions?: boolean
   currentValue?: boolean
   deadline?: boolean
   status?: boolean
@@ -705,6 +748,7 @@ export type ClientGoalSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   clientId?: boolean
   goalId?: boolean
   targetValue?: boolean
+  targetSessions?: boolean
   currentValue?: boolean
   deadline?: boolean
   status?: boolean
@@ -717,12 +761,13 @@ export type ClientGoalSelectScalar = {
   clientId?: boolean
   goalId?: boolean
   targetValue?: boolean
+  targetSessions?: boolean
   currentValue?: boolean
   deadline?: boolean
   status?: boolean
 }
 
-export type ClientGoalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clientId" | "goalId" | "targetValue" | "currentValue" | "deadline" | "status", ExtArgs["result"]["clientGoal"]>
+export type ClientGoalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "clientId" | "goalId" | "targetValue" | "targetSessions" | "currentValue" | "deadline" | "status", ExtArgs["result"]["clientGoal"]>
 export type ClientGoalInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   client?: boolean | Prisma.ClientProfileDefaultArgs<ExtArgs>
   goal?: boolean | Prisma.WorkoutGoalDefaultArgs<ExtArgs>
@@ -747,6 +792,7 @@ export type $ClientGoalPayload<ExtArgs extends runtime.Types.Extensions.Internal
     clientId: string
     goalId: string
     targetValue: number | null
+    targetSessions: number | null
     currentValue: number | null
     deadline: Date | null
     status: $Enums.GoalStatus
@@ -1179,6 +1225,7 @@ export interface ClientGoalFieldRefs {
   readonly clientId: Prisma.FieldRef<"ClientGoal", 'String'>
   readonly goalId: Prisma.FieldRef<"ClientGoal", 'String'>
   readonly targetValue: Prisma.FieldRef<"ClientGoal", 'Float'>
+  readonly targetSessions: Prisma.FieldRef<"ClientGoal", 'Int'>
   readonly currentValue: Prisma.FieldRef<"ClientGoal", 'Float'>
   readonly deadline: Prisma.FieldRef<"ClientGoal", 'DateTime'>
   readonly status: Prisma.FieldRef<"ClientGoal", 'GoalStatus'>

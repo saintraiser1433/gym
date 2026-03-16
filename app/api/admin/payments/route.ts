@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
     ? {
         client: {
           user: {
-            name: { contains: search, mode: "insensitive" },
+            name: { contains: search, mode: "insensitive" as const },
           },
         },
       }

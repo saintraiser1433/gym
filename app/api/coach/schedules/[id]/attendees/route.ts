@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireCoach } from "@/lib/auth";
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_req: Request, { params }: Params) {
+  const { id } = await params;
   const session = await requireCoach();
   const userId = (session.user as any).id as string;
 
@@ -21,7 +22,7 @@ export async function GET(_req: Request, { params }: Params) {
   }
 
   const schedule = await prisma.schedule.findFirst({
-    where: { id: params.id, coachId: coach.id },
+    where: { id, coachId: coach.id },
     select: { id: true },
   });
 

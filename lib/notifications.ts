@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import type { Prisma } from "@/lib/generated/prisma/client";
 
 export async function createNotification(
   userId: string,
@@ -13,7 +14,7 @@ export async function createNotification(
       type,
       title,
       message,
-      metadata: metadata ?? undefined,
+      metadata: (metadata ?? undefined) as Prisma.InputJsonValue | undefined,
     },
   });
 }
@@ -51,7 +52,7 @@ export async function notifyAdmins(
       type,
       title,
       message,
-      metadata: metadata ?? undefined,
+      metadata: (metadata ?? undefined) as Prisma.InputJsonValue | undefined,
     })),
   });
 }

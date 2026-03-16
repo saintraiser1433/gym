@@ -22,9 +22,9 @@ export const prisma =
     adapter,
     log:
       process.env.NODE_ENV === "development"
-        ? ["query", "error", "warn"]
-        : ["error"],
-  });
+        ? (["query", "error", "warn"] as const)
+        : (["error"] as const),
+  } as ConstructorParameters<typeof PrismaClient>[0]);
 
 if (process.env.NODE_ENV !== "production") {
   globalForPrisma.prisma = prisma;

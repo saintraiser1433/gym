@@ -23,6 +23,7 @@ import {
 type ScheduleEvent = {
   id: string;
   title: string;
+  baseTitle: string;
   start: Date;
   end: Date;
   type?: string;
@@ -41,6 +42,25 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
+function ScheduleEventComponent({ event }: { event: ScheduleEvent }) {
+  const timeRange = `${format(event.start, "h:mm a")} – ${format(event.end, "h:mm a")}`;
+  const isPremiumOnly =
+    Array.isArray(event.allowedMembershipTypes) &&
+    event.allowedMembershipTypes.length === 1 &&
+    event.allowedMembershipTypes[0] === "PREMIUM";
+  return (
+    <div className="flex flex-col gap-0.5 overflow-hidden text-left">
+      <span className="truncate font-medium" title={event.title}>
+        {event.baseTitle} · {timeRange}
+      </span>
+      <span className="text-[10px] opacity-90">Coach: {event.coachName ?? "Unassigned"}</span>
+      {isPremiumOnly && (
+        <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400">Exclusive: Premium</span>
+      )}
+    </div>
+  );
+}
+
 export default function AdminSchedulesPage() {
   const [events, setEvents] = React.useState<ScheduleEvent[]>([]);
   const [loading, setLoading] = React.useState(false);
@@ -53,10 +73,12 @@ export default function AdminSchedulesPage() {
     type: "CLASS",
     startTime: "",
     endTime: "",
+    timeSlots: [] as { startTime: string; endTime: string; coachId: string }[],
     coachId: "",
     allowedMembershipTypes: [] as string[],
   });
   const [saving, setSaving] = React.useState(false);
+  const [dayModalDate, setDayModalDate] = React.useState<Date | null>(null);
 
   const scheduleToEvent = (
     s: {
@@ -69,18 +91,37 @@ export default function AdminSchedulesPage() {
       coach?: { user?: { name?: string } };
       allowedMembershipTypes?: unknown;
     },
-  ): ScheduleEvent => ({
-    id: s.id,
-    title: s.title ?? "Session",
-    start: s.startTime ? new Date(s.startTime) : new Date(),
-    end: s.endTime ? new Date(s.endTime) : new Date(),
-    type: s.type,
-    coachId: s.coachId,
-    coachName: s.coach?.user?.name ?? "Unassigned",
-    allowedMembershipTypes: Array.isArray(s.allowedMembershipTypes)
-      ? (s.allowedMembershipTypes as string[])
-      : null,
-  });
+  ): ScheduleEvent => {
+    const start = s.startTime ? new Date(s.startTime) : new Date();
+    const rawEnd = s.endTime ? new Date(s.endTime) : new Date();
+    let end = rawEnd;
+    if (end.getTime() <= start.getTime()) {
+      end = new Date(start.getTime() + 60 * 60 * 1000);
+    }
+    // Clamp end to 23:59:59 of the start day so the event never
+    // renders as a multi-day bar spanning into the next column.
+    const startDayEnd = new Date(start);
+    startDayEnd.setHours(23, 59, 59, 999);
+    if (end > startDayEnd) {
+      end = startDayEnd;
+    }
+    const coachName = s.coach?.user?.name ?? "Unassigned";
+    const timeRange = `${format(start, "h:mm a")} – ${format(rawEnd, "h:mm a")}`;
+    const baseTitle = s.title ?? "Session";
+    return {
+      id: s.id,
+      title: `${baseTitle} • ${timeRange} • ${coachName}`,
+      baseTitle,
+      start,
+      end,
+      type: s.type,
+      coachId: s.coachId,
+      coachName,
+      allowedMembershipTypes: Array.isArray(s.allowedMembershipTypes)
+        ? (s.allowedMembershipTypes as string[])
+        : null,
+    };
+  };
 
   const fetchData = React.useCallback(async (options?: { silent?: boolean }) => {
     if (!options?.silent) setLoading(true);
@@ -118,11 +159,14 @@ export default function AdminSchedulesPage() {
   const openNewDialogForSlot = (start: Date, end: Date) => {
     setEditingSchedule(null);
     setSlotDate(startOfDay(start));
+    const startTime = format(start, "HH:mm");
+    const endTime = format(end, "HH:mm");
     setFormValues({
       title: "",
       type: "CLASS",
-      startTime: format(start, "HH:mm"),
-      endTime: format(end, "HH:mm"),
+      startTime,
+      endTime,
+      timeSlots: [{ startTime, endTime, coachId: "" }],
       coachId: "",
       allowedMembershipTypes: [],
     });
@@ -133,10 +177,11 @@ export default function AdminSchedulesPage() {
     setEditingSchedule(event);
     setSlotDate(startOfDay(event.start));
     setFormValues({
-      title: event.title,
+      title: event.baseTitle,
       type: (event as any).type ?? "CLASS",
       startTime: format(event.start, "HH:mm"),
       endTime: format(event.end, "HH:mm"),
+      timeSlots: [],
       coachId: (event as any).coachId ?? "",
       allowedMembershipTypes: (event as any).allowedMembershipTypes ?? [],
     });
@@ -155,13 +200,41 @@ export default function AdminSchedulesPage() {
       const current = prev.allowedMembershipTypes ?? [];
       const exists = current.includes(type);
       const next = exists ? current.filter((t) => t !== type) : [...current, type];
-      // When Premium is not allowed (Basic only), remove coach
+      // When Premium is not allowed (Basic only), clear coach(s)
       const noPremium = !next.includes("PREMIUM");
       return {
         ...prev,
         allowedMembershipTypes: next,
-        ...(noPremium ? { coachId: "" } : {}),
+        ...(noPremium
+          ? {
+              coachId: "",
+              timeSlots: prev.timeSlots.map((s) => ({ ...s, coachId: "" })),
+            }
+          : {}),
       };
+    });
+  };
+
+  const slotsToCreate = (): { start: Date; end: Date; coachId: string }[] => {
+    const baseDate = slotDate ?? startOfDay(new Date());
+    const slots = formValues.timeSlots?.length
+      ? formValues.timeSlots
+      : [{ startTime: formValues.startTime, endTime: formValues.endTime, coachId: formValues.coachId }];
+    return slots.map((slot) => {
+      const [startHours, startMins] = slot.startTime.split(":").map(Number);
+      const [endHours, endMins] = slot.endTime.split(":").map(Number);
+      const start = new Date(baseDate);
+      start.setHours(startHours, startMins ?? 0, 0, 0);
+      const end = new Date(baseDate);
+      end.setHours(endHours, endMins ?? 0, 0, 0);
+      // same time → bump 1 hr; end earlier in the day (overnight) → next day
+      if (end.getTime() === start.getTime()) {
+        end.setHours(end.getHours() + 1);
+      } else if (end < start) {
+        end.setDate(end.getDate() + 1);
+      }
+      const coachId = "coachId" in slot ? (slot.coachId ?? "") : formValues.coachId;
+      return { start, end, coachId };
     });
   };
 
@@ -174,64 +247,72 @@ export default function AdminSchedulesPage() {
     }
     setSaving(true);
     try {
-      const baseDate = slotDate ?? startOfDay(new Date());
-      const [startHours, startMins] = formValues.startTime.split(":").map(Number);
-      const [endHours, endMins] = formValues.endTime.split(":").map(Number);
-      const start = new Date(baseDate);
-      start.setHours(startHours, startMins ?? 0, 0, 0);
-      const end = new Date(baseDate);
-      end.setHours(endHours, endMins ?? 0, 0, 0);
-      if (end <= start) end.setDate(end.getDate() + 1);
-      const payload = {
-        title: formValues.title,
-        type: formValues.type,
-        startTime: start.toISOString(),
-        endTime: end.toISOString(),
-        coachId: formValues.allowedMembershipTypes?.includes("PREMIUM")
-          ? formValues.coachId || undefined
-          : undefined,
-        allowedMembershipTypes: allowed,
-      };
-
-      let res: Response;
       if (editingSchedule) {
-        res = await fetch(`/api/admin/schedules/${editingSchedule.id}`, {
+        const slots = slotsToCreate();
+        const { start, end } = slots[0]!;
+        const payload = {
+          title: formValues.title,
+          type: formValues.type,
+          startTime: start.toISOString(),
+          endTime: end.toISOString(),
+          coachId: formValues.allowedMembershipTypes?.includes("PREMIUM")
+            ? formValues.coachId || undefined
+            : undefined,
+          allowedMembershipTypes: allowed,
+        };
+        const res = await fetch(`/api/admin/schedules/${editingSchedule.id}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
-      } else {
-        res = await fetch("/api/admin/schedules", {
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          toast.error((err as { error?: string }).error ?? "Failed to save schedule");
+          return;
+        }
+        const json = await res.json();
+        const newEvent = scheduleToEvent(json);
+        setEvents((prev) =>
+          prev.map((e) => (e.id === editingSchedule.id ? newEvent : e)),
+        );
+        toast.success("Schedule updated");
+        setDialogOpen(false);
+        await fetchData({ silent: true });
+        return;
+      }
+
+      const slots = slotsToCreate();
+      let created = 0;
+      const canAssignCoach = formValues.allowedMembershipTypes?.includes("PREMIUM");
+      for (const { start, end, coachId: slotCoachId } of slots) {
+        const payload = {
+          title: formValues.title,
+          type: formValues.type,
+          startTime: start.toISOString(),
+          endTime: end.toISOString(),
+          coachId: canAssignCoach ? (slotCoachId || undefined) : undefined,
+          allowedMembershipTypes: allowed,
+        };
+        const res = await fetch("/api/admin/schedules", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
         });
+        if (res.ok) {
+          const json = await res.json();
+          const newEvent = scheduleToEvent(json);
+          setEvents((prev) => [{ ...newEvent, start, end }, ...prev]);
+          created++;
+        } else {
+          const err = await res.json().catch(() => ({}));
+          toast.error((err as { error?: string }).error ?? "Failed to create schedule");
+        }
       }
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        const message = (err as { error?: string }).error ?? "Failed to save schedule";
-        toast.error(message);
-        return;
+      if (created > 0) {
+        toast.success(created === 1 ? "Schedule created" : `${created} schedules created`);
+        setDialogOpen(false);
+        await fetchData({ silent: true });
       }
-
-      const json = await res.json();
-      const newEvent = scheduleToEvent(json);
-
-      if (editingSchedule) {
-        setEvents((prev) =>
-          prev.map((e) => (e.id === editingSchedule.id ? newEvent : e)),
-        );
-      } else {
-        setEvents((prev) => [
-          { ...newEvent, start, end },
-          ...prev,
-        ]);
-      }
-
-      toast.success(editingSchedule ? "Schedule updated" : "Schedule created");
-      setDialogOpen(false);
-      await fetchData({ silent: true });
     } catch {
       toast.error("Failed to save schedule");
     } finally {
@@ -253,14 +334,32 @@ export default function AdminSchedulesPage() {
   const todayStart = startOfDay(new Date());
   const handleSelectSlot = (slotInfo: { start: Date; end: Date }) => {
     if (slotInfo.start < todayStart) return;
-    const end = slotInfo.end.getTime() - slotInfo.start.getTime() < 60 * 60 * 1000
-      ? new Date(slotInfo.start.getTime() + 60 * 60 * 1000)
-      : slotInfo.end;
-    openNewDialogForSlot(slotInfo.start, end);
+    setDayModalDate(startOfDay(slotInfo.start));
+  };
+
+  const dayModalSchedules = React.useMemo(() => {
+    if (!dayModalDate) return [];
+    const dayStart = dayModalDate.getTime();
+    return events.filter((e) => startOfDay(e.start).getTime() === dayStart);
+  }, [dayModalDate, events]);
+
+  const openAddScheduleForDay = () => {
+    if (!dayModalDate) return;
+    const start = new Date(dayModalDate);
+    start.setHours(9, 0, 0, 0);
+    const end = new Date(dayModalDate);
+    end.setHours(10, 0, 0, 0);
+    openNewDialogForSlot(start, end);
+    setDayModalDate(null);
+  };
+
+  const openEditFromDayModal = (event: ScheduleEvent) => {
+    setDayModalDate(null);
+    openEditDialog(event);
   };
   const dayPropGetter = (date: Date) => {
     if (date < todayStart) {
-      return { className: "rbc-past-disabled", style: { pointerEvents: "none" as const, opacity: 0.6 } };
+      return { className: "rbc-past-disabled", style: { pointerEvents: "none" as const } };
     }
     return {};
   };
@@ -270,12 +369,12 @@ export default function AdminSchedulesPage() {
       <div>
         <h1 className="text-lg font-semibold">Schedules</h1>
         <p className="text-sm text-muted-foreground">
-          Click a date (today or later) to add a schedule. Click an event to edit.
+          Click a date (today or later) to view or manage that day&apos;s schedules. Click an event to edit.
         </p>
       </div>
 
       <Card className="p-3">
-        <div className="h-[600px]">
+        <div style={{ height: 640 }}>
           {loading ? (
             <p className="text-sm text-muted-foreground">Loading calendar…</p>
           ) : (
@@ -292,11 +391,110 @@ export default function AdminSchedulesPage() {
               onSelectSlot={handleSelectSlot}
               onSelectEvent={(event) => openEditDialog(event as ScheduleEvent)}
               dayPropGetter={dayPropGetter}
-              className="rbc-calendar rounded-md border border-border bg-card text-foreground"
+              dayLayoutAlgorithm="no-overlap"
+              components={{
+                event: (props) => <ScheduleEventComponent event={props.event as ScheduleEvent} />,
+              }}
+              style={{ height: "100%" }}
             />
           )}
         </div>
       </Card>
+
+      {dayModalDate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="w-full max-w-md rounded-md bg-card p-4 shadow-lg">
+            <h2 className="mb-3 text-sm font-semibold">
+              Schedules for {format(dayModalDate, "PPP")}
+            </h2>
+            {dayModalSchedules.length === 0 ? (
+              <p className="mb-3 text-xs text-muted-foreground">No schedules on this date.</p>
+            ) : (
+              <ul className="mb-3 max-h-[320px] space-y-2 overflow-y-auto">
+                {dayModalSchedules
+                  .slice()
+                  .sort((a, b) => a.start.getTime() - b.start.getTime())
+                  .map((ev) => (
+                    <li
+                      key={ev.id}
+                      className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border/60 bg-muted/30 p-2 text-[11px]"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <span className="font-medium">{ev.baseTitle}</span>
+                        <span className="ml-1 text-muted-foreground">
+                          {format(ev.start, "h:mm a")} – {format(ev.end, "h:mm a")}
+                        </span>
+                        <span className="ml-1 text-muted-foreground">· {ev.coachName ?? "Unassigned"}</span>
+                      </div>
+                      <div className="flex shrink-0 gap-1">
+                        <Button
+                          type="button"
+                          size="xs"
+                          variant="outline"
+                          className="h-6 px-2 text-[10px]"
+                          onClick={() => openEditFromDayModal(ev)}
+                        >
+                          Edit
+                        </Button>
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              type="button"
+                              size="xs"
+                              variant="ghost"
+                              className="h-6 px-2 text-[10px] text-destructive"
+                            >
+                              Delete
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="text-sm">Delete schedule?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Remove &quot;{ev.baseTitle}&quot; ({format(ev.start, "h:mm a")} – {format(ev.end, "h:mm a")})?
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className="h-7 px-2 text-[11px]">Cancel</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="h-7 px-3 text-[11px]"
+                                onClick={async () => {
+                                  await handleDelete(ev.id);
+                                  setDayModalDate(null);
+                                }}
+                              >
+                                Delete
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    </li>
+                  ))}
+              </ul>
+            )}
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="h-7 text-[11px]"
+                onClick={() => setDayModalDate(null)}
+              >
+                Close
+              </Button>
+              <Button
+                type="button"
+                size="sm"
+                className="h-7 text-[11px]"
+                onClick={openAddScheduleForDay}
+              >
+                Add schedule
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {dialogOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -339,36 +537,169 @@ export default function AdminSchedulesPage() {
                   Date: {format(slotDate, "PPP")}
                 </p>
               )}
-              <div className="grid grid-cols-2 gap-2">
-                <div className="space-y-1">
-                  <label className="font-medium" htmlFor="startTime">
-                    Start time
-                  </label>
-                  <Input
-                    id="startTime"
-                    name="startTime"
-                    type="time"
-                    value={formValues.startTime}
-                    onChange={handleFormChange}
-                    className="h-7 text-[11px]"
-                    required
-                  />
+              {editingSchedule ? (
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="space-y-1">
+                    <label className="font-medium" htmlFor="startTime">
+                      Start time
+                    </label>
+                    <Input
+                      id="startTime"
+                      name="startTime"
+                      type="time"
+                      value={formValues.startTime}
+                      onChange={handleFormChange}
+                      className="h-7 text-[11px]"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-medium" htmlFor="endTime">
+                      End time
+                    </label>
+                    <Input
+                      id="endTime"
+                      name="endTime"
+                      type="time"
+                      value={formValues.endTime}
+                      onChange={handleFormChange}
+                      className="h-7 text-[11px]"
+                      required
+                    />
+                  </div>
                 </div>
-                <div className="space-y-1">
-                  <label className="font-medium" htmlFor="endTime">
-                    End time
-                  </label>
-                  <Input
-                    id="endTime"
-                    name="endTime"
-                    type="time"
-                    value={formValues.endTime}
-                    onChange={handleFormChange}
-                    className="h-7 text-[11px]"
-                    required
-                  />
+              ) : (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="font-medium">Time slots (same date)</label>
+                    <Button
+                      type="button"
+                      size="xs"
+                      variant="outline"
+                      className="h-6 px-2 text-[10px]"
+                      onClick={() =>
+                        setFormValues((prev) => ({
+                          ...prev,
+                          timeSlots: [
+                            ...(prev.timeSlots.length ? prev.timeSlots : [{ startTime: prev.startTime, endTime: prev.endTime, coachId: prev.coachId }]),
+                            { startTime: "09:00", endTime: "10:00", coachId: "" },
+                          ],
+                        }))
+                      }
+                    >
+                      + Add slot
+                    </Button>
+                  </div>
+                  {(formValues.timeSlots.length ? formValues.timeSlots : [{ startTime: formValues.startTime, endTime: formValues.endTime, coachId: formValues.coachId }]).map(
+                    (slot, i) => {
+                      const effectiveSlots = formValues.timeSlots.length
+                        ? formValues.timeSlots
+                        : [{ startTime: formValues.startTime, endTime: formValues.endTime, coachId: formValues.coachId }];
+                      const canRemove = effectiveSlots.length > 1;
+                      const slotCoachId = "coachId" in slot ? slot.coachId : formValues.coachId;
+                      const isPremium = formValues.allowedMembershipTypes?.includes("PREMIUM");
+                      return (
+                        <div key={i} className="rounded-md border border-border/60 bg-muted/30 p-2 space-y-2">
+                          <div className="flex items-end gap-2">
+                            <div className="grid flex-1 grid-cols-2 gap-2">
+                              <div className="space-y-1">
+                                <label className="text-[10px] font-medium text-muted-foreground">Start</label>
+                                <Input
+                                  type="time"
+                                  value={slot.startTime}
+                                  onChange={(e) => {
+                                    const v = e.target.value;
+                                    if (formValues.timeSlots.length) {
+                                      setFormValues((prev) => ({
+                                        ...prev,
+                                        timeSlots: prev.timeSlots.map((s, j) => (j === i ? { ...s, startTime: v } : s)),
+                                      }));
+                                    } else {
+                                      setFormValues((prev) => ({ ...prev, startTime: v }));
+                                    }
+                                  }}
+                                  className="h-7 text-[11px]"
+                                />
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-[10px] font-medium text-muted-foreground">End</label>
+                                <Input
+                                  type="time"
+                                  value={slot.endTime}
+                                  onChange={(e) => {
+                                    const v = e.target.value;
+                                    if (formValues.timeSlots.length) {
+                                      setFormValues((prev) => ({
+                                        ...prev,
+                                        timeSlots: prev.timeSlots.map((s, j) => (j === i ? { ...s, endTime: v } : s)),
+                                      }));
+                                    } else {
+                                      setFormValues((prev) => ({ ...prev, endTime: v }));
+                                    }
+                                  }}
+                                  className="h-7 text-[11px]"
+                                />
+                              </div>
+                            </div>
+                            {canRemove && (
+                              <Button
+                                type="button"
+                                size="xs"
+                                variant="ghost"
+                                className="h-7 shrink-0 px-2 text-[10px] text-destructive"
+                                onClick={() => {
+                                  if (formValues.timeSlots.length) {
+                                    setFormValues((prev) => ({
+                                      ...prev,
+                                      timeSlots: prev.timeSlots.filter((_, j) => j !== i),
+                                    }));
+                                  } else {
+                                    setFormValues((prev) => ({
+                                      ...prev,
+                                      timeSlots: [],
+                                      startTime: "09:00",
+                                      endTime: "10:00",
+                                    }));
+                                  }
+                                }}
+                              >
+                                Remove
+                              </Button>
+                            )}
+                          </div>
+                          {isPremium && (
+                            <div className="space-y-1">
+                              <label className="text-[10px] font-medium text-muted-foreground">Coach (this slot)</label>
+                              <select
+                                value={slotCoachId}
+                                onChange={(e) => {
+                                  const v = e.target.value;
+                                  if (formValues.timeSlots.length) {
+                                    setFormValues((prev) => ({
+                                      ...prev,
+                                      timeSlots: prev.timeSlots.map((s, j) => (j === i ? { ...s, coachId: v } : s)),
+                                    }));
+                                  } else {
+                                    setFormValues((prev) => ({ ...prev, coachId: v }));
+                                  }
+                                }}
+                                className="h-7 w-full rounded-md border border-input bg-background px-2 text-[11px]"
+                              >
+                                <option value="">Unassigned</option>
+                                {coaches.map((c) => (
+                                  <option key={c.id} value={c.id}>
+                                    {c.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    },
+                  )}
                 </div>
-              </div>
+              )}
               <div className="space-y-1">
                 <label className="font-medium">
                   Allowed membership types <span className="text-destructive">*</span>
@@ -397,7 +728,7 @@ export default function AdminSchedulesPage() {
                   </label>
                 </div>
               </div>
-              {formValues.allowedMembershipTypes.includes("PREMIUM") && (
+              {editingSchedule && formValues.allowedMembershipTypes.includes("PREMIUM") && (
                 <div className="space-y-1">
                   <label className="font-medium" htmlFor="coachId">
                     Coach

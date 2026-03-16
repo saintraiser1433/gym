@@ -2,10 +2,21 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { RequireMembership } from "@/components/require-membership";
 import { Card } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 type AvailableGoal = {
   id: string;
@@ -19,7 +30,10 @@ type ClientGoal = {
   name: string;
   category: string;
   targetValue: number | null;
+  targetSessions: number | null;
+  currentValue: number | null;
   deadline: string | null;
+  status: string;
 };
 
 export default function ClientGoalsPage() {
@@ -30,6 +44,8 @@ export default function ClientGoalsPage() {
   const [newTarget, setNewTarget] = React.useState("");
   const [newDeadline, setNewDeadline] = React.useState("");
   const [selectedGoalId, setSelectedGoalId] = React.useState("");
+  const [removeGoalId, setRemoveGoalId] = React.useState<string | null>(null);
+  const [removing, setRemoving] = React.useState(false);
 
   React.useEffect(() => {
     const load = async () => {
@@ -54,9 +70,12 @@ export default function ClientGoalsPage() {
             name: cg.goal?.name as string,
             category: cg.goal?.category as string,
             targetValue: (cg.targetValue as number | null) ?? null,
+            targetSessions: (cg.targetSessions as number | null) ?? null,
+            currentValue: (cg.currentValue as number | null) ?? null,
             deadline: cg.deadline
               ? new Date(cg.deadline).toLocaleDateString()
               : null,
+            status: (cg.status as string) ?? "ACTIVE",
           })),
         );
       } finally {
@@ -107,9 +126,12 @@ export default function ClientGoalsPage() {
           name: g?.name ?? "Goal",
           category: g?.category ?? "",
           targetValue: payload.targetValue ?? null,
+          targetSessions: json.targetSessions ?? null,
+          currentValue: null,
           deadline: payload.deadline
             ? new Date(payload.deadline).toLocaleDateString()
             : null,
+          status: "ACTIVE",
         },
       ]);
       setSelectedGoalId("");
@@ -123,14 +145,38 @@ export default function ClientGoalsPage() {
     }
   };
 
+  const handleRemoveGoal = async () => {
+    if (!removeGoalId) return;
+    setRemoving(true);
+    try {
+      const res = await fetch(`/api/client/goals/${removeGoalId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.error(json.error ?? "Failed to remove goal");
+        return;
+      }
+      setSelected((prev) => prev.filter((g) => g.id !== removeGoalId));
+      setRemoveGoalId(null);
+      toast.success("Goal removed");
+    } catch {
+      toast.error("Failed to remove goal");
+    } finally {
+      setRemoving(false);
+    }
+  };
+
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-lg font-semibold">My Workout Goals</h1>
-        <p className="text-sm text-muted-foreground">
-          Select your personal workout goals and track high-level progress.
-        </p>
-      </div>
+    <RequireMembership>
+      <div className="space-y-4">
+        <div>
+          <h1 className="text-lg font-semibold">My Workout Goals</h1>
+          <p className="text-sm text-muted-foreground">
+            Select your personal workout goals and track high-level progress.
+          </p>
+        </div>
 
       {loading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
@@ -170,7 +216,7 @@ export default function ClientGoalsPage() {
                   className="h-7 text-[11px]"
                   value={newTarget}
                   onChange={(e) => setNewTarget(e.target.value)}
-                  placeholder="e.g. 10 kg lost"
+                  placeholder="e.g. 10 kg"
                 />
               </div>
               <div className="space-y-1">
@@ -183,7 +229,11 @@ export default function ClientGoalsPage() {
                   className="h-7 text-[11px]"
                   value={newDeadline}
                   onChange={(e) => setNewDeadline(e.target.value)}
+                  min={new Date().toISOString().slice(0, 10)}
                 />
+                <p className="text-[10px] text-muted-foreground">
+                  Must be today or a future date.
+                </p>
               </div>
               <div className="flex items-end justify-end sm:col-span-3">
                 <Button
@@ -206,37 +256,135 @@ export default function ClientGoalsPage() {
               </Card>
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {selected.map((g) => (
-                  <Card key={g.id} className="p-3 text-xs">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <div className="text-sm font-medium">{g.name}</div>
-                        <div className="text-[11px] text-muted-foreground">
-                          {formatCategory(g.category)}
+                {selected.map((g) => {
+                  const isSessionGoal = g.targetSessions != null;
+                  const target = isSessionGoal ? (g.targetSessions ?? 0) : (g.targetValue ?? 0);
+                  const current = g.currentValue ?? 0;
+                  const pct = target > 0 ? Math.min(100, (current / target) * 100) : 0;
+                  const deadlineDate = g.deadline ? new Date(g.deadline) : null;
+                  const now = new Date();
+                  now.setHours(0, 0, 0, 0);
+                  const daysLeft = deadlineDate
+                    ? Math.ceil((deadlineDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+                    : null;
+                  const isOverdue = daysLeft != null && daysLeft < 0;
+                  return (
+                    <Card key={g.id} className="p-3 text-xs">
+                      <div className="flex items-center justify-between gap-2">
+                        <div>
+                          <div className="text-sm font-medium">{g.name}</div>
+                          <div className="text-[11px] text-muted-foreground">
+                            {formatCategory(g.category)}
+                          </div>
                         </div>
+                        <span
+                          className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium ${
+                            g.status === "COMPLETED"
+                              ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
+                              : g.status === "CANCELLED"
+                                ? "bg-muted text-muted-foreground"
+                                : "bg-primary/10 text-primary"
+                          }`}
+                        >
+                          {g.status}
+                        </span>
                       </div>
-                    </div>
-                    <dl className="mt-2 grid grid-cols-2 gap-1 text-[11px] text-muted-foreground">
-                      <dt>Target</dt>
-                      <dd>{g.targetValue != null ? g.targetValue : "—"}</dd>
-                      <dt>Deadline</dt>
-                      <dd>{g.deadline ?? "—"}</dd>
-                    </dl>
-                    <div className="mt-3">
-                      <Button size="xs" variant="outline" className="h-7 px-2 text-[11px]" asChild>
-                        <Link href={`/client/workouts?goalId=${encodeURIComponent(g.goalId)}`}>
-                          View workouts
-                        </Link>
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
+                      {target > 0 && (
+                        <div className="mt-2 space-y-1">
+                          <div className="flex justify-between text-[11px] text-muted-foreground">
+                            <span>
+                              {isSessionGoal
+                                ? `${Math.round(current)} / ${target} sessions`
+                                : `${current} / ${target}`}
+                            </span>
+                            {target > 0 && <span>{Math.round(pct)}%</span>}
+                          </div>
+                          <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-primary transition-all"
+                              style={{ width: `${pct}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                      <dl className="mt-2 grid grid-cols-2 gap-1 text-[11px] text-muted-foreground">
+                        <dt>Target</dt>
+                        <dd>
+                          {g.targetSessions != null
+                            ? `${g.targetSessions} sessions`
+                            : g.targetValue != null
+                              ? g.targetValue
+                              : "—"}
+                        </dd>
+                        <dt>Deadline</dt>
+                        <dd>
+                          {g.deadline ?? "—"}
+                          {daysLeft != null && g.status === "ACTIVE" && (
+                            <span
+                              className={`ml-1 ${isOverdue ? "text-destructive font-medium" : "text-muted-foreground"}`}
+                            >
+                              ({isOverdue ? `${Math.abs(daysLeft)} days overdue` : `${daysLeft} days left`})
+                            </span>
+                          )}
+                        </dd>
+                      </dl>
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <Button size="xs" variant="outline" className="h-7 px-2 text-[11px]" asChild>
+                          <Link href={`/client/workouts?goalId=${encodeURIComponent(g.goalId)}`}>
+                            View workouts
+                          </Link>
+                        </Button>
+                        <AlertDialog
+                          open={removeGoalId === g.id}
+                          onOpenChange={(open) => !open && setRemoveGoalId(null)}
+                        >
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Remove goal</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Remove &quot;{g.name}&quot; from your goals? This cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel
+                                disabled={removing}
+                                className={buttonVariants({ variant: "outline", size: "sm" })}
+                              >
+                                Cancel
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  void handleRemoveGoal();
+                                }}
+                                disabled={removing}
+                                className={buttonVariants({ variant: "destructive", size: "sm" })}
+                              >
+                                {removing ? "Removing…" : "Remove"}
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                          <Button
+                            type="button"
+                            size="xs"
+                            variant="ghost"
+                            className="h-7 px-2 text-[11px] text-destructive hover:text-destructive"
+                            onClick={() => setRemoveGoalId(g.id)}
+                          >
+                            Remove
+                          </Button>
+                        </AlertDialog>
+                      </div>
+                    </Card>
+                  );
+                })}
               </div>
             )}
           </div>
         </>
       )}
-    </div>
+      </div>
+    </RequireMembership>
   );
 }
 

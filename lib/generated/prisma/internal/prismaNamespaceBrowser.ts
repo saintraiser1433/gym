@@ -58,6 +58,7 @@ export const ModelName = {
   ClientMembership: 'ClientMembership',
   MembershipRenewal: 'MembershipRenewal',
   WorkoutGoal: 'WorkoutGoal',
+  GoalWorkout: 'GoalWorkout',
   ClientGoal: 'ClientGoal',
   Exercise: 'Exercise',
   Workout: 'Workout',
@@ -66,6 +67,7 @@ export const ModelName = {
   WorkoutProgress: 'WorkoutProgress',
   Schedule: 'Schedule',
   Attendance: 'Attendance',
+  WorkoutEquipment: 'WorkoutEquipment',
   Equipment: 'Equipment',
   Payment: 'Payment',
   Notification: 'Notification'
@@ -110,6 +112,10 @@ export const ClientProfileScalarFieldEnum = {
   weight: 'weight',
   height: 'height',
   emergencyContact: 'emergencyContact',
+  address: 'address',
+  gender: 'gender',
+  occupation: 'occupation',
+  gymNotes: 'gymNotes',
   joinDate: 'joinDate',
   assignedCoachId: 'assignedCoachId'
 } as const
@@ -171,10 +177,22 @@ export const WorkoutGoalScalarFieldEnum = {
   id: 'id',
   name: 'name',
   description: 'description',
-  category: 'category'
+  category: 'category',
+  targetSessions: 'targetSessions'
 } as const
 
 export type WorkoutGoalScalarFieldEnum = (typeof WorkoutGoalScalarFieldEnum)[keyof typeof WorkoutGoalScalarFieldEnum]
+
+
+export const GoalWorkoutScalarFieldEnum = {
+  id: 'id',
+  goalId: 'goalId',
+  workoutId: 'workoutId',
+  workoutType: 'workoutType',
+  targetValue: 'targetValue'
+} as const
+
+export type GoalWorkoutScalarFieldEnum = (typeof GoalWorkoutScalarFieldEnum)[keyof typeof GoalWorkoutScalarFieldEnum]
 
 
 export const ClientGoalScalarFieldEnum = {
@@ -182,6 +200,7 @@ export const ClientGoalScalarFieldEnum = {
   clientId: 'clientId',
   goalId: 'goalId',
   targetValue: 'targetValue',
+  targetSessions: 'targetSessions',
   currentValue: 'currentValue',
   deadline: 'deadline',
   status: 'status'
@@ -213,7 +232,8 @@ export const WorkoutScalarFieldEnum = {
   targetGoals: 'targetGoals',
   duration: 'duration',
   difficulty: 'difficulty',
-  demoMediaUrl: 'demoMediaUrl'
+  demoMediaUrl: 'demoMediaUrl',
+  types: 'types'
 } as const
 
 export type WorkoutScalarFieldEnum = (typeof WorkoutScalarFieldEnum)[keyof typeof WorkoutScalarFieldEnum]
@@ -251,6 +271,7 @@ export const WorkoutProgressScalarFieldEnum = {
   id: 'id',
   clientId: 'clientId',
   workoutExerciseId: 'workoutExerciseId',
+  workoutId: 'workoutId',
   completedDate: 'completedDate',
   actualSets: 'actualSets',
   actualReps: 'actualReps',
@@ -290,6 +311,18 @@ export const AttendanceScalarFieldEnum = {
 export type AttendanceScalarFieldEnum = (typeof AttendanceScalarFieldEnum)[keyof typeof AttendanceScalarFieldEnum]
 
 
+export const WorkoutEquipmentScalarFieldEnum = {
+  id: 'id',
+  workoutId: 'workoutId',
+  equipmentId: 'equipmentId',
+  quantity: 'quantity',
+  targetKg: 'targetKg',
+  targetPcs: 'targetPcs'
+} as const
+
+export type WorkoutEquipmentScalarFieldEnum = (typeof WorkoutEquipmentScalarFieldEnum)[keyof typeof WorkoutEquipmentScalarFieldEnum]
+
+
 export const EquipmentScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -299,7 +332,8 @@ export const EquipmentScalarFieldEnum = {
   lastMaintenance: 'lastMaintenance',
   nextMaintenance: 'nextMaintenance',
   status: 'status',
-  quantity: 'quantity'
+  quantity: 'quantity',
+  measureTypes: 'measureTypes'
 } as const
 
 export type EquipmentScalarFieldEnum = (typeof EquipmentScalarFieldEnum)[keyof typeof EquipmentScalarFieldEnum]

@@ -17,12 +17,19 @@ export async function POST(req: NextRequest) {
   const session = await requireClient();
   const userId = (session.user as { id?: string }).id as string;
 
-  const profile = await prisma.clientProfile.findUnique({
+  let profile = await prisma.clientProfile.findUnique({
     where: { userId },
     select: { id: true },
   });
   if (!profile) {
-    return NextResponse.json({ error: "Client profile not found" }, { status: 404 });
+    try {
+      profile = await prisma.clientProfile.create({
+        data: { userId },
+        select: { id: true },
+      });
+    } catch {
+      return NextResponse.json({ error: "Client profile not found" }, { status: 404 });
+    }
   }
 
   const formData = await req.formData();

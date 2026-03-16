@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx prisma/seed.ts",
+    "clear-progress": "tsx scripts/clear-all-progress.ts",
+    "migrate": "npx prisma migrate dev",
+    "generate": "npx prisma generate"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

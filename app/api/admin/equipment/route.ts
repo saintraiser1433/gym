@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
   const { page, pageSize, search } = parsed.data;
   const where = search
     ? {
-        name: { contains: search, mode: "insensitive" },
+        name: { contains: search, mode: "insensitive" as const },
       }
     : {};
 
@@ -39,7 +39,21 @@ export async function GET(req: NextRequest) {
     }),
   ]);
 
-  return NextResponse.json({ data: equipment, page, pageSize, total });
+  const ids = equipment.map((e) => e.id);
+  let measureTypesById: Record<string, string[]> = {};
+  if (ids.length > 0) {
+    try {
+      const rows = await prisma.$queryRawUnsafe<{ id: string; measureTypes: string[] | null }[]>(
+        `SELECT id, "measureTypes" FROM "Equipment" WHERE id = ANY($1::text[])`,
+        ids,
+      );
+      rows.forEach((r) => {
+        measureTypesById[r.id] = Array.isArray(r.measureTypes) ? r.measureTypes.filter((t) => t === "PER_KG" || t === "PER_PCS") : ["PER_PCS"];
+      });
+    } catch {}
+  }
+  const data = equipment.map((e) => ({ ...e, measureTypes: measureTypesById[e.id] ?? ["PER_PCS"] }));
+  return NextResponse.json({ data, page, pageSize, total });
 }
 
 export async function POST(req: NextRequest) {
@@ -54,15 +68,30 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const { purchaseDate, ...rest } = parsed.data;
+  const { purchaseDate, measureTypes, ...rest } = parsed.data as { name: string; purchaseDate?: string; measureTypes?: string[]; type?: string; brand?: string; status?: string; quantity?: number; [k: string]: unknown };
 
   const equipment = await prisma.equipment.create({
     data: {
-      ...rest,
+      name: rest.name,
+      type: rest.type ?? undefined,
+      brand: rest.brand ?? undefined,
+      status: (rest.status as "AVAILABLE" | "MAINTENANCE" | "BROKEN") ?? "AVAILABLE",
+      quantity: rest.quantity ?? 1,
       purchaseDate: purchaseDate ? new Date(purchaseDate) : undefined,
     },
   });
 
-  return NextResponse.json(equipment, { status: 201 });
+  const types = Array.isArray(measureTypes) ? measureTypes.filter((t) => t === "PER_KG" || t === "PER_PCS") : ["PER_PCS"];
+  if (types.length === 0) types.push("PER_PCS");
+  try {
+    await prisma.$executeRawUnsafe(
+      `UPDATE "Equipment" SET "measureTypes" = $1::text[] WHERE id = $2`,
+      types,
+      equipment.id,
+    );
+  } catch {}
+  const out = equipment as Record<string, unknown>;
+  out.measureTypes = types;
+  return NextResponse.json(out, { status: 201 });
 }
 

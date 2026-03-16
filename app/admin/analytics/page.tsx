@@ -82,7 +82,7 @@ export default function AdminAnalyticsPage() {
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis dataKey="date" tick={{ fontSize: 10 }} tickFormatter={(v) => v.slice(5)} />
               <YAxis tick={{ fontSize: 10 }} allowDecimals={false} />
-              <Tooltip formatter={(value: number) => [value, "Check-ins"]} labelFormatter={(v) => `Date: ${v}`} />
+              <Tooltip formatter={(value: number | undefined) => [value ?? 0, "Check-ins"]} labelFormatter={(v) => `Date: ${v}`} />
               <Line type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 3 }} />
             </LineChart>
           </ResponsiveContainer>
@@ -93,7 +93,7 @@ export default function AdminAnalyticsPage() {
               <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
               <XAxis dataKey="month" tick={{ fontSize: 10 }} />
               <YAxis tick={{ fontSize: 10 }} tickFormatter={(v) => `₱${v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v}`} />
-              <Tooltip formatter={(value: number) => [`₱${value.toLocaleString()}`, "Revenue"]} />
+              <Tooltip formatter={(value: number | undefined) => [`₱${(value ?? 0).toLocaleString()}`, "Revenue"]} />
               <Bar dataKey="total" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
