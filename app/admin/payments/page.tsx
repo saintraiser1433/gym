@@ -30,6 +30,16 @@ type PaymentRow = {
   proofUrl?: string | null;
 };
 
+async function readJsonResponse(res: Response): Promise<{ json: Record<string, unknown> | null }> {
+  const text = await res.text();
+  if (!text.trim()) return { json: null };
+  try {
+    return { json: JSON.parse(text) as Record<string, unknown> };
+  } catch {
+    return { json: null };
+  }
+}
+
 export default function AdminPaymentsPage() {
   const [rows, setRows] = React.useState<PaymentRow[]>([]);
   const [page, setPage] = React.useState(1);
@@ -56,12 +66,22 @@ export default function AdminPaymentsPage() {
         const res = await fetch(`/api/admin/payments?${params.toString()}`, {
           cache: "no-store",
         });
-        const json = await res.json();
+        const { json } = await readJsonResponse(res);
+        if (!res.ok) {
+          toast.error(
+            (json?.error as string | undefined) ?? `Failed to load payments (${res.status})`,
+          );
+          return;
+        }
+        if (!json) {
+          toast.error("Empty response from server. Try signing in again.");
+          return;
+        }
         setRows(
-          (json.data ?? []).map((p: any) => {
+          ((json.data as unknown[]) ?? []).map((p: Record<string, unknown>) => {
             let proofUrl: string | null = null;
             let reference: string | null = null;
-            const refRaw = p.referenceId as string | null;
+            const refRaw = p.referenceId as string | null | undefined;
             if (refRaw) {
               try {
                 const parsed = JSON.parse(refRaw);
@@ -77,20 +97,21 @@ export default function AdminPaymentsPage() {
                 }
               }
             }
+            const client = p.client as { user?: { name?: string } } | undefined;
             return {
-              id: p.id,
-              clientName: p.client?.user?.name ?? "—",
-              amount: p.amount,
-              type: p.type,
-              status: p.status,
-              method: p.method ?? null,
-              date: new Date(p.date).toLocaleDateString(),
+              id: String(p.id),
+              clientName: client?.user?.name ?? "—",
+              amount: Number(p.amount),
+              type: String(p.type),
+              status: String(p.status),
+              method: (p.method as string | null) ?? null,
+              date: new Date(String(p.date)).toLocaleDateString(),
               reference,
               proofUrl,
             } satisfies PaymentRow;
           }),
         );
-        setTotal(json.total ?? 0);
+        setTotal((json.total as number | undefined) ?? 0);
         if (opts?.page) setPage(opts.page);
       } finally {
         setLoading(false);
@@ -111,17 +132,21 @@ export default function AdminPaymentsPage() {
         toast.error("Could not load receipt");
         return;
       }
-      const data = await res.json();
+      const { json: data } = await readJsonResponse(res);
+      if (!data) {
+        toast.error("Could not load receipt");
+        return;
+      }
       setReceiptData({
-        id: data.id,
-        amount: data.amount,
-        type: data.type,
-        status: data.status,
-        method: data.method,
-        referenceId: data.referenceId,
-        date: data.date,
-        clientName: data.clientName,
-        clientEmail: data.clientEmail,
+        id: String(data.id),
+        amount: Number(data.amount),
+        type: String(data.type),
+        status: String(data.status),
+        method: data.method as string | null | undefined,
+        referenceId: data.referenceId as string | null | undefined,
+        date: String(data.date),
+        clientName: String(data.clientName ?? ""),
+        clientEmail: String(data.clientEmail ?? ""),
       });
     } catch {
       toast.error("Could not load receipt");
@@ -136,8 +161,8 @@ export default function AdminPaymentsPage() {
         method: "POST",
       });
       if (!res.ok) {
-        const j = await res.json();
-        toast.error(j.error ?? "Failed to approve");
+        const { json: j } = await readJsonResponse(res);
+        toast.error((j?.error as string | undefined) ?? "Failed to approve");
         return;
       }
       await fetchData({ page, search });

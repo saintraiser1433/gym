@@ -8,58 +8,66 @@ import {
 } from "@/lib/validators/admin";
 
 export async function GET(req: NextRequest) {
-  await requireAdmin();
-  const url = new URL(req.url);
-  const parsed = paginationSchema.safeParse({
-    page: url.searchParams.get("page"),
-    pageSize: url.searchParams.get("pageSize"),
-    search: url.searchParams.get("search") ?? undefined,
-  });
+  try {
+    await requireAdmin();
+    const url = new URL(req.url);
+    const parsed = paginationSchema.safeParse({
+      page: url.searchParams.get("page"),
+      pageSize: url.searchParams.get("pageSize"),
+      search: url.searchParams.get("search") ?? undefined,
+    });
 
-  if (!parsed.success) {
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: "Invalid query params" },
+        { status: 400 },
+      );
+    }
+
+    const { page, pageSize, search } = parsed.data;
+    const where =
+      search && search.trim().length > 0
+        ? {
+            client: {
+              user: {
+                name: { contains: search, mode: "insensitive" as const },
+              },
+            },
+          }
+        : {};
+
+    // Auto-mark expired memberships for all clients based on today's date
+    const now = new Date();
+    await prisma.clientMembership.updateMany({
+      where: {
+        status: "ACTIVE",
+        endDate: { lt: now },
+      },
+      data: { status: "EXPIRED" },
+    });
+
+    const [total, memberships] = await Promise.all([
+      prisma.clientMembership.count({ where }),
+      prisma.clientMembership.findMany({
+        where,
+        orderBy: { startDate: "desc" },
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        include: {
+          client: { include: { user: true } },
+          membership: true,
+        },
+      }),
+    ]);
+
+    return NextResponse.json({ data: memberships, page, pageSize, total });
+  } catch (error) {
+    console.error("GET /api/admin/registrations failed:", error);
     return NextResponse.json(
-      { error: "Invalid query params" },
-      { status: 400 },
+      { error: "Failed to load client memberships" },
+      { status: 500 },
     );
   }
-
-  const { page, pageSize, search } = parsed.data;
-  const where =
-    search && search.trim().length > 0
-      ? {
-          client: {
-            user: {
-              name: { contains: search, mode: "insensitive" as const },
-            },
-          },
-        }
-      : {};
-
-  // Auto-mark expired memberships for all clients based on today's date
-  const now = new Date();
-  await prisma.clientMembership.updateMany({
-    where: {
-      status: "ACTIVE",
-      endDate: { lt: now },
-    },
-    data: { status: "EXPIRED" },
-  });
-
-  const [total, memberships] = await Promise.all([
-    prisma.clientMembership.count({ where }),
-    prisma.clientMembership.findMany({
-      where,
-      orderBy: { startDate: "desc" },
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      include: {
-        client: { include: { user: true } },
-        membership: true,
-      },
-    }),
-  ]);
-
-  return NextResponse.json({ data: memberships, page, pageSize, total });
 }
 
 export async function POST(req: NextRequest) {

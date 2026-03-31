@@ -42,6 +42,21 @@ type PendingApplication = {
   } | null;
 };
 
+async function readJsonResponse(res: Response): Promise<{
+  json: Record<string, unknown> | null;
+  isHtml: boolean;
+}> {
+  const text = await res.text();
+  const trimmed = text.trim();
+  if (!trimmed) return { json: null, isHtml: false };
+  if (trimmed.startsWith("<")) return { json: null, isHtml: true };
+  try {
+    return { json: JSON.parse(trimmed) as Record<string, unknown>, isHtml: false };
+  } catch {
+    return { json: null, isHtml: false };
+  }
+}
+
 export default function ClientMembershipsPage() {
   const [list, setList] = React.useState<ClientMembershipItem[]>([]);
   const [available, setAvailable] = React.useState<AvailablePlan[]>([]);
@@ -61,48 +76,75 @@ export default function ClientMembershipsPage() {
         fetch("/api/client/memberships/available", { cache: "no-store" }),
         fetch("/api/client/memberships/pending", { cache: "no-store" }),
       ]);
-      const myJson = await myRes.json();
-      const availJson = await availRes.json();
-      const pendingJson = await pendingRes.json();
-      if (Array.isArray(myJson.data)) {
+      const [myParsed, availParsed, pendingParsed] = await Promise.all([
+        readJsonResponse(myRes),
+        readJsonResponse(availRes),
+        readJsonResponse(pendingRes),
+      ]);
+      if (myParsed.isHtml || availParsed.isHtml || pendingParsed.isHtml) {
+        toast.error(
+          "Could not load memberships. You may need to sign in again as a client.",
+        );
+        setList([]);
+        setAvailable([]);
+        setPending(null);
+        return;
+      }
+      const myJson = myParsed.json;
+      const availJson = availParsed.json;
+      const pendingJson = pendingParsed.json;
+      if (!myRes.ok) {
+        toast.error(
+          (myJson?.error as string | undefined) ??
+            `Could not load your memberships (${myRes.status})`,
+        );
+      }
+      if (!availRes.ok && availJson?.error) {
+        toast.error(String(availJson.error));
+      }
+      if (Array.isArray(myJson?.data)) {
         setList(
-          myJson.data.map((r: any) => ({
-            id: r.id,
-            startDate: new Date(r.startDate).toLocaleDateString(),
-            endDate: new Date(r.endDate).toLocaleDateString(),
-            status: r.status ?? "ACTIVE",
+          (myJson!.data as unknown[]).map((r: Record<string, unknown>) => ({
+            id: String(r.id),
+            startDate: new Date(String(r.startDate)).toLocaleDateString(),
+            endDate: new Date(String(r.endDate)).toLocaleDateString(),
+            status: String(r.status ?? "ACTIVE"),
             membership: r.membership
-              ? {
-                  id: r.membership.id,
-                  name: r.membership.name,
-                  type: r.membership.type,
-                  description: r.membership.description ?? null,
-                  price: r.membership.price,
-                }
+              ? (() => {
+                  const m = r.membership as Record<string, unknown>;
+                  return {
+                    id: String(m.id),
+                    name: String(m.name),
+                    type: String(m.type),
+                    description: (m.description as string | null) ?? null,
+                    price: Number(m.price),
+                  };
+                })()
               : ({} as ClientMembershipItem["membership"]),
           })),
         );
       }
-      if (Array.isArray(availJson.data)) {
+      if (Array.isArray(availJson?.data)) {
         setAvailable(
-          availJson.data.map((m: any) => ({
-            id: m.id,
-            name: m.name,
-            type: m.type,
-            description: m.description ?? null,
-            price: m.price,
+          (availJson!.data as unknown[]).map((m: Record<string, unknown>) => ({
+            id: String(m.id),
+            name: String(m.name),
+            type: String(m.type),
+            description: (m.description as string | null) ?? null,
+            price: Number(m.price),
           })),
         );
       }
+      const pendingData = pendingJson?.data as Record<string, unknown> | null | undefined;
       setPending(
-        pendingJson?.data
+        pendingData && typeof pendingData === "object" && pendingData.id
           ? {
-              id: pendingJson.data.id,
-              amount: pendingJson.data.amount,
-              method: pendingJson.data.method ?? null,
-              createdAt: new Date(pendingJson.data.createdAt).toLocaleString(),
-              reference: pendingJson.data.reference ?? null,
-              membership: pendingJson.data.membership ?? null,
+              id: String(pendingData.id),
+              amount: Number(pendingData.amount),
+              method: (pendingData.method as string | null) ?? null,
+              createdAt: new Date(String(pendingData.createdAt)).toLocaleString(),
+              reference: (pendingData.reference as string | null) ?? null,
+              membership: (pendingData.membership as PendingApplication["membership"]) ?? null,
             }
           : null,
       );
@@ -172,9 +214,17 @@ export default function ClientMembershipsPage() {
         method: "POST",
         body: formData,
       });
-      const json = await res.json();
+      const { json, isHtml } = await readJsonResponse(res);
+      if (isHtml || !json) {
+        toast.error(
+          !res.ok
+            ? "Request failed. Sign in again if your session expired."
+            : "Invalid response from server.",
+        );
+        return;
+      }
       if (!res.ok) {
-        toast.error(json.error ?? "Failed to apply");
+        toast.error((json.error as string | undefined) ?? "Failed to apply");
         return;
       }
       setApplyModalOpen(false);
@@ -200,6 +250,8 @@ export default function ClientMembershipsPage() {
   const hasPending = !!pending;
   const activeMembership = list.find((m) => m.status === "ACTIVE") ?? null;
   const hasActive = !!activeMembership;
+  // Hide expired plans when you still have an active membership (cleaner “current plan” view).
+  const displayList = hasActive ? list.filter((m) => m.status !== "EXPIRED") : list;
 
   return (
     <div className="space-y-6">
@@ -244,8 +296,13 @@ export default function ClientMembershipsPage() {
                       method: "DELETE",
                     });
                     if (!res.ok) {
-                      const j = await res.json();
-                      toast.error(j.error ?? "Failed to cancel application");
+                      const { json: j, isHtml } = await readJsonResponse(res);
+                      toast.error(
+                        isHtml
+                          ? "Could not cancel. Try signing in again."
+                          : (j?.error as string | undefined) ??
+                            "Failed to cancel application",
+                      );
                       return;
                     }
                     await loadData();
@@ -262,7 +319,7 @@ export default function ClientMembershipsPage() {
         )}
         {loading ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
-        ) : list.length === 0 ? (
+        ) : displayList.length === 0 ? (
           <Card className="p-6">
             <p className="text-sm text-muted-foreground">
               You don’t have any membership yet. Apply for a plan below.
@@ -270,7 +327,7 @@ export default function ClientMembershipsPage() {
           </Card>
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {list.map((item) => {
+            {displayList.map((item) => {
               const isExpired = item.status === "EXPIRED";
               return (
                 <Card key={item.id} className="p-4">

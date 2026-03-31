@@ -34,6 +34,16 @@ type ClientMembershipRow = {
 type ClientOption = { id: string; name: string; email: string };
 type MembershipOption = { id: string; name: string };
 
+async function readJsonResponse(res: Response): Promise<{ json: Record<string, unknown> | null }> {
+  const text = await res.text();
+  if (!text.trim()) return { json: null };
+  try {
+    return { json: JSON.parse(text) as Record<string, unknown> };
+  } catch {
+    return { json: null };
+  }
+}
+
 export default function AdminClientMembershipsPage() {
   const [rows, setRows] = React.useState<ClientMembershipRow[]>([]);
   const [page, setPage] = React.useState(1);
@@ -72,8 +82,18 @@ export default function AdminClientMembershipsPage() {
         const res = await fetch(`/api/admin/registrations?${params.toString()}`, {
           cache: "no-store",
         });
-        const json = await res.json();
-        const data = json.data ?? [];
+        const { json } = await readJsonResponse(res);
+        if (!res.ok) {
+          toast.error(
+            (json?.error as string | undefined) ?? `Failed to load (${res.status})`,
+          );
+          return;
+        }
+        if (!json) {
+          toast.error("Empty response from server. Try signing in again.");
+          return;
+        }
+        const data = (json.data as unknown[] | undefined) ?? [];
         setRows(
           data.map((r: any) => ({
             id: r.id,
@@ -87,7 +107,7 @@ export default function AdminClientMembershipsPage() {
             status: r.status ?? "ACTIVE",
           })),
         );
-        setTotal(json.total ?? 0);
+        setTotal((json.total as number | undefined) ?? 0);
         if (opts?.page) setPage(opts.page);
       } finally {
         setLoading(false);
@@ -99,8 +119,12 @@ export default function AdminClientMembershipsPage() {
   const fetchClients = React.useCallback(async () => {
     try {
       const res = await fetch("/api/admin/clients", { cache: "no-store" });
-      const json = await res.json();
-      setClients(json.data ?? []);
+      const { json } = await readJsonResponse(res);
+      if (!res.ok || !json) {
+        setClients([]);
+        return;
+      }
+      setClients((json.data as ClientOption[] | undefined) ?? []);
     } catch {
       setClients([]);
     }
@@ -111,8 +135,13 @@ export default function AdminClientMembershipsPage() {
       const res = await fetch("/api/admin/memberships?page=1&pageSize=100", {
         cache: "no-store",
       });
-      const json = await res.json();
-      setMemberships((json.data ?? []).map((m: any) => ({ id: m.id, name: m.name })));
+      const { json } = await readJsonResponse(res);
+      if (!res.ok || !json) {
+        setMemberships([]);
+        return;
+      }
+      const data = (json.data as { id: string; name: string }[] | undefined) ?? [];
+      setMemberships(data.map((m) => ({ id: m.id, name: m.name })));
     } catch {
       setMemberships([]);
     }
@@ -330,9 +359,9 @@ export default function AdminClientMembershipsPage() {
                         method: "DELETE",
                       });
                       if (!res.ok) {
-                        const j = await res.json().catch(() => null);
+                        const { json: j } = await readJsonResponse(res);
                         toast.error(
-                          j?.error ??
+                          (j?.error as string | undefined) ??
                             "Failed to clear client memberships. Please try again.",
                         );
                       } else {
