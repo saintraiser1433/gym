@@ -22,6 +22,15 @@ type GoalWorkout = {
   duration?: number | null;
   difficulty?: string | null;
   demoMediaUrl?: string | null;
+  media?: {
+    id: string;
+    url: string;
+    stepName?: string | null;
+    description?: string | null;
+    mediaType: "GIF" | "VIDEO";
+    durationSeconds: number;
+    order: number;
+  }[];
   goals?: { id: string; name: string }[];
   equipment?: WorkoutEquipmentItem[];
 };
@@ -44,6 +53,7 @@ function ClientWorkoutsContent() {
   const goalIdParam = searchParams.get("goalId") ?? "";
 
   const [workouts, setWorkouts] = React.useState<GoalWorkout[]>([]);
+  const [expandedSteps, setExpandedSteps] = React.useState<Record<string, boolean>>({});
   const [progressRows, setProgressRows] = React.useState<ProgressEntry[]>([]);
   const [loadingWorkouts, setLoadingWorkouts] = React.useState(true);
   const [loadingProgress, setLoadingProgress] = React.useState(true);
@@ -69,12 +79,30 @@ function ClientWorkoutsContent() {
     rating: "",
   });
 
+  const formatSeconds = (seconds: number) => {
+    if (!Number.isFinite(seconds) || seconds <= 0) return "0s";
+    const mins = Math.floor(seconds / 60);
+    const rem = seconds % 60;
+    if (mins === 0) return `${rem}s`;
+    if (rem === 0) return `${mins}m`;
+    return `${mins}m ${rem}s`;
+  };
+
   const loadProgress = React.useCallback(async () => {
     const res = await fetch("/api/client/workouts/progress", { cache: "no-store" });
     const json = await safeJson(res);
     const data = Array.isArray(json?.data) ? json.data : [];
     setProgressRows(
-      data.map((p: any) => ({
+      data.map((p: {
+        id: string;
+        completedDate: string;
+        actualSets?: number | null;
+        actualReps?: number | null;
+        weight?: number | null;
+        rating?: number | null;
+        workout?: { name?: string | null } | null;
+        workoutExercise?: { workout?: { name?: string | null } | null; exercise?: { name?: string | null } | null } | null;
+      }) => ({
         id: p.id as string,
         date: new Date(p.completedDate).toLocaleDateString(),
         workoutName: p.workout?.name ?? p.workoutExercise?.workout?.name ?? "Workout",
@@ -163,6 +191,11 @@ function ClientWorkoutsContent() {
           </p>
         )}
       </div>
+      {logWorkout && (
+        <Card className="border-primary/40 bg-primary/5 p-2 text-xs">
+          <span className="font-medium">Current workout:</span> {logWorkout.name}
+        </Card>
+      )}
 
       {goalIdParam && (
         <p className="text-xs text-muted-foreground">
@@ -177,7 +210,7 @@ function ClientWorkoutsContent() {
         <p className="text-sm text-muted-foreground">Loading workouts…</p>
       ) : workouts.length === 0 ? (
         <Card className="p-4 text-sm text-muted-foreground">
-          No workouts yet. Select goals in{" "}
+          No workouts for the selected goal yet. Select goals in{" "}
           <Link href="/client/goals" className="font-medium underline">
             My Goals
           </Link>{" "}
@@ -189,28 +222,58 @@ function ClientWorkoutsContent() {
           <div className="grid gap-3 sm:grid-cols-2">
             {workouts.map((w) => (
               <Card key={w.id} className="overflow-hidden p-0">
-                {w.demoMediaUrl && (
-                  <div className="aspect-video w-full bg-muted">
-                    {w.demoMediaUrl.toLowerCase().endsWith(".gif") ? (
-                      <img
-                        src={w.demoMediaUrl}
-                        alt=""
-                        className="h-full w-full object-cover"
-                      />
-                    ) : (
-                      <video
-                        src={w.demoMediaUrl}
-                        controls
-                        className="h-full w-full object-cover"
-                        preload="metadata"
-                      />
-                    )}
-                  </div>
-                )}
+                {(() => {
+                  const steps = w.media?.length
+                    ? w.media
+                    : w.demoMediaUrl
+                      ? [
+                          {
+                            id: `legacy-${w.id}`,
+                            url: w.demoMediaUrl,
+                            stepName: null,
+                            description: null,
+                            mediaType: w.demoMediaUrl.toLowerCase().endsWith(".gif") ? "GIF" : "VIDEO",
+                            durationSeconds: (w.duration ?? 1) * 60,
+                            order: 0,
+                          },
+                        ]
+                      : [];
+                  const isExpanded = expandedSteps[w.id] ?? false;
+
+                  return (
+                    <>
+                      {(steps.length > 0 && isExpanded) && (
+                        <div className="space-y-2 p-2 pb-0">
+                          {steps.map((m, stepIndex) => (
+                            <div key={m.id} className="relative overflow-hidden rounded-md border bg-muted">
+                              <span className="absolute right-2 top-2 z-10 rounded bg-primary/90 px-1.5 py-0.5 text-[10px] text-primary-foreground">
+                                Step {stepIndex + 1}
+                              </span>
+                              <span className="absolute left-2 top-2 z-10 rounded bg-black/70 px-1.5 py-0.5 text-[10px] text-white">
+                                {formatSeconds(m.durationSeconds)}
+                              </span>
+                              {m.url.toLowerCase().endsWith(".gif") || m.mediaType === "GIF" ? (
+                                <img src={m.url} alt="" className="aspect-video w-full object-cover" />
+                              ) : (
+                                <video src={m.url} controls className="aspect-video w-full object-cover" preload="metadata" />
+                              )}
+                              {(m.stepName || m.description) && (
+                                <div className="space-y-0.5 border-t bg-background/95 px-2 py-1 text-[11px] text-muted-foreground">
+                                  {m.stepName && <div className="font-medium text-foreground">{m.stepName}</div>}
+                                  {m.description && <div>{m.description}</div>}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
                 <div className="p-3 space-y-2 text-[11px]">
                   <div className="flex items-start justify-between gap-2">
                     <div className="space-y-0.5">
-                      <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Title</div>
+                      <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">Workout</div>
                       <div className="font-medium text-[12px]">{w.name}</div>
                     </div>
                     <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-[10px]">
@@ -256,6 +319,18 @@ function ClientWorkoutsContent() {
                       )}
                       {canLogToday?.hasAttendance && canLogToday.loggedWorkoutIds.includes(w.id) && (
                         <p className="text-[10px] text-muted-foreground mb-1">Already logged for this workout today.</p>
+                      )}
+                      {((w.media?.length ?? 0) > 0 || Boolean(w.demoMediaUrl)) && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-7 text-[11px] w-full mb-2"
+                          onClick={() =>
+                            setExpandedSteps((prev) => ({ ...prev, [w.id]: !(prev[w.id] ?? false) }))
+                          }
+                        >
+                          {(expandedSteps[w.id] ?? false) ? "Hide steps" : "Show steps"}
+                        </Button>
                       )}
                       <Button
                         size="sm"
@@ -333,6 +408,9 @@ function ClientWorkoutsContent() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <Card className="w-full max-w-sm p-4 space-y-3">
             <h3 className="text-sm font-semibold">Log session — {logWorkout.name}</h3>
+            <p className="text-[11px] text-muted-foreground">
+              You are logging progress for <span className="font-medium text-foreground">{logWorkout.name}</span>.
+            </p>
             {logLoadingExercises ? (
               <p className="text-xs text-muted-foreground">Loading exercises…</p>
             ) : logExercises.length === 0 ? (

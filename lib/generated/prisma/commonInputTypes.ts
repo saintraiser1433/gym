@@ -416,6 +416,13 @@ export type EnumGoalStatusWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedEnumGoalStatusFilter<$PrismaModel>
 }
 
+export type EnumWorkoutMediaTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.WorkoutMediaType | Prisma.EnumWorkoutMediaTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.WorkoutMediaType[] | Prisma.ListEnumWorkoutMediaTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.WorkoutMediaType[] | Prisma.ListEnumWorkoutMediaTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumWorkoutMediaTypeFilter<$PrismaModel> | $Enums.WorkoutMediaType
+}
+
 export type IntFilter<$PrismaModel = never> = {
   equals?: number | Prisma.IntFieldRefInput<$PrismaModel>
   in?: number[] | Prisma.ListIntFieldRefInput<$PrismaModel>
@@ -425,6 +432,16 @@ export type IntFilter<$PrismaModel = never> = {
   gt?: number | Prisma.IntFieldRefInput<$PrismaModel>
   gte?: number | Prisma.IntFieldRefInput<$PrismaModel>
   not?: Prisma.NestedIntFilter<$PrismaModel> | number
+}
+
+export type EnumWorkoutMediaTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.WorkoutMediaType | Prisma.EnumWorkoutMediaTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.WorkoutMediaType[] | Prisma.ListEnumWorkoutMediaTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.WorkoutMediaType[] | Prisma.ListEnumWorkoutMediaTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumWorkoutMediaTypeWithAggregatesFilter<$PrismaModel> | $Enums.WorkoutMediaType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumWorkoutMediaTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumWorkoutMediaTypeFilter<$PrismaModel>
 }
 
 export type IntWithAggregatesFilter<$PrismaModel = never> = {
@@ -920,6 +937,23 @@ export type NestedEnumGoalStatusWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumGoalStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumGoalStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumWorkoutMediaTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.WorkoutMediaType | Prisma.EnumWorkoutMediaTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.WorkoutMediaType[] | Prisma.ListEnumWorkoutMediaTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.WorkoutMediaType[] | Prisma.ListEnumWorkoutMediaTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumWorkoutMediaTypeFilter<$PrismaModel> | $Enums.WorkoutMediaType
+}
+
+export type NestedEnumWorkoutMediaTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.WorkoutMediaType | Prisma.EnumWorkoutMediaTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.WorkoutMediaType[] | Prisma.ListEnumWorkoutMediaTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.WorkoutMediaType[] | Prisma.ListEnumWorkoutMediaTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumWorkoutMediaTypeWithAggregatesFilter<$PrismaModel> | $Enums.WorkoutMediaType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumWorkoutMediaTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumWorkoutMediaTypeFilter<$PrismaModel>
 }
 
 export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {

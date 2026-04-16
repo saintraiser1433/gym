@@ -145,6 +145,7 @@ model ClientGoal {
 
   client ClientProfile @relation(fields: [clientId], references: [id])
   goal   WorkoutGoal   @relation(fields: [goalId], references: [id])
+  updates ClientGoalUpdate[]
 }
 
 model Exercise {
@@ -178,6 +179,33 @@ model Workout {
   goalWorkouts GoalWorkout[]
   equipmentUsed WorkoutEquipment[]
   progressEntries WorkoutProgress[]
+  media          WorkoutMedia[]
+}
+
+model WorkoutMedia {
+  id              String           @id @default(cuid())
+  workoutId        String
+  url             String
+  stepName        String?
+  description     String?
+  mediaType       WorkoutMediaType @default(GIF)
+  durationSeconds Int
+  order           Int              @default(0)
+
+  workout Workout @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+
+  @@index([workoutId, order])
+}
+
+model ClientGoalUpdate {
+  id           String   @id @default(cuid())
+  clientGoalId String
+  message      String
+  createdAt    DateTime @default(now())
+
+  clientGoal ClientGoal @relation(fields: [clientGoalId], references: [id], onDelete: Cascade)
+
+  @@index([clientGoalId, createdAt])
 }
 
 model WorkoutExercise {
@@ -349,6 +377,11 @@ enum MembershipInstanceStatus {
 enum WorkoutType {
   PER_PCS
   PER_KG
+}
+
+enum WorkoutMediaType {
+  GIF
+  VIDEO
 }
 
 enum WorkoutGoalCategory {

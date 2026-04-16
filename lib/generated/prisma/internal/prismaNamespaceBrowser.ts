@@ -62,6 +62,8 @@ export const ModelName = {
   ClientGoal: 'ClientGoal',
   Exercise: 'Exercise',
   Workout: 'Workout',
+  WorkoutMedia: 'WorkoutMedia',
+  ClientGoalUpdate: 'ClientGoalUpdate',
   WorkoutExercise: 'WorkoutExercise',
   WorkoutAssignment: 'WorkoutAssignment',
   WorkoutProgress: 'WorkoutProgress',
@@ -237,6 +239,30 @@ export const WorkoutScalarFieldEnum = {
 } as const
 
 export type WorkoutScalarFieldEnum = (typeof WorkoutScalarFieldEnum)[keyof typeof WorkoutScalarFieldEnum]
+
+
+export const WorkoutMediaScalarFieldEnum = {
+  id: 'id',
+  workoutId: 'workoutId',
+  url: 'url',
+  stepName: 'stepName',
+  description: 'description',
+  mediaType: 'mediaType',
+  durationSeconds: 'durationSeconds',
+  order: 'order'
+} as const
+
+export type WorkoutMediaScalarFieldEnum = (typeof WorkoutMediaScalarFieldEnum)[keyof typeof WorkoutMediaScalarFieldEnum]
+
+
+export const ClientGoalUpdateScalarFieldEnum = {
+  id: 'id',
+  clientGoalId: 'clientGoalId',
+  message: 'message',
+  createdAt: 'createdAt'
+} as const
+
+export type ClientGoalUpdateScalarFieldEnum = (typeof ClientGoalUpdateScalarFieldEnum)[keyof typeof ClientGoalUpdateScalarFieldEnum]
 
 
 export const WorkoutExerciseScalarFieldEnum = {

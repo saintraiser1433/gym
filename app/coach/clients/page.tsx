@@ -34,6 +34,15 @@ type GoalWorkout = {
   duration?: number | null;
   difficulty?: string | null;
   demoMediaUrl?: string | null;
+  media?: {
+    id: string;
+    url: string;
+    stepName?: string | null;
+    description?: string | null;
+    mediaType: "GIF" | "VIDEO";
+    durationSeconds: number;
+    order: number;
+  }[];
   goals?: { id: string; name: string }[];
   equipment?: { equipmentName: string; quantity: number; targetKg?: number; targetPcs?: number }[];
 };
@@ -56,6 +65,15 @@ const formatCategory = (c: string) =>
         .map((p) => p.charAt(0) + p.slice(1).toLowerCase())
         .join(" ")
     : "";
+
+const formatSeconds = (seconds: number) => {
+  if (!Number.isFinite(seconds) || seconds <= 0) return "0s";
+  const mins = Math.floor(seconds / 60);
+  const rem = seconds % 60;
+  if (mins === 0) return `${rem}s`;
+  if (rem === 0) return `${mins}m`;
+  return `${mins}m ${rem}s`;
+};
 
 export default function CoachClientsPage() {
   const [rows, setRows] = React.useState<ClientRow[]>([]);
@@ -470,22 +488,45 @@ export default function CoachClientsPage() {
                       <div className="grid gap-3 sm:grid-cols-2">
                         {workouts.map((w) => (
                           <Card key={w.id} className="overflow-hidden p-0">
-                            {w.demoMediaUrl && (
-                              <div className="aspect-video w-full bg-muted">
-                                {w.demoMediaUrl.toLowerCase().endsWith(".gif") ? (
-                                  <img
-                                    src={w.demoMediaUrl}
-                                    alt=""
-                                    className="h-full w-full object-cover"
-                                  />
-                                ) : (
-                                  <video
-                                    src={w.demoMediaUrl}
-                                    controls
-                                    className="h-full w-full object-cover"
-                                    preload="metadata"
-                                  />
-                                )}
+                            {(w.media?.length ? w.media : w.demoMediaUrl ? [{
+                              id: `legacy-${w.id}`,
+                              url: w.demoMediaUrl,
+                              stepName: null,
+                              description: null,
+                              mediaType: w.demoMediaUrl.toLowerCase().endsWith(".gif") ? "GIF" : "VIDEO",
+                              durationSeconds: (w.duration ?? 1) * 60,
+                              order: 0,
+                            }] : []).length > 0 && (
+                              <div className="space-y-2 p-2 pb-0">
+                                {(w.media?.length ? w.media : [{
+                                  id: `legacy-${w.id}`,
+                                  url: w.demoMediaUrl!,
+                                  stepName: null,
+                                  description: null,
+                                  mediaType: w.demoMediaUrl!.toLowerCase().endsWith(".gif") ? "GIF" : "VIDEO",
+                                  durationSeconds: (w.duration ?? 1) * 60,
+                                  order: 0,
+                                }]).map((m, stepIndex) => (
+                                  <div key={m.id} className="relative overflow-hidden rounded-md border bg-muted">
+                                    <span className="absolute right-2 top-2 z-10 rounded bg-primary/90 px-1.5 py-0.5 text-[10px] text-primary-foreground">
+                                      Step {stepIndex + 1}
+                                    </span>
+                                    <span className="absolute left-2 top-2 z-10 rounded bg-black/70 px-1.5 py-0.5 text-[10px] text-white">
+                                      {formatSeconds(m.durationSeconds)}
+                                    </span>
+                                    {m.url.toLowerCase().endsWith(".gif") || m.mediaType === "GIF" ? (
+                                      <img src={m.url} alt="" className="aspect-video w-full object-cover" />
+                                    ) : (
+                                      <video src={m.url} controls className="aspect-video w-full object-cover" preload="metadata" />
+                                    )}
+                                    {(m.stepName || m.description) && (
+                                      <div className="space-y-0.5 border-t bg-background/95 px-2 py-1 text-[11px] text-muted-foreground">
+                                        {m.stepName && <div className="font-medium text-foreground">{m.stepName}</div>}
+                                        {m.description && <div>{m.description}</div>}
+                                      </div>
+                                    )}
+                                  </div>
+                                ))}
                               </div>
                             )}
                             <div className="space-y-2 p-3 text-[11px]">
@@ -583,7 +624,7 @@ export default function CoachClientsPage() {
       )}
 
       {logWorkout && clientId && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4">
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50 p-4">
           <Card className="w-full max-w-sm space-y-3 p-4">
             <h3 className="text-sm font-semibold">Log session — {logWorkout.name}</h3>
             {logLoadingExercises ? (

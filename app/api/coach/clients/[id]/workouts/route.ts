@@ -56,6 +56,18 @@ export async function GET(req: NextRequest, { params }: Params) {
         duration: true,
         difficulty: true,
         demoMediaUrl: true,
+        media: {
+          select: {
+            id: true,
+            url: true,
+            stepName: true,
+            description: true,
+            mediaType: true,
+            durationSeconds: true,
+            order: true,
+          },
+          orderBy: { order: "asc" },
+        },
       },
       orderBy: { name: "asc" },
     }),
@@ -96,6 +108,21 @@ export async function GET(req: NextRequest, { params }: Params) {
 
   const data = workouts.map((w) => ({
     ...w,
+    media: w.media.length
+      ? w.media
+      : w.demoMediaUrl
+        ? [
+            {
+              id: `legacy-${w.id}`,
+              url: w.demoMediaUrl,
+              stepName: null,
+              description: null,
+              mediaType: w.demoMediaUrl.toLowerCase().endsWith(".gif") ? "GIF" : "VIDEO",
+              durationSeconds: w.duration ? w.duration * 60 : 60,
+              order: 0,
+            },
+          ]
+        : [],
     goals: goalsByWorkoutId[w.id] ?? [],
     equipment: equipmentByWorkoutId[w.id] ?? [],
   }));

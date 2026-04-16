@@ -250,6 +250,7 @@ export type ClientGoalWhereInput = {
   status?: Prisma.EnumGoalStatusFilter<"ClientGoal"> | $Enums.GoalStatus
   client?: Prisma.XOR<Prisma.ClientProfileScalarRelationFilter, Prisma.ClientProfileWhereInput>
   goal?: Prisma.XOR<Prisma.WorkoutGoalScalarRelationFilter, Prisma.WorkoutGoalWhereInput>
+  updates?: Prisma.ClientGoalUpdateListRelationFilter
 }
 
 export type ClientGoalOrderByWithRelationInput = {
@@ -263,6 +264,7 @@ export type ClientGoalOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   client?: Prisma.ClientProfileOrderByWithRelationInput
   goal?: Prisma.WorkoutGoalOrderByWithRelationInput
+  updates?: Prisma.ClientGoalUpdateOrderByRelationAggregateInput
 }
 
 export type ClientGoalWhereUniqueInput = Prisma.AtLeast<{
@@ -279,6 +281,7 @@ export type ClientGoalWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumGoalStatusFilter<"ClientGoal"> | $Enums.GoalStatus
   client?: Prisma.XOR<Prisma.ClientProfileScalarRelationFilter, Prisma.ClientProfileWhereInput>
   goal?: Prisma.XOR<Prisma.WorkoutGoalScalarRelationFilter, Prisma.WorkoutGoalWhereInput>
+  updates?: Prisma.ClientGoalUpdateListRelationFilter
 }, "id">
 
 export type ClientGoalOrderByWithAggregationInput = {
@@ -320,6 +323,7 @@ export type ClientGoalCreateInput = {
   status?: $Enums.GoalStatus
   client: Prisma.ClientProfileCreateNestedOneWithoutGoalsInput
   goal: Prisma.WorkoutGoalCreateNestedOneWithoutClientGoalsInput
+  updates?: Prisma.ClientGoalUpdateCreateNestedManyWithoutClientGoalInput
 }
 
 export type ClientGoalUncheckedCreateInput = {
@@ -331,6 +335,7 @@ export type ClientGoalUncheckedCreateInput = {
   currentValue?: number | null
   deadline?: Date | string | null
   status?: $Enums.GoalStatus
+  updates?: Prisma.ClientGoalUpdateUncheckedCreateNestedManyWithoutClientGoalInput
 }
 
 export type ClientGoalUpdateInput = {
@@ -342,6 +347,7 @@ export type ClientGoalUpdateInput = {
   status?: Prisma.EnumGoalStatusFieldUpdateOperationsInput | $Enums.GoalStatus
   client?: Prisma.ClientProfileUpdateOneRequiredWithoutGoalsNestedInput
   goal?: Prisma.WorkoutGoalUpdateOneRequiredWithoutClientGoalsNestedInput
+  updates?: Prisma.ClientGoalUpdateUpdateManyWithoutClientGoalNestedInput
 }
 
 export type ClientGoalUncheckedUpdateInput = {
@@ -353,6 +359,7 @@ export type ClientGoalUncheckedUpdateInput = {
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumGoalStatusFieldUpdateOperationsInput | $Enums.GoalStatus
+  updates?: Prisma.ClientGoalUpdateUncheckedUpdateManyWithoutClientGoalNestedInput
 }
 
 export type ClientGoalCreateManyInput = {
@@ -439,6 +446,11 @@ export type ClientGoalSumOrderByAggregateInput = {
   targetValue?: Prisma.SortOrder
   targetSessions?: Prisma.SortOrder
   currentValue?: Prisma.SortOrder
+}
+
+export type ClientGoalScalarRelationFilter = {
+  is?: Prisma.ClientGoalWhereInput
+  isNot?: Prisma.ClientGoalWhereInput
 }
 
 export type ClientGoalCreateNestedManyWithoutClientInput = {
@@ -529,6 +541,20 @@ export type EnumGoalStatusFieldUpdateOperationsInput = {
   set?: $Enums.GoalStatus
 }
 
+export type ClientGoalCreateNestedOneWithoutUpdatesInput = {
+  create?: Prisma.XOR<Prisma.ClientGoalCreateWithoutUpdatesInput, Prisma.ClientGoalUncheckedCreateWithoutUpdatesInput>
+  connectOrCreate?: Prisma.ClientGoalCreateOrConnectWithoutUpdatesInput
+  connect?: Prisma.ClientGoalWhereUniqueInput
+}
+
+export type ClientGoalUpdateOneRequiredWithoutUpdatesNestedInput = {
+  create?: Prisma.XOR<Prisma.ClientGoalCreateWithoutUpdatesInput, Prisma.ClientGoalUncheckedCreateWithoutUpdatesInput>
+  connectOrCreate?: Prisma.ClientGoalCreateOrConnectWithoutUpdatesInput
+  upsert?: Prisma.ClientGoalUpsertWithoutUpdatesInput
+  connect?: Prisma.ClientGoalWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ClientGoalUpdateToOneWithWhereWithoutUpdatesInput, Prisma.ClientGoalUpdateWithoutUpdatesInput>, Prisma.ClientGoalUncheckedUpdateWithoutUpdatesInput>
+}
+
 export type ClientGoalCreateWithoutClientInput = {
   id?: string
   targetValue?: number | null
@@ -537,6 +563,7 @@ export type ClientGoalCreateWithoutClientInput = {
   deadline?: Date | string | null
   status?: $Enums.GoalStatus
   goal: Prisma.WorkoutGoalCreateNestedOneWithoutClientGoalsInput
+  updates?: Prisma.ClientGoalUpdateCreateNestedManyWithoutClientGoalInput
 }
 
 export type ClientGoalUncheckedCreateWithoutClientInput = {
@@ -547,6 +574,7 @@ export type ClientGoalUncheckedCreateWithoutClientInput = {
   currentValue?: number | null
   deadline?: Date | string | null
   status?: $Enums.GoalStatus
+  updates?: Prisma.ClientGoalUpdateUncheckedCreateNestedManyWithoutClientGoalInput
 }
 
 export type ClientGoalCreateOrConnectWithoutClientInput = {
@@ -597,6 +625,7 @@ export type ClientGoalCreateWithoutGoalInput = {
   deadline?: Date | string | null
   status?: $Enums.GoalStatus
   client: Prisma.ClientProfileCreateNestedOneWithoutGoalsInput
+  updates?: Prisma.ClientGoalUpdateCreateNestedManyWithoutClientGoalInput
 }
 
 export type ClientGoalUncheckedCreateWithoutGoalInput = {
@@ -607,6 +636,7 @@ export type ClientGoalUncheckedCreateWithoutGoalInput = {
   currentValue?: number | null
   deadline?: Date | string | null
   status?: $Enums.GoalStatus
+  updates?: Prisma.ClientGoalUpdateUncheckedCreateNestedManyWithoutClientGoalInput
 }
 
 export type ClientGoalCreateOrConnectWithoutGoalInput = {
@@ -635,6 +665,66 @@ export type ClientGoalUpdateManyWithWhereWithoutGoalInput = {
   data: Prisma.XOR<Prisma.ClientGoalUpdateManyMutationInput, Prisma.ClientGoalUncheckedUpdateManyWithoutGoalInput>
 }
 
+export type ClientGoalCreateWithoutUpdatesInput = {
+  id?: string
+  targetValue?: number | null
+  targetSessions?: number | null
+  currentValue?: number | null
+  deadline?: Date | string | null
+  status?: $Enums.GoalStatus
+  client: Prisma.ClientProfileCreateNestedOneWithoutGoalsInput
+  goal: Prisma.WorkoutGoalCreateNestedOneWithoutClientGoalsInput
+}
+
+export type ClientGoalUncheckedCreateWithoutUpdatesInput = {
+  id?: string
+  clientId: string
+  goalId: string
+  targetValue?: number | null
+  targetSessions?: number | null
+  currentValue?: number | null
+  deadline?: Date | string | null
+  status?: $Enums.GoalStatus
+}
+
+export type ClientGoalCreateOrConnectWithoutUpdatesInput = {
+  where: Prisma.ClientGoalWhereUniqueInput
+  create: Prisma.XOR<Prisma.ClientGoalCreateWithoutUpdatesInput, Prisma.ClientGoalUncheckedCreateWithoutUpdatesInput>
+}
+
+export type ClientGoalUpsertWithoutUpdatesInput = {
+  update: Prisma.XOR<Prisma.ClientGoalUpdateWithoutUpdatesInput, Prisma.ClientGoalUncheckedUpdateWithoutUpdatesInput>
+  create: Prisma.XOR<Prisma.ClientGoalCreateWithoutUpdatesInput, Prisma.ClientGoalUncheckedCreateWithoutUpdatesInput>
+  where?: Prisma.ClientGoalWhereInput
+}
+
+export type ClientGoalUpdateToOneWithWhereWithoutUpdatesInput = {
+  where?: Prisma.ClientGoalWhereInput
+  data: Prisma.XOR<Prisma.ClientGoalUpdateWithoutUpdatesInput, Prisma.ClientGoalUncheckedUpdateWithoutUpdatesInput>
+}
+
+export type ClientGoalUpdateWithoutUpdatesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  targetSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.EnumGoalStatusFieldUpdateOperationsInput | $Enums.GoalStatus
+  client?: Prisma.ClientProfileUpdateOneRequiredWithoutGoalsNestedInput
+  goal?: Prisma.WorkoutGoalUpdateOneRequiredWithoutClientGoalsNestedInput
+}
+
+export type ClientGoalUncheckedUpdateWithoutUpdatesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  clientId?: Prisma.StringFieldUpdateOperationsInput | string
+  goalId?: Prisma.StringFieldUpdateOperationsInput | string
+  targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  targetSessions?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  status?: Prisma.EnumGoalStatusFieldUpdateOperationsInput | $Enums.GoalStatus
+}
+
 export type ClientGoalCreateManyClientInput = {
   id?: string
   goalId: string
@@ -653,6 +743,7 @@ export type ClientGoalUpdateWithoutClientInput = {
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumGoalStatusFieldUpdateOperationsInput | $Enums.GoalStatus
   goal?: Prisma.WorkoutGoalUpdateOneRequiredWithoutClientGoalsNestedInput
+  updates?: Prisma.ClientGoalUpdateUpdateManyWithoutClientGoalNestedInput
 }
 
 export type ClientGoalUncheckedUpdateWithoutClientInput = {
@@ -663,6 +754,7 @@ export type ClientGoalUncheckedUpdateWithoutClientInput = {
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumGoalStatusFieldUpdateOperationsInput | $Enums.GoalStatus
+  updates?: Prisma.ClientGoalUpdateUncheckedUpdateManyWithoutClientGoalNestedInput
 }
 
 export type ClientGoalUncheckedUpdateManyWithoutClientInput = {
@@ -693,6 +785,7 @@ export type ClientGoalUpdateWithoutGoalInput = {
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumGoalStatusFieldUpdateOperationsInput | $Enums.GoalStatus
   client?: Prisma.ClientProfileUpdateOneRequiredWithoutGoalsNestedInput
+  updates?: Prisma.ClientGoalUpdateUpdateManyWithoutClientGoalNestedInput
 }
 
 export type ClientGoalUncheckedUpdateWithoutGoalInput = {
@@ -703,6 +796,7 @@ export type ClientGoalUncheckedUpdateWithoutGoalInput = {
   currentValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   deadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.EnumGoalStatusFieldUpdateOperationsInput | $Enums.GoalStatus
+  updates?: Prisma.ClientGoalUpdateUncheckedUpdateManyWithoutClientGoalNestedInput
 }
 
 export type ClientGoalUncheckedUpdateManyWithoutGoalInput = {
@@ -716,6 +810,35 @@ export type ClientGoalUncheckedUpdateManyWithoutGoalInput = {
 }
 
 
+/**
+ * Count Type ClientGoalCountOutputType
+ */
+
+export type ClientGoalCountOutputType = {
+  updates: number
+}
+
+export type ClientGoalCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  updates?: boolean | ClientGoalCountOutputTypeCountUpdatesArgs
+}
+
+/**
+ * ClientGoalCountOutputType without action
+ */
+export type ClientGoalCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ClientGoalCountOutputType
+   */
+  select?: Prisma.ClientGoalCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * ClientGoalCountOutputType without action
+ */
+export type ClientGoalCountOutputTypeCountUpdatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ClientGoalUpdateWhereInput
+}
+
 
 export type ClientGoalSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -728,6 +851,8 @@ export type ClientGoalSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   status?: boolean
   client?: boolean | Prisma.ClientProfileDefaultArgs<ExtArgs>
   goal?: boolean | Prisma.WorkoutGoalDefaultArgs<ExtArgs>
+  updates?: boolean | Prisma.ClientGoal$updatesArgs<ExtArgs>
+  _count?: boolean | Prisma.ClientGoalCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["clientGoal"]>
 
 export type ClientGoalSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -771,6 +896,8 @@ export type ClientGoalOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs
 export type ClientGoalInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   client?: boolean | Prisma.ClientProfileDefaultArgs<ExtArgs>
   goal?: boolean | Prisma.WorkoutGoalDefaultArgs<ExtArgs>
+  updates?: boolean | Prisma.ClientGoal$updatesArgs<ExtArgs>
+  _count?: boolean | Prisma.ClientGoalCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ClientGoalIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   client?: boolean | Prisma.ClientProfileDefaultArgs<ExtArgs>
@@ -786,6 +913,7 @@ export type $ClientGoalPayload<ExtArgs extends runtime.Types.Extensions.Internal
   objects: {
     client: Prisma.$ClientProfilePayload<ExtArgs>
     goal: Prisma.$WorkoutGoalPayload<ExtArgs>
+    updates: Prisma.$ClientGoalUpdatePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1192,6 +1320,7 @@ export interface Prisma__ClientGoalClient<T, Null = never, ExtArgs extends runti
   readonly [Symbol.toStringTag]: "PrismaPromise"
   client<T extends Prisma.ClientProfileDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClientProfileDefaultArgs<ExtArgs>>): Prisma.Prisma__ClientProfileClient<runtime.Types.Result.GetResult<Prisma.$ClientProfilePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   goal<T extends Prisma.WorkoutGoalDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.WorkoutGoalDefaultArgs<ExtArgs>>): Prisma.Prisma__WorkoutGoalClient<runtime.Types.Result.GetResult<Prisma.$WorkoutGoalPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  updates<T extends Prisma.ClientGoal$updatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ClientGoal$updatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClientGoalUpdatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1622,6 +1751,30 @@ export type ClientGoalDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many ClientGoals to delete.
    */
   limit?: number
+}
+
+/**
+ * ClientGoal.updates
+ */
+export type ClientGoal$updatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ClientGoalUpdate
+   */
+  select?: Prisma.ClientGoalUpdateSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ClientGoalUpdate
+   */
+  omit?: Prisma.ClientGoalUpdateOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ClientGoalUpdateInclude<ExtArgs> | null
+  where?: Prisma.ClientGoalUpdateWhereInput
+  orderBy?: Prisma.ClientGoalUpdateOrderByWithRelationInput | Prisma.ClientGoalUpdateOrderByWithRelationInput[]
+  cursor?: Prisma.ClientGoalUpdateWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ClientGoalUpdateScalarFieldEnum | Prisma.ClientGoalUpdateScalarFieldEnum[]
 }
 
 /**

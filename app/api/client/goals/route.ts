@@ -5,7 +5,7 @@ import { notifyCoach } from "@/lib/notifications";
 
 export async function GET() {
   const session = await requireClient();
-  const userId = (session.user as any).id as string;
+  const userId = (session.user as { id?: string }).id as string;
 
   const profile = await prisma.clientProfile.findUnique({
     where: { userId },
@@ -24,7 +24,13 @@ export async function GET() {
 
   const data = await Promise.all(
     goals.map(async (cg) => {
-      if (cg.targetSessions == null) return cg;
+      const updates = await prisma.clientGoalUpdate.findMany({
+        where: { clientGoalId: cg.id },
+        orderBy: { createdAt: "desc" },
+        take: 5,
+        select: { id: true, message: true, createdAt: true },
+      });
+      if (cg.targetSessions == null) return { ...cg, updates };
       const links = await prisma.goalWorkout.findMany({
         where: { goalId: cg.goalId },
         select: { workoutId: true },
@@ -45,16 +51,21 @@ export async function GET() {
           ],
         },
       });
-      return { ...cg, currentValue: count };
+      return { ...cg, currentValue: count, updates };
     }),
   );
 
-  return NextResponse.json({ data });
+  return NextResponse.json({
+    data: data.map((cg) => ({
+      ...cg,
+      updates: (cg as { updates?: { id: string; message: string; createdAt: Date }[] }).updates ?? [],
+    })),
+  });
 }
 
 export async function POST(req: NextRequest) {
   const session = await requireClient();
-  const userId = (session.user as any).id as string;
+  const userId = (session.user as { id?: string }).id as string;
   const body = await req.json();
 
   const profile = await prisma.clientProfile.findUnique({

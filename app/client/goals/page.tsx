@@ -33,7 +33,9 @@ type ClientGoal = {
   targetSessions: number | null;
   currentValue: number | null;
   deadline: string | null;
+  deadlineRaw?: string | null;
   status: string;
+  updates?: { id: string; message: string; createdAt: string }[];
 };
 
 export default function ClientGoalsPage() {
@@ -46,6 +48,9 @@ export default function ClientGoalsPage() {
   const [selectedGoalId, setSelectedGoalId] = React.useState("");
   const [removeGoalId, setRemoveGoalId] = React.useState<string | null>(null);
   const [removing, setRemoving] = React.useState(false);
+  const [selectedDayByGoalId, setSelectedDayByGoalId] = React.useState<Record<string, string>>({});
+  const [feedbackByGoalId, setFeedbackByGoalId] = React.useState<Record<string, string>>({});
+  const [savingFeedbackGoalId, setSavingFeedbackGoalId] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     const load = async () => {
@@ -57,25 +62,45 @@ export default function ClientGoalsPage() {
         const availJson = await availRes.json();
         const mineJson = await mineRes.json();
         setAvailable(
-          (availJson.data ?? []).map((g: any) => ({
-            id: g.id as string,
-            name: g.name as string,
-            category: g.category as string,
+          (Array.isArray(availJson.data) ? availJson.data : []).map((g: { id: string; name: string; category: string }) => ({
+            id: g.id,
+            name: g.name,
+            category: g.category,
           })),
         );
         setSelected(
-          (mineJson.data ?? []).map((cg: any) => ({
-            id: cg.id as string,
-            goalId: cg.goalId as string,
-            name: cg.goal?.name as string,
-            category: cg.goal?.category as string,
-            targetValue: (cg.targetValue as number | null) ?? null,
-            targetSessions: (cg.targetSessions as number | null) ?? null,
-            currentValue: (cg.currentValue as number | null) ?? null,
+          (Array.isArray(mineJson.data) ? mineJson.data : []).map((cg: {
+            id: string;
+            goalId: string;
+            goal?: { name?: string; category?: string };
+            targetValue?: number | null;
+            targetSessions?: number | null;
+            currentValue?: number | null;
+            deadline?: string | null;
+            status?: string;
+            updates?: { id: string; message: string; createdAt: string }[];
+          }) => ({
+            id: cg.id,
+            goalId: cg.goalId,
+            name: cg.goal?.name ?? "Goal",
+            category: cg.goal?.category ?? "",
+            targetValue: cg.targetValue ?? null,
+            targetSessions: cg.targetSessions ?? null,
+            currentValue: cg.currentValue ?? null,
             deadline: cg.deadline
               ? new Date(cg.deadline).toLocaleDateString()
               : null,
-            status: (cg.status as string) ?? "ACTIVE",
+            deadlineRaw: cg.deadline
+              ? new Date(cg.deadline).toISOString()
+              : null,
+            status: cg.status ?? "ACTIVE",
+            updates: Array.isArray(cg.updates)
+              ? cg.updates.map((u: { id: string; message: string; createdAt: string }) => ({
+                  id: String(u.id),
+                  message: String(u.message),
+                  createdAt: String(u.createdAt),
+                }))
+              : [],
           })),
         );
       } finally {
@@ -104,7 +129,7 @@ export default function ClientGoalsPage() {
     }
     setSavingId("new");
     try {
-      const payload: any = { goalId: selectedGoalId };
+      const payload: { goalId: string; targetValue?: number; deadline?: string } = { goalId: selectedGoalId };
       if (newTarget) payload.targetValue = Number(newTarget);
       if (newDeadline) payload.deadline = newDeadline;
       const res = await fetch("/api/client/goals", {
@@ -165,6 +190,53 @@ export default function ClientGoalsPage() {
       toast.error("Failed to remove goal");
     } finally {
       setRemoving(false);
+    }
+  };
+
+  const getDayOptions = (goal: ClientGoal) => {
+    if (goal.targetSessions != null && goal.targetSessions > 0) {
+      return Array.from({ length: goal.targetSessions }, (_, i) => `day-${i + 1}`);
+    }
+    if (goal.deadlineRaw) {
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      const deadline = new Date(goal.deadlineRaw);
+      deadline.setHours(0, 0, 0, 0);
+      const diff = Math.max(1, Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+      return Array.from({ length: diff }, (_, i) => `day-${i + 1}`);
+    }
+    return ["day-1"];
+  };
+
+  const saveFeedback = async (goalId: string) => {
+    const message = (feedbackByGoalId[goalId] ?? "").trim();
+    if (!message) {
+      toast.error("Write a progress update first");
+      return;
+    }
+    setSavingFeedbackGoalId(goalId);
+    try {
+      const res = await fetch(`/api/client/goals/${goalId}/updates`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.error(json.error ?? "Failed to save update");
+        return;
+      }
+      setSelected((prev) =>
+        prev.map((g) =>
+          g.id === goalId
+            ? { ...g, updates: [json, ...(g.updates ?? [])].slice(0, 5) }
+            : g,
+        ),
+      );
+      setFeedbackByGoalId((prev) => ({ ...prev, [goalId]: "" }));
+      toast.success("Progress update saved");
+    } finally {
+      setSavingFeedbackGoalId(null);
     }
   };
 
@@ -257,6 +329,8 @@ export default function ClientGoalsPage() {
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {selected.map((g) => {
+                  const dayOptions = getDayOptions(g);
+                  const selectedDay = selectedDayByGoalId[g.id] ?? dayOptions[0];
                   const isSessionGoal = g.targetSessions != null;
                   const target = isSessionGoal ? (g.targetSessions ?? 0) : (g.targetValue ?? 0);
                   const current = g.currentValue ?? 0;
@@ -329,8 +403,29 @@ export default function ClientGoalsPage() {
                         </dd>
                       </dl>
                       <div className="mt-3 flex flex-wrap items-center gap-2">
+                        <div className="flex items-center gap-1">
+                          <span className="text-[10px] text-muted-foreground">Day</span>
+                          <select
+                            value={selectedDay}
+                            onChange={(e) =>
+                              setSelectedDayByGoalId((prev) => ({
+                                ...prev,
+                                [g.id]: e.target.value,
+                              }))
+                            }
+                            className="h-7 rounded-md border bg-transparent px-2 text-[11px]"
+                          >
+                            {dayOptions.map((dayKey, idx) => (
+                              <option key={dayKey} value={dayKey}>
+                                Day {idx + 1}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                         <Button size="xs" variant="outline" className="h-7 px-2 text-[11px]" asChild>
-                          <Link href={`/client/workouts?goalId=${encodeURIComponent(g.goalId)}`}>
+                          <Link
+                            href={`/client/workouts?goalId=${encodeURIComponent(g.goalId)}`}
+                          >
                             View workouts
                           </Link>
                         </Button>
@@ -374,6 +469,49 @@ export default function ClientGoalsPage() {
                             Remove
                           </Button>
                         </AlertDialog>
+                      </div>
+                      <div className="mt-3 space-y-2 border-t pt-2">
+                        <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
+                          Goal progress updates
+                        </div>
+                        <div className="flex gap-2">
+                          <Input
+                            value={feedbackByGoalId[g.id] ?? ""}
+                            onChange={(e) =>
+                              setFeedbackByGoalId((prev) => ({
+                                ...prev,
+                                [g.id]: e.target.value,
+                              }))
+                            }
+                            placeholder="e.g. my biceps improved today"
+                            className="h-7 text-[11px]"
+                          />
+                          <Button
+                            type="button"
+                            size="xs"
+                            className="h-7 px-2 text-[11px]"
+                            disabled={savingFeedbackGoalId === g.id}
+                            onClick={() => void saveFeedback(g.id)}
+                          >
+                            {savingFeedbackGoalId === g.id ? "Saving..." : "Send"}
+                          </Button>
+                        </div>
+                        <div className="space-y-1">
+                          {(g.updates ?? []).length === 0 ? (
+                            <p className="text-[10px] text-muted-foreground">
+                              No updates yet.
+                            </p>
+                          ) : (
+                            (g.updates ?? []).slice(0, 3).map((u) => (
+                              <div key={u.id} className="rounded bg-muted/40 px-2 py-1 text-[11px]">
+                                <div>{u.message}</div>
+                                <div className="text-[10px] text-muted-foreground">
+                                  {new Date(u.createdAt).toLocaleString()}
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
                       </div>
                     </Card>
                   );

@@ -33,13 +33,48 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
     const equipmentList = Array.isArray(body.equipment)
       ? body.equipment.filter(
-          (e: any) => e?.equipmentId && Number(e?.quantity) >= 1,
-        ).map((e: any) => ({
-          equipmentId: String(e.equipmentId),
-          quantity: Math.max(1, Number(e.quantity) || 1),
-          targetKg: e.targetKg != null ? Number(e.targetKg) : null,
-          targetPcs: e.targetPcs != null ? Number(e.targetPcs) : null,
-        }))
+          (e: unknown) =>
+            typeof e === "object" &&
+            e !== null &&
+            "equipmentId" in e &&
+            "quantity" in e &&
+            Number((e as { quantity: unknown }).quantity) >= 1,
+        ).map((e: unknown) => {
+          const item = e as {
+            equipmentId: unknown;
+            quantity: unknown;
+            targetKg?: unknown;
+            targetPcs?: unknown;
+          };
+          return {
+            equipmentId: String(item.equipmentId),
+            quantity: Math.max(1, Number(item.quantity) || 1),
+            targetKg: item.targetKg != null ? Number(item.targetKg) : null,
+            targetPcs: item.targetPcs != null ? Number(item.targetPcs) : null,
+          };
+        })
+      : null;
+    const mediaList = Array.isArray(body.media)
+      ? body.media
+          .map((m: unknown, index: number) => {
+            const item = (typeof m === "object" && m !== null ? m : {}) as {
+              url?: unknown;
+              stepName?: unknown;
+              description?: unknown;
+              mediaType?: unknown;
+              durationSeconds?: unknown;
+              order?: unknown;
+            };
+            return {
+              url: String(item.url ?? "").trim(),
+              stepName: item.stepName != null ? String(item.stepName).trim() : null,
+              description: item.description != null ? String(item.description).trim() : null,
+              mediaType: String(item.mediaType ?? "").toUpperCase() === "VIDEO" ? "VIDEO" : "GIF",
+              durationSeconds: Number(item.durationSeconds),
+              order: Number.isFinite(Number(item.order)) ? Number(item.order) : index,
+            };
+          })
+          .filter((m: { url: string; durationSeconds: number }) => m.url.length > 0 && Number.isFinite(m.durationSeconds) && m.durationSeconds > 0)
       : null;
 
     if (equipmentList !== null) {
@@ -61,6 +96,23 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         }
       } catch {
         // WorkoutEquipment table may not exist yet (migration not run)
+      }
+    }
+
+    if (mediaList !== null) {
+      await prisma.workoutMedia.deleteMany({ where: { workoutId: id } });
+      if (mediaList.length > 0) {
+        await prisma.workoutMedia.createMany({
+          data: mediaList.map((m: { url: string; stepName: string | null; description: string | null; mediaType: "GIF" | "VIDEO"; durationSeconds: number; order: number }) => ({
+            workoutId: id,
+            url: m.url,
+            stepName: m.stepName,
+            description: m.description,
+            mediaType: m.mediaType,
+            durationSeconds: m.durationSeconds,
+            order: m.order,
+          })),
+        });
       }
     }
 
@@ -91,7 +143,12 @@ export async function PATCH(req: NextRequest, { params }: Params) {
         targetPcs: r.targetPcs,
       }));
     } catch {}
-    return NextResponse.json({ ...workout, equipment });
+    const media = await prisma.workoutMedia.findMany({
+      where: { workoutId: id },
+      select: { id: true, url: true, stepName: true, description: true, mediaType: true, durationSeconds: true, order: true },
+      orderBy: { order: "asc" },
+    });
+    return NextResponse.json({ ...workout, equipment, media });
   } catch {
     return NextResponse.json(
       { error: "Workout not found" },

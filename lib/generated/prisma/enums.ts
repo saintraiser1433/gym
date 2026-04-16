@@ -60,6 +60,14 @@ export const WorkoutType = {
 export type WorkoutType = (typeof WorkoutType)[keyof typeof WorkoutType]
 
 
+export const WorkoutMediaType = {
+  GIF: 'GIF',
+  VIDEO: 'VIDEO'
+} as const
+
+export type WorkoutMediaType = (typeof WorkoutMediaType)[keyof typeof WorkoutMediaType]
+
+
 export const WorkoutGoalCategory = {
   WEIGHT_LOSS: 'WEIGHT_LOSS',
   MUSCLE_GAIN: 'MUSCLE_GAIN',

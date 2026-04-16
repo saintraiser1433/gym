@@ -20,6 +20,18 @@ export async function GET() {
           duration: true,
           difficulty: true,
           demoMediaUrl: true,
+          media: {
+            select: {
+              id: true,
+              url: true,
+              stepName: true,
+              description: true,
+              mediaType: true,
+              durationSeconds: true,
+              order: true,
+            },
+            orderBy: { order: "asc" },
+          },
         },
         orderBy: { name: "asc" },
       }),
@@ -30,7 +42,7 @@ export async function GET() {
     ]);
     const workoutIds = workouts.map((w) => w.id);
     const equipmentIds = allEquipment.map((e) => e.id);
-    let measureTypesById: Record<string, string[]> = {};
+    const measureTypesById: Record<string, string[]> = {};
     if (equipmentIds.length > 0) {
       try {
         const rows = await prisma.$queryRawUnsafe<{ id: string; measureTypes: string[] | null }[]>(
@@ -81,10 +93,25 @@ export async function GET() {
     }, {} as Record<string, { equipmentId: string; equipmentName: string; quantity: number; measureTypes: string[]; targetKg: number | null; targetPcs: number | null }[]>);
     const data = workouts.map((w) => ({
       ...w,
+      media: w.media.length
+        ? w.media
+        : w.demoMediaUrl
+          ? [
+              {
+                id: `legacy-${w.id}`,
+                url: w.demoMediaUrl,
+                stepName: null,
+                description: null,
+                mediaType: w.demoMediaUrl.toLowerCase().endsWith(".gif") ? "GIF" : "VIDEO",
+                durationSeconds: w.duration ? w.duration * 60 : 60,
+                order: 0,
+              },
+            ]
+          : [],
       equipment: equipmentByWorkout[w.id] ?? [],
     }));
     return NextResponse.json({ data, equipment });
-  } catch (e) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to load workouts", data: [] },
       { status: 500 },
@@ -111,15 +138,52 @@ export async function POST(req: NextRequest) {
     const duration = body.duration != null ? Number(body.duration) : null;
     const difficulty = body.difficulty ? String(body.difficulty).trim() : null;
     const demoMediaUrl = body.demoMediaUrl ? String(body.demoMediaUrl).trim() : null;
+    const mediaList = Array.isArray(body.media)
+      ? body.media
+          .map((m: unknown, index: number) => {
+            const item = (typeof m === "object" && m !== null ? m : {}) as {
+              url?: unknown;
+              stepName?: unknown;
+              description?: unknown;
+              mediaType?: unknown;
+              durationSeconds?: unknown;
+              order?: unknown;
+            };
+            return {
+              url: String(item.url ?? "").trim(),
+              stepName: item.stepName != null ? String(item.stepName).trim() : null,
+              description: item.description != null ? String(item.description).trim() : null,
+              mediaType: String(item.mediaType ?? "").toUpperCase() === "VIDEO" ? "VIDEO" : "GIF",
+              durationSeconds: Number(item.durationSeconds),
+              order: Number.isFinite(Number(item.order)) ? Number(item.order) : index,
+            };
+          })
+          .filter((m: { url: string; durationSeconds: number }) => m.url.length > 0 && Number.isFinite(m.durationSeconds) && m.durationSeconds > 0)
+      : [];
     const equipmentList = Array.isArray(body.equipment)
-      ? body.equipment.filter(
-          (e: any) => e?.equipmentId && Number(e?.quantity) >= 1,
-        ).map((e: any) => ({
-          equipmentId: String(e.equipmentId),
-          quantity: Math.max(1, Number(e.quantity) || 1),
-          targetKg: e.targetKg != null ? Number(e.targetKg) : null,
-          targetPcs: e.targetPcs != null ? Number(e.targetPcs) : null,
-        }))
+      ? body.equipment
+          .filter(
+            (e: unknown) =>
+              typeof e === "object" &&
+              e !== null &&
+              "equipmentId" in e &&
+              "quantity" in e &&
+              Number((e as { quantity: unknown }).quantity) >= 1,
+          )
+          .map((e: unknown) => {
+            const item = e as {
+              equipmentId: unknown;
+              quantity: unknown;
+              targetKg?: unknown;
+              targetPcs?: unknown;
+            };
+            return {
+              equipmentId: String(item.equipmentId),
+              quantity: Math.max(1, Number(item.quantity) || 1),
+              targetKg: item.targetKg != null ? Number(item.targetKg) : null,
+              targetPcs: item.targetPcs != null ? Number(item.targetPcs) : null,
+            };
+          })
       : [];
 
     const workout = await prisma.workout.create({
@@ -127,7 +191,22 @@ export async function POST(req: NextRequest) {
       select: { id: true, name: true, description: true, duration: true, difficulty: true, demoMediaUrl: true },
     });
 
+    if (mediaList.length > 0) {
+      await prisma.workoutMedia.createMany({
+        data: mediaList.map((m: { url: string; stepName: string | null; description: string | null; mediaType: "GIF" | "VIDEO"; durationSeconds: number; order: number }) => ({
+          workoutId: workout.id,
+          url: m.url,
+          stepName: m.stepName,
+          description: m.description,
+          mediaType: m.mediaType,
+          durationSeconds: m.durationSeconds,
+          order: m.order,
+        })),
+      });
+    }
+
     let equipment: { equipmentId: string; equipmentName: string; quantity: number; measureTypes: string[]; targetKg: number | null; targetPcs: number | null }[] = [];
+    let media: { id: string; url: string; stepName: string | null; description: string | null; mediaType: "GIF" | "VIDEO"; durationSeconds: number; order: number }[] = [];
     if (equipmentList.length > 0) {
       try {
         const { randomUUID } = await import("crypto");
@@ -158,8 +237,13 @@ export async function POST(req: NextRequest) {
         equipment = [];
       }
     }
-    return NextResponse.json({ ...workout, equipment }, { status: 201 });
-  } catch (e) {
+    media = await prisma.workoutMedia.findMany({
+      where: { workoutId: workout.id },
+      select: { id: true, url: true, stepName: true, description: true, mediaType: true, durationSeconds: true, order: true },
+      orderBy: { order: "asc" },
+    });
+    return NextResponse.json({ ...workout, equipment, media }, { status: 201 });
+  } catch {
     return NextResponse.json(
       { error: "Failed to create workout" },
       { status: 500 },

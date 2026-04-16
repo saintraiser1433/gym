@@ -73,6 +73,16 @@ export type Exercise = Prisma.ExerciseModel
  */
 export type Workout = Prisma.WorkoutModel
 /**
+ * Model WorkoutMedia
+ * 
+ */
+export type WorkoutMedia = Prisma.WorkoutMediaModel
+/**
+ * Model ClientGoalUpdate
+ * 
+ */
+export type ClientGoalUpdate = Prisma.ClientGoalUpdateModel
+/**
  * Model WorkoutExercise
  * 
  */
