@@ -57,8 +57,13 @@ export async function GET(req: NextRequest) {
       name: gw.workout.name,
       workoutType: gw.workoutType,
       targetValue: gw.targetValue,
+      planDay: gw.planDay,
     })),
-    workouts: g.goalWorkouts.map((gw) => ({ id: gw.workout.id, name: gw.workout.name })),
+    workouts: g.goalWorkouts.map((gw) => ({
+      id: gw.workout.id,
+      name: gw.workout.name,
+      planDay: gw.planDay,
+    })),
   }));
   return NextResponse.json({ data: goals, page, pageSize, total });
 }
@@ -88,32 +93,55 @@ export async function POST(req: NextRequest) {
 
   const toInsert =
     Array.isArray(goalWorkoutsInput) && goalWorkoutsInput.length > 0
-      ? goalWorkoutsInput.map((gw: any) => ({
+      ? goalWorkoutsInput.map((gw) => ({
           workoutId: gw.workoutId,
-          workoutType: gw.workoutType === "PER_KG" ? "PER_KG" : "PER_PCS",
+          workoutType: (gw.workoutType === "PER_KG" ? "PER_KG" : "PER_PCS") as "PER_KG" | "PER_PCS",
           targetValue: gw.targetValue ?? null,
+          planDay: gw.planDay ?? 1,
         }))
-      : (workoutIds as string[]).map((workoutId) => ({ workoutId, workoutType: "PER_PCS" as const, targetValue: null }));
+      : (workoutIds as string[]).map((workoutId) => ({
+          workoutId,
+          workoutType: "PER_PCS" as const,
+          targetValue: null,
+          planDay: 1,
+        }));
 
   if (toInsert.length > 0) {
-    const { randomUUID } = await import("crypto");
-    for (const gw of toInsert) {
-      await prisma.$executeRawUnsafe(
-        `INSERT INTO "GoalWorkout" (id, "goalId", "workoutId", "workoutType", "targetValue") VALUES ($1, $2, $3, $4::"WorkoutType", $5)`,
-        randomUUID(),
-        goal.id,
-        gw.workoutId,
-        gw.workoutType,
-        gw.targetValue ?? null,
-      );
-    }
+    await prisma.goalWorkout.createMany({
+      data: toInsert.map((gw) => ({
+        goalId: goal.id,
+        workoutId: gw.workoutId,
+        workoutType: gw.workoutType,
+        targetValue: gw.targetValue,
+        planDay: gw.planDay,
+      })),
+    });
   }
 
-  const gwRows = await prisma.$queryRawUnsafe<{ workoutId: string; workoutType: string; targetValue: number | null; name: string }[]>(
-    `SELECT gw."workoutId", gw."workoutType", gw."targetValue", w.name FROM "GoalWorkout" gw JOIN "Workout" w ON w.id = gw."workoutId" WHERE gw."goalId" = $1`,
-    goal.id,
+  const gwRows = await prisma.goalWorkout.findMany({
+    where: { goalId: goal.id },
+    select: {
+      workoutId: true,
+      workoutType: true,
+      targetValue: true,
+      planDay: true,
+      workout: { select: { name: true } },
+    },
+  });
+  const goalWorkouts = gwRows.map((r) => ({
+    id: r.workoutId,
+    name: r.workout.name,
+    workoutType: r.workoutType,
+    targetValue: r.targetValue,
+    planDay: r.planDay,
+  }));
+  return NextResponse.json(
+    {
+      ...goal,
+      goalWorkouts,
+      workouts: goalWorkouts.map((w) => ({ id: w.id, name: w.name, planDay: w.planDay })),
+    },
+    { status: 201 },
   );
-  const goalWorkouts = gwRows.map((r) => ({ id: r.workoutId, name: r.name, workoutType: r.workoutType, targetValue: r.targetValue }));
-  return NextResponse.json({ ...goal, goalWorkouts, workouts: goalWorkouts.map((w) => ({ id: w.id, name: w.name })) }, { status: 201 });
 }
 

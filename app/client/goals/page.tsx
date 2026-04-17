@@ -48,7 +48,6 @@ export default function ClientGoalsPage() {
   const [selectedGoalId, setSelectedGoalId] = React.useState("");
   const [removeGoalId, setRemoveGoalId] = React.useState<string | null>(null);
   const [removing, setRemoving] = React.useState(false);
-  const [selectedDayByGoalId, setSelectedDayByGoalId] = React.useState<Record<string, string>>({});
   const [feedbackByGoalId, setFeedbackByGoalId] = React.useState<Record<string, string>>({});
   const [savingFeedbackGoalId, setSavingFeedbackGoalId] = React.useState<string | null>(null);
 
@@ -193,21 +192,6 @@ export default function ClientGoalsPage() {
     }
   };
 
-  const getDayOptions = (goal: ClientGoal) => {
-    if (goal.targetSessions != null && goal.targetSessions > 0) {
-      return Array.from({ length: goal.targetSessions }, (_, i) => `day-${i + 1}`);
-    }
-    if (goal.deadlineRaw) {
-      const now = new Date();
-      now.setHours(0, 0, 0, 0);
-      const deadline = new Date(goal.deadlineRaw);
-      deadline.setHours(0, 0, 0, 0);
-      const diff = Math.max(1, Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) + 1);
-      return Array.from({ length: diff }, (_, i) => `day-${i + 1}`);
-    }
-    return ["day-1"];
-  };
-
   const saveFeedback = async (goalId: string) => {
     const message = (feedbackByGoalId[goalId] ?? "").trim();
     if (!message) {
@@ -329,8 +313,6 @@ export default function ClientGoalsPage() {
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {selected.map((g) => {
-                  const dayOptions = getDayOptions(g);
-                  const selectedDay = selectedDayByGoalId[g.id] ?? dayOptions[0];
                   const isSessionGoal = g.targetSessions != null;
                   const target = isSessionGoal ? (g.targetSessions ?? 0) : (g.targetValue ?? 0);
                   const current = g.currentValue ?? 0;
@@ -403,29 +385,8 @@ export default function ClientGoalsPage() {
                         </dd>
                       </dl>
                       <div className="mt-3 flex flex-wrap items-center gap-2">
-                        <div className="flex items-center gap-1">
-                          <span className="text-[10px] text-muted-foreground">Day</span>
-                          <select
-                            value={selectedDay}
-                            onChange={(e) =>
-                              setSelectedDayByGoalId((prev) => ({
-                                ...prev,
-                                [g.id]: e.target.value,
-                              }))
-                            }
-                            className="h-7 rounded-md border bg-transparent px-2 text-[11px]"
-                          >
-                            {dayOptions.map((dayKey, idx) => (
-                              <option key={dayKey} value={dayKey}>
-                                Day {idx + 1}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
                         <Button size="xs" variant="outline" className="h-7 px-2 text-[11px]" asChild>
-                          <Link
-                            href={`/client/workouts?goalId=${encodeURIComponent(g.goalId)}`}
-                          >
+                          <Link href={`/client/workouts?goalId=${encodeURIComponent(g.goalId)}`}>
                             View workouts
                           </Link>
                         </Button>

@@ -191,7 +191,8 @@ export const GoalWorkoutScalarFieldEnum = {
   goalId: 'goalId',
   workoutId: 'workoutId',
   workoutType: 'workoutType',
-  targetValue: 'targetValue'
+  targetValue: 'targetValue',
+  planDay: 'planDay'
 } as const
 
 export type GoalWorkoutScalarFieldEnum = (typeof GoalWorkoutScalarFieldEnum)[keyof typeof GoalWorkoutScalarFieldEnum]

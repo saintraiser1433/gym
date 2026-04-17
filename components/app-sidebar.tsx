@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import {
-  Command,
   LayoutDashboard,
   Users,
   Dumbbell,
@@ -12,6 +11,7 @@ import {
 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
+import Image from "next/image"
 
 import { NavMain } from "@/components/nav-main"
 import { NavUser } from "@/components/nav-user"
@@ -184,8 +184,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/">
-                <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                  <Command className="size-4" />
+                <div className="flex aspect-square size-8 items-center justify-center overflow-hidden rounded-lg border bg-white">
+                  <Image
+                    src="/croscalogo.jpg"
+                    alt="CrosCal logo"
+                    width={32}
+                    height={32}
+                    className="size-full object-cover"
+                    priority
+                  />
                 </div>
                 <div className="grid flex-1 text-left text-[12px] leading-tight">
                   <span className="truncate font-medium">CrosCal Fitness</span>

@@ -28,10 +28,12 @@ export type AggregateGoalWorkout = {
 
 export type GoalWorkoutAvgAggregateOutputType = {
   targetValue: number | null
+  planDay: number | null
 }
 
 export type GoalWorkoutSumAggregateOutputType = {
   targetValue: number | null
+  planDay: number | null
 }
 
 export type GoalWorkoutMinAggregateOutputType = {
@@ -40,6 +42,7 @@ export type GoalWorkoutMinAggregateOutputType = {
   workoutId: string | null
   workoutType: $Enums.WorkoutType | null
   targetValue: number | null
+  planDay: number | null
 }
 
 export type GoalWorkoutMaxAggregateOutputType = {
@@ -48,6 +51,7 @@ export type GoalWorkoutMaxAggregateOutputType = {
   workoutId: string | null
   workoutType: $Enums.WorkoutType | null
   targetValue: number | null
+  planDay: number | null
 }
 
 export type GoalWorkoutCountAggregateOutputType = {
@@ -56,16 +60,19 @@ export type GoalWorkoutCountAggregateOutputType = {
   workoutId: number
   workoutType: number
   targetValue: number
+  planDay: number
   _all: number
 }
 
 
 export type GoalWorkoutAvgAggregateInputType = {
   targetValue?: true
+  planDay?: true
 }
 
 export type GoalWorkoutSumAggregateInputType = {
   targetValue?: true
+  planDay?: true
 }
 
 export type GoalWorkoutMinAggregateInputType = {
@@ -74,6 +81,7 @@ export type GoalWorkoutMinAggregateInputType = {
   workoutId?: true
   workoutType?: true
   targetValue?: true
+  planDay?: true
 }
 
 export type GoalWorkoutMaxAggregateInputType = {
@@ -82,6 +90,7 @@ export type GoalWorkoutMaxAggregateInputType = {
   workoutId?: true
   workoutType?: true
   targetValue?: true
+  planDay?: true
 }
 
 export type GoalWorkoutCountAggregateInputType = {
@@ -90,6 +99,7 @@ export type GoalWorkoutCountAggregateInputType = {
   workoutId?: true
   workoutType?: true
   targetValue?: true
+  planDay?: true
   _all?: true
 }
 
@@ -185,6 +195,7 @@ export type GoalWorkoutGroupByOutputType = {
   workoutId: string
   workoutType: $Enums.WorkoutType
   targetValue: number | null
+  planDay: number
   _count: GoalWorkoutCountAggregateOutputType | null
   _avg: GoalWorkoutAvgAggregateOutputType | null
   _sum: GoalWorkoutSumAggregateOutputType | null
@@ -216,6 +227,7 @@ export type GoalWorkoutWhereInput = {
   workoutId?: Prisma.StringFilter<"GoalWorkout"> | string
   workoutType?: Prisma.EnumWorkoutTypeFilter<"GoalWorkout"> | $Enums.WorkoutType
   targetValue?: Prisma.FloatNullableFilter<"GoalWorkout"> | number | null
+  planDay?: Prisma.IntFilter<"GoalWorkout"> | number
   goal?: Prisma.XOR<Prisma.WorkoutGoalScalarRelationFilter, Prisma.WorkoutGoalWhereInput>
   workout?: Prisma.XOR<Prisma.WorkoutScalarRelationFilter, Prisma.WorkoutWhereInput>
 }
@@ -226,13 +238,14 @@ export type GoalWorkoutOrderByWithRelationInput = {
   workoutId?: Prisma.SortOrder
   workoutType?: Prisma.SortOrder
   targetValue?: Prisma.SortOrderInput | Prisma.SortOrder
+  planDay?: Prisma.SortOrder
   goal?: Prisma.WorkoutGoalOrderByWithRelationInput
   workout?: Prisma.WorkoutOrderByWithRelationInput
 }
 
 export type GoalWorkoutWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  goalId_workoutId?: Prisma.GoalWorkoutGoalIdWorkoutIdCompoundUniqueInput
+  goalId_workoutId_planDay?: Prisma.GoalWorkoutGoalIdWorkoutIdPlanDayCompoundUniqueInput
   AND?: Prisma.GoalWorkoutWhereInput | Prisma.GoalWorkoutWhereInput[]
   OR?: Prisma.GoalWorkoutWhereInput[]
   NOT?: Prisma.GoalWorkoutWhereInput | Prisma.GoalWorkoutWhereInput[]
@@ -240,9 +253,10 @@ export type GoalWorkoutWhereUniqueInput = Prisma.AtLeast<{
   workoutId?: Prisma.StringFilter<"GoalWorkout"> | string
   workoutType?: Prisma.EnumWorkoutTypeFilter<"GoalWorkout"> | $Enums.WorkoutType
   targetValue?: Prisma.FloatNullableFilter<"GoalWorkout"> | number | null
+  planDay?: Prisma.IntFilter<"GoalWorkout"> | number
   goal?: Prisma.XOR<Prisma.WorkoutGoalScalarRelationFilter, Prisma.WorkoutGoalWhereInput>
   workout?: Prisma.XOR<Prisma.WorkoutScalarRelationFilter, Prisma.WorkoutWhereInput>
-}, "id" | "goalId_workoutId">
+}, "id" | "goalId_workoutId_planDay">
 
 export type GoalWorkoutOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -250,6 +264,7 @@ export type GoalWorkoutOrderByWithAggregationInput = {
   workoutId?: Prisma.SortOrder
   workoutType?: Prisma.SortOrder
   targetValue?: Prisma.SortOrderInput | Prisma.SortOrder
+  planDay?: Prisma.SortOrder
   _count?: Prisma.GoalWorkoutCountOrderByAggregateInput
   _avg?: Prisma.GoalWorkoutAvgOrderByAggregateInput
   _max?: Prisma.GoalWorkoutMaxOrderByAggregateInput
@@ -266,12 +281,14 @@ export type GoalWorkoutScalarWhereWithAggregatesInput = {
   workoutId?: Prisma.StringWithAggregatesFilter<"GoalWorkout"> | string
   workoutType?: Prisma.EnumWorkoutTypeWithAggregatesFilter<"GoalWorkout"> | $Enums.WorkoutType
   targetValue?: Prisma.FloatNullableWithAggregatesFilter<"GoalWorkout"> | number | null
+  planDay?: Prisma.IntWithAggregatesFilter<"GoalWorkout"> | number
 }
 
 export type GoalWorkoutCreateInput = {
   id?: string
   workoutType: $Enums.WorkoutType
   targetValue?: number | null
+  planDay?: number
   goal: Prisma.WorkoutGoalCreateNestedOneWithoutGoalWorkoutsInput
   workout: Prisma.WorkoutCreateNestedOneWithoutGoalWorkoutsInput
 }
@@ -282,12 +299,14 @@ export type GoalWorkoutUncheckedCreateInput = {
   workoutId: string
   workoutType: $Enums.WorkoutType
   targetValue?: number | null
+  planDay?: number
 }
 
 export type GoalWorkoutUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   workoutType?: Prisma.EnumWorkoutTypeFieldUpdateOperationsInput | $Enums.WorkoutType
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  planDay?: Prisma.IntFieldUpdateOperationsInput | number
   goal?: Prisma.WorkoutGoalUpdateOneRequiredWithoutGoalWorkoutsNestedInput
   workout?: Prisma.WorkoutUpdateOneRequiredWithoutGoalWorkoutsNestedInput
 }
@@ -298,6 +317,7 @@ export type GoalWorkoutUncheckedUpdateInput = {
   workoutId?: Prisma.StringFieldUpdateOperationsInput | string
   workoutType?: Prisma.EnumWorkoutTypeFieldUpdateOperationsInput | $Enums.WorkoutType
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  planDay?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type GoalWorkoutCreateManyInput = {
@@ -306,12 +326,14 @@ export type GoalWorkoutCreateManyInput = {
   workoutId: string
   workoutType: $Enums.WorkoutType
   targetValue?: number | null
+  planDay?: number
 }
 
 export type GoalWorkoutUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   workoutType?: Prisma.EnumWorkoutTypeFieldUpdateOperationsInput | $Enums.WorkoutType
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  planDay?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type GoalWorkoutUncheckedUpdateManyInput = {
@@ -320,6 +342,7 @@ export type GoalWorkoutUncheckedUpdateManyInput = {
   workoutId?: Prisma.StringFieldUpdateOperationsInput | string
   workoutType?: Prisma.EnumWorkoutTypeFieldUpdateOperationsInput | $Enums.WorkoutType
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  planDay?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type GoalWorkoutListRelationFilter = {
@@ -332,9 +355,10 @@ export type GoalWorkoutOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type GoalWorkoutGoalIdWorkoutIdCompoundUniqueInput = {
+export type GoalWorkoutGoalIdWorkoutIdPlanDayCompoundUniqueInput = {
   goalId: string
   workoutId: string
+  planDay: number
 }
 
 export type GoalWorkoutCountOrderByAggregateInput = {
@@ -343,10 +367,12 @@ export type GoalWorkoutCountOrderByAggregateInput = {
   workoutId?: Prisma.SortOrder
   workoutType?: Prisma.SortOrder
   targetValue?: Prisma.SortOrder
+  planDay?: Prisma.SortOrder
 }
 
 export type GoalWorkoutAvgOrderByAggregateInput = {
   targetValue?: Prisma.SortOrder
+  planDay?: Prisma.SortOrder
 }
 
 export type GoalWorkoutMaxOrderByAggregateInput = {
@@ -355,6 +381,7 @@ export type GoalWorkoutMaxOrderByAggregateInput = {
   workoutId?: Prisma.SortOrder
   workoutType?: Prisma.SortOrder
   targetValue?: Prisma.SortOrder
+  planDay?: Prisma.SortOrder
 }
 
 export type GoalWorkoutMinOrderByAggregateInput = {
@@ -363,10 +390,12 @@ export type GoalWorkoutMinOrderByAggregateInput = {
   workoutId?: Prisma.SortOrder
   workoutType?: Prisma.SortOrder
   targetValue?: Prisma.SortOrder
+  planDay?: Prisma.SortOrder
 }
 
 export type GoalWorkoutSumOrderByAggregateInput = {
   targetValue?: Prisma.SortOrder
+  planDay?: Prisma.SortOrder
 }
 
 export type GoalWorkoutCreateNestedManyWithoutGoalInput = {
@@ -415,6 +444,14 @@ export type EnumWorkoutTypeFieldUpdateOperationsInput = {
   set?: $Enums.WorkoutType
 }
 
+export type IntFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
 export type GoalWorkoutCreateNestedManyWithoutWorkoutInput = {
   create?: Prisma.XOR<Prisma.GoalWorkoutCreateWithoutWorkoutInput, Prisma.GoalWorkoutUncheckedCreateWithoutWorkoutInput> | Prisma.GoalWorkoutCreateWithoutWorkoutInput[] | Prisma.GoalWorkoutUncheckedCreateWithoutWorkoutInput[]
   connectOrCreate?: Prisma.GoalWorkoutCreateOrConnectWithoutWorkoutInput | Prisma.GoalWorkoutCreateOrConnectWithoutWorkoutInput[]
@@ -461,6 +498,7 @@ export type GoalWorkoutCreateWithoutGoalInput = {
   id?: string
   workoutType: $Enums.WorkoutType
   targetValue?: number | null
+  planDay?: number
   workout: Prisma.WorkoutCreateNestedOneWithoutGoalWorkoutsInput
 }
 
@@ -469,6 +507,7 @@ export type GoalWorkoutUncheckedCreateWithoutGoalInput = {
   workoutId: string
   workoutType: $Enums.WorkoutType
   targetValue?: number | null
+  planDay?: number
 }
 
 export type GoalWorkoutCreateOrConnectWithoutGoalInput = {
@@ -506,12 +545,14 @@ export type GoalWorkoutScalarWhereInput = {
   workoutId?: Prisma.StringFilter<"GoalWorkout"> | string
   workoutType?: Prisma.EnumWorkoutTypeFilter<"GoalWorkout"> | $Enums.WorkoutType
   targetValue?: Prisma.FloatNullableFilter<"GoalWorkout"> | number | null
+  planDay?: Prisma.IntFilter<"GoalWorkout"> | number
 }
 
 export type GoalWorkoutCreateWithoutWorkoutInput = {
   id?: string
   workoutType: $Enums.WorkoutType
   targetValue?: number | null
+  planDay?: number
   goal: Prisma.WorkoutGoalCreateNestedOneWithoutGoalWorkoutsInput
 }
 
@@ -520,6 +561,7 @@ export type GoalWorkoutUncheckedCreateWithoutWorkoutInput = {
   goalId: string
   workoutType: $Enums.WorkoutType
   targetValue?: number | null
+  planDay?: number
 }
 
 export type GoalWorkoutCreateOrConnectWithoutWorkoutInput = {
@@ -553,12 +595,14 @@ export type GoalWorkoutCreateManyGoalInput = {
   workoutId: string
   workoutType: $Enums.WorkoutType
   targetValue?: number | null
+  planDay?: number
 }
 
 export type GoalWorkoutUpdateWithoutGoalInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   workoutType?: Prisma.EnumWorkoutTypeFieldUpdateOperationsInput | $Enums.WorkoutType
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  planDay?: Prisma.IntFieldUpdateOperationsInput | number
   workout?: Prisma.WorkoutUpdateOneRequiredWithoutGoalWorkoutsNestedInput
 }
 
@@ -567,6 +611,7 @@ export type GoalWorkoutUncheckedUpdateWithoutGoalInput = {
   workoutId?: Prisma.StringFieldUpdateOperationsInput | string
   workoutType?: Prisma.EnumWorkoutTypeFieldUpdateOperationsInput | $Enums.WorkoutType
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  planDay?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type GoalWorkoutUncheckedUpdateManyWithoutGoalInput = {
@@ -574,6 +619,7 @@ export type GoalWorkoutUncheckedUpdateManyWithoutGoalInput = {
   workoutId?: Prisma.StringFieldUpdateOperationsInput | string
   workoutType?: Prisma.EnumWorkoutTypeFieldUpdateOperationsInput | $Enums.WorkoutType
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  planDay?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type GoalWorkoutCreateManyWorkoutInput = {
@@ -581,12 +627,14 @@ export type GoalWorkoutCreateManyWorkoutInput = {
   goalId: string
   workoutType: $Enums.WorkoutType
   targetValue?: number | null
+  planDay?: number
 }
 
 export type GoalWorkoutUpdateWithoutWorkoutInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   workoutType?: Prisma.EnumWorkoutTypeFieldUpdateOperationsInput | $Enums.WorkoutType
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  planDay?: Prisma.IntFieldUpdateOperationsInput | number
   goal?: Prisma.WorkoutGoalUpdateOneRequiredWithoutGoalWorkoutsNestedInput
 }
 
@@ -595,6 +643,7 @@ export type GoalWorkoutUncheckedUpdateWithoutWorkoutInput = {
   goalId?: Prisma.StringFieldUpdateOperationsInput | string
   workoutType?: Prisma.EnumWorkoutTypeFieldUpdateOperationsInput | $Enums.WorkoutType
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  planDay?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type GoalWorkoutUncheckedUpdateManyWithoutWorkoutInput = {
@@ -602,6 +651,7 @@ export type GoalWorkoutUncheckedUpdateManyWithoutWorkoutInput = {
   goalId?: Prisma.StringFieldUpdateOperationsInput | string
   workoutType?: Prisma.EnumWorkoutTypeFieldUpdateOperationsInput | $Enums.WorkoutType
   targetValue?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  planDay?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 
@@ -612,6 +662,7 @@ export type GoalWorkoutSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   workoutId?: boolean
   workoutType?: boolean
   targetValue?: boolean
+  planDay?: boolean
   goal?: boolean | Prisma.WorkoutGoalDefaultArgs<ExtArgs>
   workout?: boolean | Prisma.WorkoutDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["goalWorkout"]>
@@ -622,6 +673,7 @@ export type GoalWorkoutSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   workoutId?: boolean
   workoutType?: boolean
   targetValue?: boolean
+  planDay?: boolean
   goal?: boolean | Prisma.WorkoutGoalDefaultArgs<ExtArgs>
   workout?: boolean | Prisma.WorkoutDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["goalWorkout"]>
@@ -632,6 +684,7 @@ export type GoalWorkoutSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   workoutId?: boolean
   workoutType?: boolean
   targetValue?: boolean
+  planDay?: boolean
   goal?: boolean | Prisma.WorkoutGoalDefaultArgs<ExtArgs>
   workout?: boolean | Prisma.WorkoutDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["goalWorkout"]>
@@ -642,9 +695,10 @@ export type GoalWorkoutSelectScalar = {
   workoutId?: boolean
   workoutType?: boolean
   targetValue?: boolean
+  planDay?: boolean
 }
 
-export type GoalWorkoutOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "goalId" | "workoutId" | "workoutType" | "targetValue", ExtArgs["result"]["goalWorkout"]>
+export type GoalWorkoutOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "goalId" | "workoutId" | "workoutType" | "targetValue" | "planDay", ExtArgs["result"]["goalWorkout"]>
 export type GoalWorkoutInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   goal?: boolean | Prisma.WorkoutGoalDefaultArgs<ExtArgs>
   workout?: boolean | Prisma.WorkoutDefaultArgs<ExtArgs>
@@ -670,6 +724,7 @@ export type $GoalWorkoutPayload<ExtArgs extends runtime.Types.Extensions.Interna
     workoutId: string
     workoutType: $Enums.WorkoutType
     targetValue: number | null
+    planDay: number
   }, ExtArgs["result"]["goalWorkout"]>
   composites: {}
 }
@@ -1100,6 +1155,7 @@ export interface GoalWorkoutFieldRefs {
   readonly workoutId: Prisma.FieldRef<"GoalWorkout", 'String'>
   readonly workoutType: Prisma.FieldRef<"GoalWorkout", 'WorkoutType'>
   readonly targetValue: Prisma.FieldRef<"GoalWorkout", 'Float'>
+  readonly planDay: Prisma.FieldRef<"GoalWorkout", 'Int'>
 }
     
 

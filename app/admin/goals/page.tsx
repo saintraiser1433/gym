@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 type WorkoutOption = { id: string; name: string };
+type GoalWorkoutAssignment = { workoutId: string; name: string; planDay: number };
 
 type GoalRow = {
   id: string;
@@ -27,7 +28,7 @@ type GoalRow = {
   description?: string | null;
   category: string;
   targetSessions?: number | null;
-  workouts?: { id: string; name: string }[];
+  goalWorkouts?: GoalWorkoutAssignment[];
 };
 
 export default function AdminGoalsPage() {
@@ -44,7 +45,7 @@ export default function AdminGoalsPage() {
     description: "",
     category: "GENERAL_FITNESS",
     targetSessions: "" as string,
-    workoutIds: [] as string[],
+    goalWorkouts: [] as { workoutId: string; planDay: string }[],
   });
   const [workouts, setWorkouts] = React.useState<WorkoutOption[]>([]);
   const [saving, setSaving] = React.useState(false);
@@ -80,7 +81,12 @@ export default function AdminGoalsPage() {
             description: g.description,
             category: g.category,
             targetSessions: g.targetSessions ?? null,
-            workouts: g.workouts ?? g.goalWorkouts?.map((gw: any) => ({ id: gw.id ?? gw.workoutId, name: gw.name })) ?? [],
+            goalWorkouts:
+              g.goalWorkouts?.map((gw: { id?: string; workoutId?: string; name: string; planDay?: number }) => ({
+                workoutId: gw.id ?? gw.workoutId ?? "",
+                name: gw.name,
+                planDay: gw.planDay ?? 1,
+              })) ?? [],
           })),
         );
         setTotal(json?.total ?? 0);
@@ -122,7 +128,7 @@ export default function AdminGoalsPage() {
       description: "",
       category: "GENERAL_FITNESS",
       targetSessions: "",
-      workoutIds: [],
+      goalWorkouts: [{ workoutId: "", planDay: "1" }],
     });
     setDialogOpen(true);
   };
@@ -134,17 +140,15 @@ export default function AdminGoalsPage() {
       description: row.description ?? "",
       category: row.category,
       targetSessions: row.targetSessions != null ? String(row.targetSessions) : "",
-      workoutIds: row.workouts?.map((w) => w.id) ?? [],
+      goalWorkouts:
+        row.goalWorkouts?.length
+          ? row.goalWorkouts.map((gw) => ({
+              workoutId: gw.workoutId,
+              planDay: String(gw.planDay ?? 1),
+            }))
+          : [{ workoutId: "", planDay: "1" }],
     });
     setDialogOpen(true);
-  };
-
-  const toggleWorkout = (workoutId: string) => {
-    setFormValues((prev) =>
-      prev.workoutIds.includes(workoutId)
-        ? { ...prev, workoutIds: prev.workoutIds.filter((id) => id !== workoutId) }
-        : { ...prev, workoutIds: [...prev.workoutIds, workoutId] },
-    );
   };
 
   const handleFormChange = (
@@ -154,16 +158,59 @@ export default function AdminGoalsPage() {
     setFormValues((prev) => ({ ...prev, [name]: value }));
   };
 
+  const addGoalWorkoutRow = () => {
+    setFormValues((prev) => ({
+      ...prev,
+      goalWorkouts: [...prev.goalWorkouts, { workoutId: "", planDay: "1" }],
+    }));
+  };
+
+  const removeGoalWorkoutRow = (index: number) => {
+    setFormValues((prev) => {
+      const next = prev.goalWorkouts.filter((_, i) => i !== index);
+      return {
+        ...prev,
+        goalWorkouts: next.length > 0 ? next : [{ workoutId: "", planDay: "1" }],
+      };
+    });
+  };
+
+  const updateGoalWorkoutRow = (
+    index: number,
+    patch: Partial<{ workoutId: string; planDay: string }>,
+  ) => {
+    setFormValues((prev) => ({
+      ...prev,
+      goalWorkouts: prev.goalWorkouts.map((row, i) =>
+        i === index ? { ...row, ...patch } : row,
+      ),
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
     try {
+      const normalizedGoalWorkouts = formValues.goalWorkouts
+        .map((row) => ({
+          workoutId: row.workoutId.trim(),
+          planDay: Number.parseInt(row.planDay, 10) || 1,
+        }))
+        .filter((row) => row.workoutId.length > 0)
+        .filter((row, index, list) => list.findIndex((x) => x.workoutId === row.workoutId && x.planDay === row.planDay) === index)
+        .map((row) => ({
+          workoutId: row.workoutId,
+          workoutType: "PER_PCS" as const,
+          targetValue: null as number | null,
+          planDay: Math.max(1, Math.min(366, row.planDay)),
+        }));
+
       const payload = {
         name: formValues.name,
         description: formValues.description || undefined,
         category: formValues.category,
         targetSessions: formValues.targetSessions ? Number(formValues.targetSessions) : undefined,
-        workoutIds: formValues.workoutIds,
+        goalWorkouts: normalizedGoalWorkouts,
       };
 
       let res: Response;
@@ -193,17 +240,42 @@ export default function AdminGoalsPage() {
 
       // Update the row from PATCH/POST response so the table shows new workouts immediately
       if (updated?.workouts && Array.isArray(updated.workouts)) {
-        const workouts = updated.workouts as { id: string; name: string }[];
+        const goalWorkouts = updated.workouts as { id: string; name: string; planDay?: number }[];
         if (editingGoal) {
           setRows((prev) =>
             prev.map((r) =>
               r.id === editingGoal.id
-                ? { ...r, name: updated.name ?? r.name, description: updated.description ?? r.description, category: updated.category ?? r.category, targetSessions: updated.targetSessions ?? r.targetSessions, workouts }
+                ? {
+                    ...r,
+                    name: updated.name ?? r.name,
+                    description: updated.description ?? r.description,
+                    category: updated.category ?? r.category,
+                    targetSessions: updated.targetSessions ?? r.targetSessions,
+                    goalWorkouts: goalWorkouts.map((w) => ({
+                      workoutId: w.id,
+                      name: w.name,
+                      planDay: w.planDay ?? 1,
+                    })),
+                  }
                 : r
-            )
+            ),
           );
         } else if (updated.id) {
-          setRows((prev) => [{ id: updated.id, name: updated.name ?? "", description: updated.description ?? null, category: updated.category ?? "", targetSessions: updated.targetSessions ?? null, workouts }, ...prev]);
+          setRows((prev) => [
+            {
+              id: updated.id,
+              name: updated.name ?? "",
+              description: updated.description ?? null,
+              category: updated.category ?? "",
+              targetSessions: updated.targetSessions ?? null,
+              goalWorkouts: goalWorkouts.map((w) => ({
+                workoutId: w.id,
+                name: w.name,
+                planDay: w.planDay ?? 1,
+              })),
+            },
+            ...prev,
+          ]);
           setTotal((t) => t + 1);
         }
       }
@@ -238,8 +310,14 @@ export default function AdminGoalsPage() {
     {
       key: "workouts",
       header: "Workouts",
-      render: (row) =>
-        row.workouts?.length ? row.workouts.map((w) => w.name).join(", ") : "—",
+      render: (row) => {
+        if (!row.goalWorkouts?.length) return "—";
+        return row.goalWorkouts
+          .slice()
+          .sort((a, b) => a.planDay - b.planDay)
+          .map((w) => `${w.name} (Day ${w.planDay})`)
+          .join(", ");
+      },
     },
     {
       key: "id",
@@ -412,28 +490,57 @@ export default function AdminGoalsPage() {
               <div className="space-y-1">
                 <label className="font-medium">Workouts</label>
                 <p className="text-[10px] text-muted-foreground">
-                  Select workouts to link to this goal.
+                  Build the plan by day. You can reuse the same workout on multiple days.
                 </p>
                 {workouts.length === 0 ? (
                   <p className="py-2 text-[11px] text-muted-foreground">
                     No workouts available. Add workouts in Admin → Workouts.
                   </p>
                 ) : (
-                  <div className="max-h-32 overflow-y-auto rounded-md border bg-muted/30 p-2 space-y-1">
-                    {workouts.map((w) => (
-                      <label
-                        key={w.id}
-                        className="flex cursor-pointer items-center gap-2 text-[11px]"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={formValues.workoutIds.includes(w.id)}
-                          onChange={() => toggleWorkout(w.id)}
-                          className="h-3 w-3"
+                  <div className="max-h-56 overflow-y-auto rounded-md border bg-muted/30 p-2 space-y-2">
+                    {formValues.goalWorkouts.map((row, index) => (
+                      <div key={`${index}-${row.workoutId}`} className="grid grid-cols-[72px_1fr_auto] items-center gap-2">
+                        <Input
+                          type="number"
+                          min={1}
+                          max={366}
+                          className="h-7 text-[11px]"
+                          value={row.planDay}
+                          onChange={(e) => updateGoalWorkoutRow(index, { planDay: e.target.value })}
+                          placeholder="Day"
                         />
-                        <span>{w.name}</span>
-                      </label>
+                        <select
+                          className="h-7 w-full rounded-md border bg-transparent px-2 text-[11px]"
+                          value={row.workoutId}
+                          onChange={(e) => updateGoalWorkoutRow(index, { workoutId: e.target.value })}
+                        >
+                          <option value="">Select workout</option>
+                          {workouts.map((w) => (
+                            <option key={w.id} value={w.id}>
+                              {w.name}
+                            </option>
+                          ))}
+                        </select>
+                        <Button
+                          type="button"
+                          size="xs"
+                          variant="ghost"
+                          className="h-7 px-2 text-[11px]"
+                          onClick={() => removeGoalWorkoutRow(index)}
+                        >
+                          Remove
+                        </Button>
+                      </div>
                     ))}
+                    <Button
+                      type="button"
+                      size="xs"
+                      variant="outline"
+                      className="h-7 px-2 text-[11px]"
+                      onClick={addGoalWorkoutRow}
+                    >
+                      Add day workout
+                    </Button>
                   </div>
                 )}
               </div>

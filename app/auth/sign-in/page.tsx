@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { signIn, getSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { z } from "zod";
@@ -81,8 +82,15 @@ export default function SignInPage() {
 
         {/* Logo */}
         <div className="relative flex items-center gap-3">
-          <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-orange-500 shadow-lg shadow-orange-500/30">
-            <Dumbbell className="w-5 h-5 text-white" />
+          <div className="h-12 w-12 overflow-hidden rounded-xl border border-white/10 bg-white shadow-lg shadow-orange-500/20">
+            <Image
+              src="/croscalogo.jpg"
+              alt="CrosCal logo"
+              width={48}
+              height={48}
+              className="h-full w-full object-cover"
+              priority
+            />
           </div>
           <span className="text-white font-bold text-xl tracking-tight">CrosCal</span>
         </div>
@@ -129,8 +137,15 @@ export default function SignInPage() {
       <div className="flex flex-1 flex-col items-center justify-center px-6 py-12 bg-zinc-950 lg:bg-zinc-900/50">
         {/* Mobile logo */}
         <div className="flex lg:hidden items-center gap-2 mb-8">
-          <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-orange-500 shadow-lg shadow-orange-500/30">
-            <Dumbbell className="w-4 h-4 text-white" />
+          <div className="h-10 w-10 overflow-hidden rounded-xl border border-white/10 bg-white shadow-lg shadow-orange-500/20">
+            <Image
+              src="/croscalogo.jpg"
+              alt="CrosCal logo"
+              width={40}
+              height={40}
+              className="h-full w-full object-cover"
+              priority
+            />
           </div>
           <span className="text-white font-bold text-lg tracking-tight">CrosCal</span>
         </div>

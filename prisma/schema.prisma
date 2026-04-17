@@ -126,11 +126,12 @@ model GoalWorkout {
   workoutId    String
   workoutType  WorkoutType // PER_PCS or PER_KG - must match workout's types
   targetValue  Float?      // required input for the selected type (e.g. kg or pcs)
+  planDay      Int        @default(1) // 1-based day within the goal plan (admin assigns)
 
   goal    WorkoutGoal @relation(fields: [goalId], references: [id], onDelete: Cascade)
   workout Workout     @relation(fields: [workoutId], references: [id], onDelete: Cascade)
 
-  @@unique([goalId, workoutId])
+  @@unique([goalId, workoutId, planDay])
 }
 
 model ClientGoal {

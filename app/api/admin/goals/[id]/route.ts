@@ -24,7 +24,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     category?: string;
     targetSessions?: number | null;
     workoutIds?: string[];
-    goalWorkouts?: { workoutId: string; workoutType: string; targetValue?: number | null }[];
+    goalWorkouts?: { workoutId: string; workoutType: string; targetValue?: number | null; planDay?: number }[];
   };
   const { workoutIds, goalWorkouts: goalWorkoutsInput, ...rest } = body;
   const hasWorkoutIds = Object.prototype.hasOwnProperty.call(json, "workoutIds");
@@ -50,6 +50,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
               workoutId: gw.workoutId,
               workoutType: workoutType(gw.workoutType),
               targetValue: gw.targetValue ?? null,
+              planDay: gw.planDay ?? 1,
             })),
         });
       }
@@ -63,6 +64,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
             workoutId,
             workoutType: "PER_PCS" as const,
             targetValue: null,
+            planDay: 1,
           })),
         });
       }
@@ -81,11 +83,12 @@ export async function PATCH(req: NextRequest, { params }: Params) {
       name: gw.workout.name,
       workoutType: gw.workoutType,
       targetValue: gw.targetValue,
+      planDay: gw.planDay,
     }));
     return NextResponse.json({
       ...goal,
       goalWorkouts,
-      workouts: goalWorkouts.map((w) => ({ id: w.id, name: w.name })),
+      workouts: goalWorkouts.map((w) => ({ id: w.id, name: w.name, planDay: w.planDay })),
     });
   } catch {
     return NextResponse.json(

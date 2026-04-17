@@ -2,7 +2,16 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireClient } from "@/lib/auth";
 
-/** Get workouts linked to the client's goals. Optional ?goalId= to filter by one goal. */
+function parsePlanDayParam(day: string | null): number | null {
+  if (!day?.trim()) return null;
+  const m = /^day-(\d+)$/i.exec(day.trim());
+  if (!m) return null;
+  const n = parseInt(m[1], 10);
+  if (!Number.isFinite(n) || n < 1 || n > 366) return null;
+  return n;
+}
+
+/** Get workouts linked to the client's goals. Optional ?goalId= to filter by one goal. Optional ?day=day-3 with goalId to filter by plan day (GoalWorkout.planDay). */
 export async function GET(req: NextRequest) {
   let session;
   try {
@@ -13,6 +22,7 @@ export async function GET(req: NextRequest) {
   const userId = (session.user as any).id as string;
   const { searchParams } = new URL(req.url);
   const goalId = searchParams.get("goalId")?.trim() || null;
+  const planDayFilter = parsePlanDayParam(searchParams.get("day"));
 
   const profile = await prisma.clientProfile.findUnique({
     where: { userId },
@@ -33,15 +43,43 @@ export async function GET(req: NextRequest) {
   }
 
   const filterGoalIds = goalId && goalIds.includes(goalId) ? [goalId] : goalIds;
+  const selectedGoalId = goalId && filterGoalIds.length === 1 ? filterGoalIds[0] : null;
+  const goalPlan = selectedGoalId
+    ? await prisma.goalWorkout.findMany({
+        where: { goalId: selectedGoalId },
+        select: { planDay: true },
+      })
+    : [];
+
+  const usePlanDayFilter =
+    planDayFilter != null &&
+    goalId != null &&
+    filterGoalIds.length === 1 &&
+    filterGoalIds[0] === goalId;
 
   // Use GoalWorkout join table (database has this; no _WorkoutToWorkoutGoal)
   const links = await prisma.goalWorkout.findMany({
-    where: { goalId: { in: filterGoalIds } },
-    select: { workoutId: true, goal: { select: { id: true, name: true } } },
+    where: {
+      goalId: { in: filterGoalIds },
+      ...(usePlanDayFilter ? { planDay: planDayFilter } : {}),
+    },
+    select: { workoutId: true, planDay: true, goal: { select: { id: true, name: true } } },
   });
   const workoutIds = [...new Set(links.map((l) => l.workoutId))];
   if (workoutIds.length === 0) {
-    return NextResponse.json({ data: [] });
+    const availableDays = selectedGoalId
+      ? [...new Set(goalPlan.map((l) => l.planDay))].sort((a, b) => a - b)
+      : [];
+    return NextResponse.json({
+      data: [],
+      plan: selectedGoalId
+        ? {
+            goalId: selectedGoalId,
+            availableDays,
+            maxDay: availableDays.length > 0 ? availableDays[availableDays.length - 1] : 1,
+          }
+        : null,
+    });
   }
 
   const [workouts, equipmentRows] = await Promise.all([
@@ -125,5 +163,13 @@ export async function GET(req: NextRequest) {
     equipment: equipmentByWorkoutId[w.id] ?? [],
   }));
 
-  return NextResponse.json({ data });
+  const planMeta = selectedGoalId
+    ? {
+        goalId: selectedGoalId,
+        availableDays: [...new Set(goalPlan.map((l) => l.planDay))].sort((a, b) => a - b),
+        maxDay: goalPlan.reduce((max, l) => (l.planDay > max ? l.planDay : max), 1),
+      }
+    : null;
+
+  return NextResponse.json({ data, plan: planMeta });
 }

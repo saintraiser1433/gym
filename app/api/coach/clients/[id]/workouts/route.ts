@@ -4,7 +4,16 @@ import { requireCoach } from "@/lib/auth";
 
 type Params = { params: Promise<{ id: string }> };
 
-/** Get workouts linked to this client's goals. Coach must own the client. Optional ?goalId= */
+function parsePlanDayParam(day: string | null): number | null {
+  if (!day?.trim()) return null;
+  const m = /^day-(\d+)$/i.exec(day.trim());
+  if (!m) return null;
+  const n = parseInt(m[1], 10);
+  if (!Number.isFinite(n) || n < 1 || n > 366) return null;
+  return n;
+}
+
+/** Get workouts linked to this client's goals. Coach must own the client. Optional ?goalId= and ?day=day-N with goalId for plan day. */
 export async function GET(req: NextRequest, { params }: Params) {
   const session = await requireCoach();
   const userId = (session.user as { id?: string }).id as string;
@@ -24,7 +33,9 @@ export async function GET(req: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "Client not found", data: [] }, { status: 404 });
   }
 
-  const goalIdParam = new URL(req.url).searchParams.get("goalId")?.trim() || null;
+  const url = new URL(req.url);
+  const goalIdParam = url.searchParams.get("goalId")?.trim() || null;
+  const planDayFilter = parsePlanDayParam(url.searchParams.get("day"));
 
   const clientGoals = await prisma.clientGoal.findMany({
     where: { clientId: client.id },
@@ -37,8 +48,17 @@ export async function GET(req: NextRequest, { params }: Params) {
 
   const filterGoalIds = goalIdParam && goalIds.includes(goalIdParam) ? [goalIdParam] : goalIds;
 
+  const usePlanDayFilter =
+    planDayFilter != null &&
+    goalIdParam != null &&
+    filterGoalIds.length === 1 &&
+    filterGoalIds[0] === goalIdParam;
+
   const links = await prisma.goalWorkout.findMany({
-    where: { goalId: { in: filterGoalIds } },
+    where: {
+      goalId: { in: filterGoalIds },
+      ...(usePlanDayFilter ? { planDay: planDayFilter } : {}),
+    },
     select: { workoutId: true, goal: { select: { id: true, name: true } } },
   });
   const workoutIds = [...new Set(links.map((l) => l.workoutId))];

@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "GoalWorkout" ADD COLUMN "planDay" INTEGER NOT NULL DEFAULT 1;

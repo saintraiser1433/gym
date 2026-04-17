@@ -78,6 +78,7 @@ export const createGoalSchema = z.object({
         workoutId: z.string().min(1),
         workoutType: z.enum(["PER_PCS", "PER_KG"]),
         targetValue: z.number().nullable().optional(),
+        planDay: z.coerce.number().int().min(1).max(366).optional().default(1),
       }),
     )
     .optional()

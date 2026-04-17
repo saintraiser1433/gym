@@ -47,17 +47,30 @@ type ProgressEntry = {
 };
 
 type WorkoutExerciseOption = { id: string; name: string };
+type GoalOption = { id: string; name: string };
+
+function dayNumber(dayKey: string): number | null {
+  const m = /^day-(\d+)$/i.exec(dayKey.trim());
+  if (!m) return null;
+  const n = parseInt(m[1], 10);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
 
 function ClientWorkoutsContent() {
   const searchParams = useSearchParams();
-  const goalIdParam = searchParams.get("goalId") ?? "";
+  const goalIdParam = searchParams.get("goalId")?.trim() ?? "";
+  const dayParam = searchParams.get("day")?.trim() ?? "";
 
   const [workouts, setWorkouts] = React.useState<GoalWorkout[]>([]);
+  const [goalOptions, setGoalOptions] = React.useState<GoalOption[]>([]);
+  const [selectedGoalId, setSelectedGoalId] = React.useState(goalIdParam);
+  const [selectedDay, setSelectedDay] = React.useState(dayParam || "day-1");
+  const [maxPlanDay, setMaxPlanDay] = React.useState(1);
   const [expandedSteps, setExpandedSteps] = React.useState<Record<string, boolean>>({});
   const [progressRows, setProgressRows] = React.useState<ProgressEntry[]>([]);
   const [loadingWorkouts, setLoadingWorkouts] = React.useState(true);
   const [loadingProgress, setLoadingProgress] = React.useState(true);
-  const [hasCoach, setHasCoach] = React.useState(false);
+  const [hasCoach, setHasCoach] = React.useState<boolean | null>(null);
 
   const [logWorkout, setLogWorkout] = React.useState<GoalWorkout | null>(null);
   const [logExercises, setLogExercises] = React.useState<WorkoutExerciseOption[]>([]);
@@ -128,22 +141,46 @@ function ClientWorkoutsContent() {
   };
 
   React.useEffect(() => {
+    setSelectedGoalId(goalIdParam);
+    setSelectedDay(dayParam || "day-1");
+  }, [goalIdParam, dayParam]);
+
+  React.useEffect(() => {
+    fetch("/api/client/goals", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((json) => {
+        const data = Array.isArray(json?.data) ? json.data : [];
+        setGoalOptions(
+          data.map((cg: { goalId?: string; goal?: { name?: string } }) => ({
+            id: cg.goalId ?? "",
+            name: cg.goal?.name ?? "Goal",
+          })).filter((g: GoalOption) => g.id),
+        );
+      })
+      .catch(() => setGoalOptions([]));
+  }, []);
+
+  React.useEffect(() => {
     const load = async () => {
       setLoadingWorkouts(true);
       try {
-        const url = goalIdParam
-          ? `/api/client/goals/workouts?goalId=${encodeURIComponent(goalIdParam)}`
-          : "/api/client/goals/workouts";
+        const sp = new URLSearchParams();
+        if (selectedGoalId) sp.set("goalId", selectedGoalId);
+        if (hasCoach === false && selectedGoalId && selectedDay) sp.set("day", selectedDay);
+        const qs = sp.toString();
+        const url = qs ? `/api/client/goals/workouts?${qs}` : "/api/client/goals/workouts";
         const res = await fetch(url, { cache: "no-store" });
         const json = await safeJson(res);
         const data = Array.isArray(json?.data) ? json.data : [];
         setWorkouts(data);
+        const apiMax = Number(json?.plan?.maxDay);
+        setMaxPlanDay(Number.isFinite(apiMax) && apiMax > 0 ? Math.min(366, apiMax) : 1);
       } finally {
         setLoadingWorkouts(false);
       }
     };
     void load();
-  }, [goalIdParam]);
+  }, [selectedGoalId, selectedDay, hasCoach]);
 
   React.useEffect(() => {
     let cancelled = false;
@@ -165,7 +202,7 @@ function ClientWorkoutsContent() {
   }, []);
 
   React.useEffect(() => {
-    if (hasCoach) return;
+    if (hasCoach !== false) return;
     fetch(`/api/client/workouts/can-log?date=${todayStr}`, { cache: "no-store" })
       .then((r) => r.json())
       .then((d) =>
@@ -178,6 +215,16 @@ function ClientWorkoutsContent() {
       .catch(() => setCanLogToday(null));
   }, [hasCoach, todayStr]);
 
+  React.useEffect(() => {
+    if (hasCoach !== false || !selectedGoalId) return;
+    const n = dayNumber(selectedDay);
+    const clamped = n && n <= maxPlanDay ? n : 1;
+    const normalized = `day-${clamped}`;
+    if (normalized !== selectedDay) {
+      setSelectedDay(normalized);
+    }
+  }, [hasCoach, selectedGoalId, selectedDay, maxPlanDay]);
+
   return (
     <div className="space-y-6">
       <div>
@@ -185,10 +232,48 @@ function ClientWorkoutsContent() {
         <p className="text-sm text-muted-foreground">
           Workouts linked to your goals. Add goals in My Goals to see workouts here.
         </p>
-        {hasCoach && (
+        {hasCoach === true && (
           <p className="mt-1 text-xs text-muted-foreground">
             Premium: Your coach logs your workout progress and attendance.
           </p>
+        )}
+        {hasCoach === false && (
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+            <div className="flex items-center gap-1">
+              <span className="text-muted-foreground">Goal</span>
+              <select
+                value={selectedGoalId}
+                onChange={(e) => {
+                  setSelectedGoalId(e.target.value);
+                  setSelectedDay("day-1");
+                }}
+                className="h-8 rounded-md border bg-transparent px-2 text-[11px]"
+              >
+                <option value="">All goals</option>
+                {goalOptions.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {selectedGoalId && (
+              <div className="flex items-center gap-1">
+                <span className="text-muted-foreground">Plan day</span>
+                <select
+                  value={selectedDay}
+                  onChange={(e) => setSelectedDay(e.target.value)}
+                  className="h-8 rounded-md border bg-transparent px-2 text-[11px]"
+                >
+                  {Array.from({ length: maxPlanDay }, (_, i) => (
+                    <option key={`day-${i + 1}`} value={`day-${i + 1}`}>
+                      Day {i + 1}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
         )}
       </div>
       {logWorkout && (
@@ -197,12 +282,37 @@ function ClientWorkoutsContent() {
         </Card>
       )}
 
-      {goalIdParam && (
+      {selectedGoalId && (
         <p className="text-xs text-muted-foreground">
-          Showing workouts for this goal.{" "}
-          <Link href="/client/workouts" className="underline">
-            Show all goal workouts
-          </Link>
+          Showing workouts for this goal
+          {hasCoach === false ? " and the selected plan day" : ""}.{" "}
+          {hasCoach === false ? (
+            <>
+              <button
+                type="button"
+                className="underline"
+                onClick={() => setSelectedDay("day-1")}
+              >
+                Show all days for this goal
+              </button>
+              {" · "}
+              <button
+                type="button"
+                className="underline"
+                onClick={() => setSelectedGoalId("")}
+              >
+                All goals
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              className="underline"
+              onClick={() => setSelectedGoalId("")}
+            >
+              Show workouts from all goals
+            </button>
+          )}
         </p>
       )}
 
@@ -210,11 +320,32 @@ function ClientWorkoutsContent() {
         <p className="text-sm text-muted-foreground">Loading workouts…</p>
       ) : workouts.length === 0 ? (
         <Card className="p-4 text-sm text-muted-foreground">
-          No workouts for the selected goal yet. Select goals in{" "}
-          <Link href="/client/goals" className="font-medium underline">
-            My Goals
-          </Link>{" "}
-          to see workouts linked to those goals.
+          {selectedGoalId && hasCoach === false ? (
+            <>
+              No workouts are assigned to this plan day yet. In Admin → Goals, set each linked
+              workout&apos;s plan day, or pick another day in{" "}
+              <Link href="/client/goals" className="font-medium underline">
+                My Goals
+              </Link>
+              .
+            </>
+          ) : selectedGoalId ? (
+            <>
+              No workouts for the selected goal yet. Select goals in{" "}
+              <Link href="/client/goals" className="font-medium underline">
+                My Goals
+              </Link>{" "}
+              to see workouts linked to those goals.
+            </>
+          ) : (
+            <>
+              No workouts linked to your goals yet. Add goals in{" "}
+              <Link href="/client/goals" className="font-medium underline">
+                My Goals
+              </Link>
+              .
+            </>
+          )}
         </Card>
       ) : (
         <div className="space-y-3">
@@ -312,7 +443,7 @@ function ClientWorkoutsContent() {
                       </div>
                     </div>
                   )}
-                  {!hasCoach && (
+                  {hasCoach === false && (
                     <div className="mt-3 pt-2 border-t">
                       {canLogToday && !canLogToday.hasAttendance && canLogToday.reason && (
                         <p className="text-[10px] text-muted-foreground mb-1">{canLogToday.reason}</p>
