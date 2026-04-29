@@ -67,6 +67,8 @@ function ClientWorkoutsContent() {
   const [selectedDay, setSelectedDay] = React.useState(dayParam || "day-1");
   const [maxPlanDay, setMaxPlanDay] = React.useState(1);
   const [expandedSteps, setExpandedSteps] = React.useState<Record<string, boolean>>({});
+  const [mediaZoomById, setMediaZoomById] = React.useState<Record<string, number>>({});
+  const mediaContainerRefs = React.useRef<Record<string, HTMLDivElement | null>>({});
   const [progressRows, setProgressRows] = React.useState<ProgressEntry[]>([]);
   const [loadingWorkouts, setLoadingWorkouts] = React.useState(true);
   const [loadingProgress, setLoadingProgress] = React.useState(true);
@@ -99,6 +101,28 @@ function ClientWorkoutsContent() {
     if (mins === 0) return `${rem}s`;
     if (rem === 0) return `${mins}m`;
     return `${mins}m ${rem}s`;
+  };
+
+  const changeMediaZoom = (mediaId: string, direction: "in" | "out") => {
+    setMediaZoomById((prev) => {
+      const current = prev[mediaId] ?? 1;
+      const next = direction === "in" ? current + 0.25 : current - 0.25;
+      return { ...prev, [mediaId]: Math.max(0.5, Math.min(3, Number(next.toFixed(2)))) };
+    });
+  };
+
+  const openMediaFullscreen = async (mediaId: string) => {
+    const node = mediaContainerRefs.current[mediaId];
+    if (!node) return;
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+        return;
+      }
+      await node.requestFullscreen();
+    } catch {
+      toast.error("Fullscreen is not available on this device.");
+    }
   };
 
   const loadProgress = React.useCallback(async () => {
@@ -383,11 +407,58 @@ function ClientWorkoutsContent() {
                               <span className="absolute left-2 top-2 z-10 rounded bg-black/70 px-1.5 py-0.5 text-[10px] text-white">
                                 {formatSeconds(m.durationSeconds)}
                               </span>
-                              {m.url.toLowerCase().endsWith(".gif") || m.mediaType === "GIF" ? (
-                                <img src={m.url} alt="" className="aspect-video w-full object-cover" />
-                              ) : (
-                                <video src={m.url} controls className="aspect-video w-full object-cover" preload="metadata" />
-                              )}
+                              <div
+                                ref={(node) => {
+                                  mediaContainerRefs.current[m.id] = node;
+                                }}
+                                className="relative aspect-video w-full overflow-hidden bg-black"
+                              >
+                                {m.url.toLowerCase().endsWith(".gif") || m.mediaType === "GIF" ? (
+                                  <img
+                                    src={m.url}
+                                    alt=""
+                                    className="h-full w-full object-cover transition-transform duration-200"
+                                    style={{ transform: `scale(${mediaZoomById[m.id] ?? 1})` }}
+                                  />
+                                ) : (
+                                  <video
+                                    src={m.url}
+                                    controls
+                                    className="h-full w-full object-cover transition-transform duration-200"
+                                    preload="metadata"
+                                    style={{ transform: `scale(${mediaZoomById[m.id] ?? 1})` }}
+                                  />
+                                )}
+                                <div className="absolute bottom-2 right-2 z-10 flex items-center gap-1 rounded bg-black/70 p-1">
+                                  <Button
+                                    type="button"
+                                    size="xs"
+                                    variant="secondary"
+                                    className="h-6 px-2 text-[10px]"
+                                    onClick={() => changeMediaZoom(m.id, "out")}
+                                  >
+                                    Zoom -
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="xs"
+                                    variant="secondary"
+                                    className="h-6 px-2 text-[10px]"
+                                    onClick={() => changeMediaZoom(m.id, "in")}
+                                  >
+                                    Zoom +
+                                  </Button>
+                                  <Button
+                                    type="button"
+                                    size="xs"
+                                    variant="secondary"
+                                    className="h-6 px-2 text-[10px]"
+                                    onClick={() => void openMediaFullscreen(m.id)}
+                                  >
+                                    Fullscreen
+                                  </Button>
+                                </div>
+                              </div>
                               {(m.stepName || m.description) && (
                                 <div className="space-y-0.5 border-t bg-background/95 px-2 py-1 text-[11px] text-muted-foreground">
                                   {m.stepName && <div className="font-medium text-foreground">{m.stepName}</div>}
