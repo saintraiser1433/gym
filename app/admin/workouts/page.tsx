@@ -716,44 +716,33 @@ export default function AdminWorkoutsPage() {
                 <div className="space-y-2">
                   {mediaEntries.map((entry, index) => (
                     <div key={`media-${index}`} className="space-y-2 rounded-md border p-2">
-                      <div className="grid gap-2 md:grid-cols-2">
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-medium text-muted-foreground">URL</label>
+                      <div className="space-y-1 max-w-md">
+                        <label className="text-[10px] font-medium text-muted-foreground">Step time</label>
+                        <div className="grid grid-cols-3 gap-2">
                           <Input
-                            value={entry.url}
-                            onChange={(e) => updateMediaEntry(index, { url: e.target.value })}
+                            type="number"
+                            min={0}
+                            value={entry.hours}
+                            onChange={(e) => updateMediaEntry(index, { hours: e.target.value })}
                             className="h-7 text-[11px]"
-                            placeholder="/uploads/workouts/example.gif"
+                            placeholder="Hour"
                           />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-medium text-muted-foreground">Step time</label>
-                          <div className="grid grid-cols-3 gap-2">
-                            <Input
-                              type="number"
-                              min={0}
-                              value={entry.hours}
-                              onChange={(e) => updateMediaEntry(index, { hours: e.target.value })}
-                              className="h-7 text-[11px]"
-                              placeholder="Hour"
-                            />
-                            <Input
-                              type="number"
-                              min={0}
-                              value={entry.minutes}
-                              onChange={(e) => updateMediaEntry(index, { minutes: e.target.value })}
-                              className="h-7 text-[11px]"
-                              placeholder="Min"
-                            />
-                            <Input
-                              type="number"
-                              min={0}
-                              value={entry.seconds}
-                              onChange={(e) => updateMediaEntry(index, { seconds: e.target.value })}
-                              className="h-7 text-[11px]"
-                              placeholder="Sec"
-                            />
-                          </div>
+                          <Input
+                            type="number"
+                            min={0}
+                            value={entry.minutes}
+                            onChange={(e) => updateMediaEntry(index, { minutes: e.target.value })}
+                            className="h-7 text-[11px]"
+                            placeholder="Min"
+                          />
+                          <Input
+                            type="number"
+                            min={0}
+                            value={entry.seconds}
+                            onChange={(e) => updateMediaEntry(index, { seconds: e.target.value })}
+                            className="h-7 text-[11px]"
+                            placeholder="Sec"
+                          />
                         </div>
                       </div>
                       <div className="space-y-1">
