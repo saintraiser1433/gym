@@ -87,37 +87,8 @@ export async function PATCH(req: Request, { params }: Params) {
           : null;
   }
 
-  if ("gender" in body) {
-    const g = body.gender;
-    profileData.gender = g === null || g === undefined || g === "" ? null : String(g).trim() || null;
-  }
-  if ("occupation" in body) {
-    const o = body.occupation;
-    profileData.occupation = o === null || o === undefined || o === "" ? null : String(o).trim() || null;
-  }
-  if ("address" in body) {
-    const a = body.address;
-    profileData.address = a === null || a === undefined || a === "" ? null : String(a).trim() || null;
-  }
-  if ("emergencyContact" in body) {
-    const e = body.emergencyContact;
-    profileData.emergencyContact =
-      e === null || e === undefined || e === "" ? null : String(e).trim() || null;
-  }
-  if ("gymNotes" in body) {
-    const n = body.gymNotes;
-    profileData.gymNotes = n === null || n === undefined || n === "" ? null : String(n).trim() || null;
-  }
-
-  if ("dateOfBirth" in body) {
-    const d = body.dateOfBirth;
-    if (d === null || d === undefined || d === "") {
-      profileData.dateOfBirth = null;
-    } else if (typeof d === "string") {
-      const dt = new Date(d);
-      profileData.dateOfBirth = Number.isFinite(dt.getTime()) ? dt : undefined;
-    }
-  }
+  // Registration-owned fields (DOB, gender, occupation, address, emergency, gym notes) are not
+  // mutable via the coach API — clients update those through their own profile / signup.
 
   const userPatch: { name?: string; phone?: string | null } = {};
   if (body.user && typeof body.user === "object" && body.user !== null) {

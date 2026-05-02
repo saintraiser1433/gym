@@ -1,7 +1,6 @@
 "use client";
 
 import * as React from "react";
-import dynamic from "next/dynamic";
 import { format } from "date-fns";
 import { DataTable, type Column } from "@/components/data-table";
 import { Card } from "@/components/ui/card";
@@ -10,19 +9,6 @@ import { Input } from "@/components/ui/input";
 import { Target, Dumbbell, User, Lock, Unlock } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-
-const AddressMapPicker = dynamic(
-  () =>
-    import("@/components/address-map-picker").then((m) => ({
-      default: m.AddressMapPicker,
-    })),
-  {
-    ssr: false,
-    loading: () => (
-      <p className="text-[11px] text-muted-foreground">Loading map…</p>
-    ),
-  },
-);
 
 /** Stored values are exactly Male / Female for coach intake. */
 function normalizeGenderForSelect(raw: unknown): "" | "Male" | "Female" {
@@ -372,12 +358,6 @@ export default function CoachClientsPage() {
           },
           weight: profileDraft.weight === "" ? null : parseFloat(profileDraft.weight),
           height: profileDraft.height === "" ? null : parseFloat(profileDraft.height),
-          dateOfBirth: profileDraft.dateOfBirth || null,
-          gender: profileDraft.gender || null,
-          occupation: profileDraft.occupation || null,
-          address: profileDraft.address || null,
-          emergencyContact: profileDraft.emergencyContact || null,
-          gymNotes: profileDraft.gymNotes || null,
           nutritionObjective: profileDraft.nutritionObjective || null,
           dailyCalorieTarget:
             profileDraft.dailyCalorieTarget === ""
@@ -670,103 +650,110 @@ export default function CoachClientsPage() {
                           </div>
                         </div>
                       </div>
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-medium text-muted-foreground">Weight (kg)</label>
-                          <Input
-                            type="number"
-                            min={0}
-                            step={0.1}
-                            className="h-7 text-[11px]"
-                            value={profileDraft.weight}
-                            onChange={(e) =>
-                              setProfileDraft((p) => ({ ...p, weight: e.target.value }))
-                            }
-                          />
+                      <div className="space-y-2 rounded-md border border-muted-foreground/25 bg-muted/10 p-2">
+                        <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                          Personal (from registration)
+                        </p>
+                        <p className="text-[10px] leading-snug text-muted-foreground">
+                          Same order as client signup. Editable only by the client — not here.
+                        </p>
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-medium text-muted-foreground">Date of birth</label>
+                            <Input
+                              type="date"
+                              readOnly
+                              aria-readonly
+                              tabIndex={-1}
+                              className="h-7 cursor-default bg-muted/50 text-[11px] text-muted-foreground"
+                              value={profileDraft.dateOfBirth}
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-medium text-muted-foreground">Gender</label>
+                            <Input
+                              readOnly
+                              aria-readonly
+                              tabIndex={-1}
+                              className="h-7 cursor-default bg-muted/50 text-[11px] text-muted-foreground"
+                              value={profileDraft.gender || "—"}
+                            />
+                          </div>
+                          <div className="space-y-1 sm:col-span-2">
+                            <label className="text-[10px] font-medium text-muted-foreground">Occupation</label>
+                            <Input
+                              readOnly
+                              aria-readonly
+                              tabIndex={-1}
+                              className="h-7 cursor-default bg-muted/50 text-[11px] text-muted-foreground"
+                              value={profileDraft.occupation}
+                            />
+                          </div>
+                          <div className="space-y-1 sm:col-span-2">
+                            <label className="text-[10px] font-medium text-muted-foreground">Address</label>
+                            <textarea
+                              readOnly
+                              aria-readonly
+                              tabIndex={-1}
+                              className="flex min-h-[56px] w-full cursor-default rounded-md border border-input bg-muted/50 px-2 py-1.5 text-[11px] text-muted-foreground shadow-xs outline-none"
+                              value={profileDraft.address}
+                            />
+                          </div>
+                          <div className="space-y-1 sm:col-span-2">
+                            <label className="text-[10px] font-medium text-muted-foreground">Emergency contact</label>
+                            <Input
+                              readOnly
+                              aria-readonly
+                              tabIndex={-1}
+                              className="h-7 cursor-default bg-muted/50 text-[11px] text-muted-foreground"
+                              value={profileDraft.emergencyContact}
+                            />
+                          </div>
                         </div>
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-medium text-muted-foreground">Height (cm)</label>
-                          <Input
-                            type="number"
-                            min={0}
-                            step={0.1}
-                            className="h-7 text-[11px]"
-                            value={profileDraft.height}
-                            onChange={(e) =>
-                              setProfileDraft((p) => ({ ...p, height: e.target.value }))
-                            }
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-medium text-muted-foreground">Date of birth</label>
-                          <Input
-                            type="date"
-                            className="h-7 text-[11px]"
-                            value={profileDraft.dateOfBirth}
-                            onChange={(e) =>
-                              setProfileDraft((p) => ({ ...p, dateOfBirth: e.target.value }))
-                            }
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-medium text-muted-foreground">Gender</label>
-                          <select
-                            className="flex h-7 w-full rounded-md border border-input bg-transparent px-2 text-[11px]"
-                            value={profileDraft.gender}
-                            onChange={(e) => {
-                              const v = e.target.value;
-                              setProfileDraft((p) => ({
-                                ...p,
-                                gender:
-                                  v === "Male" || v === "Female" || v === ""
-                                    ? v
-                                    : "",
-                              }));
-                            }}
-                          >
-                            <option value="">— Select —</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                          </select>
-                        </div>
-                        <div className="space-y-1 sm:col-span-2">
-                          <label className="text-[10px] font-medium text-muted-foreground">Occupation</label>
-                          <Input
-                            className="h-7 text-[11px]"
-                            value={profileDraft.occupation}
-                            onChange={(e) =>
-                              setProfileDraft((p) => ({ ...p, occupation: e.target.value }))
-                            }
-                          />
-                        </div>
-                        <div className="space-y-1 sm:col-span-2">
-                          <label className="text-[10px] font-medium text-muted-foreground">Address</label>
-                          <AddressMapPicker
-                            address={profileDraft.address}
-                            onAddressChange={(address) =>
-                              setProfileDraft((p) => ({ ...p, address }))
-                            }
-                          />
-                        </div>
-                        <div className="space-y-1 sm:col-span-2">
-                          <label className="text-[10px] font-medium text-muted-foreground">Emergency contact</label>
-                          <Input
-                            className="h-7 text-[11px]"
-                            value={profileDraft.emergencyContact}
-                            onChange={(e) =>
-                              setProfileDraft((p) => ({ ...p, emergencyContact: e.target.value }))
-                            }
-                          />
-                        </div>
-                        <div className="space-y-1 sm:col-span-2">
-                          <label className="text-[10px] font-medium text-muted-foreground">Notes (medical, limitations, etc.)</label>
-                          <textarea
-                            className="flex min-h-[56px] w-full rounded-md border border-input bg-transparent px-2 py-1.5 text-[11px] shadow-xs outline-none"
-                            value={profileDraft.gymNotes}
-                            onChange={(e) =>
-                              setProfileDraft((p) => ({ ...p, gymNotes: e.target.value }))
-                            }
-                          />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-medium text-muted-foreground">
+                          Fitness goals / notes <span className="font-normal text-muted-foreground">(from registration)</span>
+                        </label>
+                        <textarea
+                          readOnly
+                          aria-readonly
+                          tabIndex={-1}
+                          className="flex min-h-[56px] w-full cursor-default rounded-md border border-input bg-muted/50 px-2 py-1.5 text-[11px] text-muted-foreground shadow-xs outline-none"
+                          value={profileDraft.gymNotes}
+                        />
+                      </div>
+                      <div className="space-y-2 border-t pt-3">
+                        <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                          Coach measurements
+                        </p>
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-medium text-muted-foreground">Weight (kg)</label>
+                            <Input
+                              type="number"
+                              min={0}
+                              step={0.1}
+                              className="h-7 text-[11px]"
+                              value={profileDraft.weight}
+                              onChange={(e) =>
+                                setProfileDraft((p) => ({ ...p, weight: e.target.value }))
+                              }
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-medium text-muted-foreground">Height (cm)</label>
+                            <Input
+                              type="number"
+                              min={0}
+                              step={0.1}
+                              className="h-7 text-[11px]"
+                              value={profileDraft.height}
+                              onChange={(e) =>
+                                setProfileDraft((p) => ({ ...p, height: e.target.value }))
+                              }
+                            />
+                          </div>
                         </div>
                       </div>
                       <div className="border-t pt-2">

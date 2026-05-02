@@ -1,15 +1,31 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Eye, EyeOff, Dumbbell, ChevronRight } from "lucide-react";
+
+const AddressMapPicker = dynamic(
+  () =>
+    import("@/components/address-map-picker").then((m) => ({
+      default: m.AddressMapPicker,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <p className="rounded-md border border-zinc-700 bg-zinc-800/40 py-8 text-center text-xs text-zinc-500">
+        Loading map…
+      </p>
+    ),
+  },
+);
 
 const registerSchema = z
   .object({
@@ -122,7 +138,7 @@ export default function RegisterPage() {
 
       {/* Content */}
       <main className="flex flex-1 items-center justify-center px-4 py-10">
-        <div className="w-full max-w-lg space-y-8">
+        <div className="w-full max-w-2xl space-y-8">
           {/* Heading */}
           <div className="text-center space-y-2">
             <h1 className="text-3xl font-black text-white tracking-tight">
@@ -238,7 +254,21 @@ export default function RegisterPage() {
 
                 <div className="space-y-1.5">
                   <FieldLabel htmlFor="address">Address</FieldLabel>
-                  <Input id="address" type="text" autoComplete="street-address" placeholder="Street, city, barangay" className={inputClass} {...form.register("address")} />
+                  <p className="text-xs text-zinc-500">
+                    Use your location, tap the map to drop a pin, or type your address. It saves with your profile.
+                  </p>
+                  <Controller
+                    name="address"
+                    control={form.control}
+                    render={({ field }) => (
+                      <AddressMapPicker
+                        address={field.value ?? ""}
+                        onAddressChange={field.onChange}
+                        hideTextareaLabel
+                      />
+                    )}
+                  />
+                  <FieldError message={form.formState.errors.address?.message} />
                 </div>
 
                 <div className="space-y-1.5">

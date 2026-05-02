@@ -1,14 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireCoach } from "@/lib/auth";
 
-/** Reverse geocode via OSM Nominatim (server-side; coach-only). */
+/** Reverse geocode via OSM Nominatim (server-side; used by address map picker during signup and in-app). */
 export async function GET(req: NextRequest) {
-  try {
-    await requireCoach();
-  } catch {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   const lat = req.nextUrl.searchParams.get("lat");
   const lon = req.nextUrl.searchParams.get("lon");
   if (lat == null || lon === "" || lon == null || lat === "") {
@@ -27,7 +20,7 @@ export async function GET(req: NextRequest) {
     const res = await fetch(url, {
       headers: {
         Accept: "application/json",
-        "User-Agent": "CrosCalGym/1.0 (coach address picker)",
+        "User-Agent": "CrosCalGym/1.0 (address picker)",
       },
       next: { revalidate: 0 },
     });
