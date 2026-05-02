@@ -23,21 +23,45 @@ type QrResponse = { image: string };
 
 type ClientGoalItem = { id: string; status: string };
 
+type CoachPlan = {
+  nutritionObjective: string | null;
+  dailyCalorieTarget: number | null;
+  dailyProteinGrams: number | null;
+  recommendedGymSessionsPerWeek: number | null;
+  workoutScheduleNotes: string | null;
+  coachName: string | null;
+};
+
+function formatNutritionObjective(key: string | null) {
+  if (!key) return "—";
+  const labels: Record<string, string> = {
+    WEIGHT_LOSS: "Weight loss",
+    SLIMMING: "Slimming / toning",
+    MUSCLE_GAIN: "Muscle gain",
+    GENERAL_FITNESS: "General fitness",
+    MAINTENANCE: "Maintenance",
+    OTHER: "Other",
+  };
+  return labels[key] ?? key.replace(/_/g, " ").toLowerCase();
+}
+
 export default function ClientDashboardPage() {
   const [membership, setMembership] = React.useState<CurrentMembership | null>(null);
   const [analytics, setAnalytics] = React.useState<AnalyticsResponse | null>(null);
   const [qr, setQr] = React.useState<string | null>(null);
   const [hasCoach, setHasCoach] = React.useState<boolean | null>(null);
   const [goals, setGoals] = React.useState<ClientGoalItem[] | null>(null);
+  const [coachPlan, setCoachPlan] = React.useState<CoachPlan | null>(null);
 
   React.useEffect(() => {
     void (async () => {
-      const [membershipRes, analyticsRes, qrRes, memberRes, goalsRes] = await Promise.all([
+      const [membershipRes, analyticsRes, qrRes, memberRes, goalsRes, profileRes] = await Promise.all([
         fetch("/api/client/memberships/current"),
         fetch("/api/client/analytics"),
         fetch("/api/client/attendance/qr"),
         fetch("/api/client/me/membership", { cache: "no-store" }).catch(() => null),
         fetch("/api/client/goals", { cache: "no-store" }).catch(() => null),
+        fetch("/api/client/profile", { cache: "no-store" }).catch(() => null),
       ]);
       if (membershipRes.ok) {
         const json = await membershipRes.json();
@@ -60,6 +84,24 @@ export default function ClientDashboardPage() {
         setGoals(data.map((g: any) => ({ id: g.id, status: g.status ?? "ACTIVE" })));
       } else {
         setGoals([]);
+      }
+      if (profileRes?.ok) {
+        const profileJson = await profileRes.json();
+        const d = profileJson?.data;
+        if (d) {
+          setCoachPlan({
+            nutritionObjective: d.nutritionObjective ?? null,
+            dailyCalorieTarget: d.dailyCalorieTarget ?? null,
+            dailyProteinGrams: d.dailyProteinGrams ?? null,
+            recommendedGymSessionsPerWeek: d.recommendedGymSessionsPerWeek ?? null,
+            workoutScheduleNotes: d.workoutScheduleNotes ?? null,
+            coachName: d.coachName ?? null,
+          });
+        } else {
+          setCoachPlan(null);
+        }
+      } else {
+        setCoachPlan(null);
       }
     })();
   }, []);
@@ -100,6 +142,76 @@ export default function ClientDashboardPage() {
           )}
         </div>
       </div>
+
+      {hasCoach === true &&
+        coachPlan &&
+        (coachPlan.nutritionObjective ||
+          coachPlan.dailyCalorieTarget != null ||
+          coachPlan.dailyProteinGrams != null ||
+          coachPlan.recommendedGymSessionsPerWeek != null ||
+          (coachPlan.workoutScheduleNotes && coachPlan.workoutScheduleNotes.trim())) && (
+          <div className="rounded-md border bg-card p-4">
+            <p className="text-xs text-muted-foreground">From your coach</p>
+            <h2 className="text-sm font-semibold">Your coach&apos;s plan</h2>
+            <div className="mt-1 text-xs text-muted-foreground">
+              Coach: <span className="text-foreground">{coachPlan.coachName ?? "—"}</span>
+            </div>
+            {(coachPlan.nutritionObjective ||
+              coachPlan.dailyCalorieTarget != null ||
+              coachPlan.dailyProteinGrams != null) && (
+              <div className="mt-4">
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Nutrition</h3>
+                <dl className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
+                  <div>
+                    <dt className="text-xs text-muted-foreground">Objective</dt>
+                    <dd>{formatNutritionObjective(coachPlan.nutritionObjective)}</dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs text-muted-foreground">Daily calories</dt>
+                    <dd>
+                      {coachPlan.dailyCalorieTarget != null
+                        ? `${Math.round(coachPlan.dailyCalorieTarget)} kcal`
+                        : "—"}
+                    </dd>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <dt className="text-xs text-muted-foreground">Daily protein</dt>
+                    <dd>
+                      {coachPlan.dailyProteinGrams != null
+                        ? `${Math.round(coachPlan.dailyProteinGrams)} g`
+                        : "—"}
+                    </dd>
+                  </div>
+                </dl>
+              </div>
+            )}
+            {(coachPlan.recommendedGymSessionsPerWeek != null ||
+              (coachPlan.workoutScheduleNotes && coachPlan.workoutScheduleNotes.trim())) && (
+              <div className="mt-4 border-t pt-4">
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                  Gym schedule
+                </h3>
+                <dl className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
+                  <div>
+                    <dt className="text-xs text-muted-foreground">Sessions per week</dt>
+                    <dd>
+                      {coachPlan.recommendedGymSessionsPerWeek != null
+                        ? `${coachPlan.recommendedGymSessionsPerWeek}× at the gym`
+                        : "—"}
+                    </dd>
+                  </div>
+                  {coachPlan.workoutScheduleNotes && coachPlan.workoutScheduleNotes.trim() && (
+                    <div className="sm:col-span-2">
+                      <dt className="text-xs text-muted-foreground">Schedule notes</dt>
+                      <dd className="whitespace-pre-wrap">{coachPlan.workoutScheduleNotes.trim()}</dd>
+                    </div>
+                  )}
+                </dl>
+              </div>
+            )}
+          </div>
+        )}
+
       <div className="grid gap-4 md:grid-cols-2">
         <ChartCard title="My attendance" description="Last 4 weeks">
           <ResponsiveContainer width="100%" height="100%">

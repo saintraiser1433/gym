@@ -148,7 +148,11 @@ export const createPaymentSchema = z.object({
 });
 
 export const createScheduleSchema = z.object({
-  title: z.string().min(1),
+  /** Optional label; empty when omitted (coach calendars use time + roster only). */
+  title: z.preprocess(
+    (v) => (typeof v === "string" ? v.trim().slice(0, 500) : ""),
+    z.string().max(500),
+  ),
   type: z.enum(["CLASS", "PERSONAL_TRAINING", "GYM_HOURS"]),
   startTime: z.string().datetime(),
   endTime: z.string().datetime(),

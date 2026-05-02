@@ -459,14 +459,6 @@ export type CoachProfileUpdateOneWithoutAssignedClientsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CoachProfileUpdateToOneWithWhereWithoutAssignedClientsInput, Prisma.CoachProfileUpdateWithoutAssignedClientsInput>, Prisma.CoachProfileUncheckedUpdateWithoutAssignedClientsInput>
 }
 
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type CoachProfileCreateNestedOneWithoutCreatedWorkoutsInput = {
   create?: Prisma.XOR<Prisma.CoachProfileCreateWithoutCreatedWorkoutsInput, Prisma.CoachProfileUncheckedCreateWithoutCreatedWorkoutsInput>
   connectOrCreate?: Prisma.CoachProfileCreateOrConnectWithoutCreatedWorkoutsInput

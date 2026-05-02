@@ -12,14 +12,35 @@ export async function GET() {
   });
 
   if (!coach) {
-    return NextResponse.json({ data: [] });
+    return NextResponse.json({ data: [], assignedClientNames: [] });
   }
 
-  const schedules = await prisma.schedule.findMany({
-    where: { coachId: coach.id },
-    orderBy: { startTime: "asc" },
-  });
+  const [schedules, assignedProfiles] = await Promise.all([
+    prisma.schedule.findMany({
+      where: { coachId: coach.id },
+      orderBy: { startTime: "asc" },
+    }),
+    prisma.clientProfile.findMany({
+      where: {
+        assignedCoachId: coach.id,
+        memberships: {
+          some: {
+            status: "ACTIVE",
+            membership: {
+              OR: [{ type: "PREMIUM" }, { hasCoach: true }],
+            },
+          },
+        },
+      },
+      include: { user: { select: { name: true } } },
+    }),
+  ]);
 
-  return NextResponse.json({ data: schedules });
+  const assignedClientNames = assignedProfiles
+    .map((p) => p.user?.name?.trim())
+    .filter((n): n is string => Boolean(n))
+    .sort((a, b) => a.localeCompare(b));
+
+  return NextResponse.json({ data: schedules, assignedClientNames });
 }
 

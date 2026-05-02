@@ -1,13 +1,37 @@
 "use client";
 
 import * as React from "react";
+import dynamic from "next/dynamic";
 import { format } from "date-fns";
 import { DataTable, type Column } from "@/components/data-table";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Target, Dumbbell } from "lucide-react";
+import { Target, Dumbbell, User, Lock, Unlock } from "lucide-react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+
+const AddressMapPicker = dynamic(
+  () =>
+    import("@/components/address-map-picker").then((m) => ({
+      default: m.AddressMapPicker,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <p className="text-[11px] text-muted-foreground">Loading map…</p>
+    ),
+  },
+);
+
+/** Stored values are exactly Male / Female for coach intake. */
+function normalizeGenderForSelect(raw: unknown): "" | "Male" | "Female" {
+  if (raw == null || typeof raw !== "string") return "";
+  const u = raw.trim().toLowerCase();
+  if (u === "male" || u === "m") return "Male";
+  if (u === "female" || u === "f") return "Female";
+  return "";
+}
 
 type ClientRow = {
   id: string;
@@ -81,6 +105,7 @@ export default function CoachClientsPage() {
   const [detailOpen, setDetailOpen] = React.useState(false);
   const [clientId, setClientId] = React.useState<string | null>(null);
   const [clientName, setClientName] = React.useState<string>("");
+  const [clientEmail, setClientEmail] = React.useState<string>("");
   const [goals, setGoals] = React.useState<ClientGoal[]>([]);
   const [workouts, setWorkouts] = React.useState<GoalWorkout[]>([]);
   const [progress, setProgress] = React.useState<ProgressEntry[]>([]);
@@ -107,6 +132,53 @@ export default function CoachClientsPage() {
     notes: "",
     rating: "",
   });
+
+  type ProfileDraft = {
+    userName: string;
+    userPhone: string;
+    weight: string;
+    height: string;
+    dateOfBirth: string;
+    gender: string;
+    occupation: string;
+    address: string;
+    emergencyContact: string;
+    gymNotes: string;
+    nutritionObjective: string;
+    dailyCalorieTarget: string;
+    dailyProteinGrams: string;
+    recommendedGymSessionsPerWeek: string;
+    workoutScheduleNotes: string;
+  };
+
+  const emptyProfileDraft = (): ProfileDraft => ({
+    userName: "",
+    userPhone: "",
+    weight: "",
+    height: "",
+    dateOfBirth: "",
+    gender: "",
+    occupation: "",
+    address: "",
+    emergencyContact: "",
+    gymNotes: "",
+    nutritionObjective: "",
+    dailyCalorieTarget: "",
+    dailyProteinGrams: "",
+    recommendedGymSessionsPerWeek: "",
+    workoutScheduleNotes: "",
+  });
+
+  const [profileDraft, setProfileDraft] = React.useState<ProfileDraft>(() => emptyProfileDraft());
+  const [profileSaving, setProfileSaving] = React.useState(false);
+  /** When false, name/phone are read-only (client account values). Unlock to edit. */
+  const [contactFieldsUnlocked, setContactFieldsUnlocked] = React.useState(false);
+  const contactBaselineRef = React.useRef<{ userName: string; userPhone: string }>({
+    userName: "",
+    userPhone: "",
+  });
+  const [goalEdits, setGoalEdits] = React.useState<Record<string, { target: string; deadline: string }>>({});
+  const [savingGoalId, setSavingGoalId] = React.useState<string | null>(null);
 
   const fetchData = React.useCallback(async () => {
     setLoading(true);
@@ -140,8 +212,46 @@ export default function CoachClientsPage() {
         const d = json.data;
         setClientId(d.id);
         setClientName(d.user?.name ?? "Client");
+        setClientEmail(d.user?.email ?? "");
+        const baselineName = d.user?.name ?? "";
+        const baselinePhone = d.user?.phone ?? "";
+        contactBaselineRef.current = { userName: baselineName, userPhone: baselinePhone };
+        setProfileDraft({
+          userName: baselineName,
+          userPhone: baselinePhone,
+          weight: d.weight != null ? String(d.weight) : "",
+          height: d.height != null ? String(d.height) : "",
+          dateOfBirth: d.dateOfBirth
+            ? format(new Date(d.dateOfBirth), "yyyy-MM-dd")
+            : "",
+          gender: normalizeGenderForSelect(d.gender),
+          occupation: d.occupation ?? "",
+          address: d.address ?? "",
+          emergencyContact: d.emergencyContact ?? "",
+          gymNotes: d.gymNotes ?? "",
+          nutritionObjective: d.nutritionObjective ?? "",
+          dailyCalorieTarget:
+            d.dailyCalorieTarget != null ? String(d.dailyCalorieTarget) : "",
+          dailyProteinGrams:
+            d.dailyProteinGrams != null ? String(d.dailyProteinGrams) : "",
+          recommendedGymSessionsPerWeek:
+            d.recommendedGymSessionsPerWeek != null
+              ? String(d.recommendedGymSessionsPerWeek)
+              : "",
+          workoutScheduleNotes: d.workoutScheduleNotes ?? "",
+        });
+        const rawGoals = (d.goals ?? []) as {
+          id: string;
+          goalId: string;
+          goal?: { name?: string; category?: string };
+          targetValue?: number | null;
+          targetSessions?: number | null;
+          currentValue?: number | null;
+          deadline?: string | null;
+          status?: string;
+        }[];
         setGoals(
-          (d.goals ?? []).map((g: any) => ({
+          rawGoals.map((g) => ({
             id: g.id,
             goalId: g.goalId,
             goal: g.goal ?? { name: "—", category: "" },
@@ -152,6 +262,21 @@ export default function CoachClientsPage() {
             status: g.status ?? "ACTIVE",
           })),
         );
+        const ge: Record<string, { target: string; deadline: string }> = {};
+        for (const g of rawGoals) {
+          const isSessionGoal = g.targetSessions != null;
+          ge[g.id] = {
+            target: isSessionGoal
+              ? g.targetSessions != null
+                ? String(g.targetSessions)
+                : ""
+              : g.targetValue != null
+                ? String(g.targetValue)
+                : "",
+            deadline: g.deadline ? format(new Date(g.deadline), "yyyy-MM-dd") : "",
+          };
+        }
+        setGoalEdits(ge);
       }
     } finally {
       setDetailLoading(false);
@@ -205,7 +330,11 @@ export default function CoachClientsPage() {
       setDetailOpen(true);
       setClientId(id);
       setClientName("");
+      setClientEmail("");
       setGoals([]);
+      setGoalEdits({});
+      setContactFieldsUnlocked(false);
+      setProfileDraft(emptyProfileDraft());
       setWorkouts([]);
       setProgress([]);
       setLogWorkout(null);
@@ -213,6 +342,109 @@ export default function CoachClientsPage() {
       await Promise.all([loadWorkouts(id), loadProgress(id)]);
     },
     [loadClientDetail, loadWorkouts, loadProgress],
+  );
+
+  const toggleContactLock = React.useCallback(() => {
+    if (contactFieldsUnlocked) {
+      const b = contactBaselineRef.current;
+      setProfileDraft((p) => ({
+        ...p,
+        userName: b.userName,
+        userPhone: b.userPhone,
+      }));
+      setContactFieldsUnlocked(false);
+    } else {
+      setContactFieldsUnlocked(true);
+    }
+  }, [contactFieldsUnlocked]);
+
+  const saveProfile = React.useCallback(async () => {
+    if (!clientId) return;
+    setProfileSaving(true);
+    try {
+      const res = await fetch(`/api/coach/clients/${clientId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user: {
+            name: profileDraft.userName,
+            phone: profileDraft.userPhone || null,
+          },
+          weight: profileDraft.weight === "" ? null : parseFloat(profileDraft.weight),
+          height: profileDraft.height === "" ? null : parseFloat(profileDraft.height),
+          dateOfBirth: profileDraft.dateOfBirth || null,
+          gender: profileDraft.gender || null,
+          occupation: profileDraft.occupation || null,
+          address: profileDraft.address || null,
+          emergencyContact: profileDraft.emergencyContact || null,
+          gymNotes: profileDraft.gymNotes || null,
+          nutritionObjective: profileDraft.nutritionObjective || null,
+          dailyCalorieTarget:
+            profileDraft.dailyCalorieTarget === ""
+              ? null
+              : parseFloat(profileDraft.dailyCalorieTarget),
+          dailyProteinGrams:
+            profileDraft.dailyProteinGrams === ""
+              ? null
+              : parseFloat(profileDraft.dailyProteinGrams),
+          recommendedGymSessionsPerWeek:
+            profileDraft.recommendedGymSessionsPerWeek === ""
+              ? null
+              : (() => {
+                  const n = parseInt(profileDraft.recommendedGymSessionsPerWeek, 10);
+                  return Number.isFinite(n) ? n : null;
+                })(),
+          workoutScheduleNotes: profileDraft.workoutScheduleNotes || null,
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.error(json?.error ?? "Failed to save profile");
+        return;
+      }
+      toast.success("Profile saved");
+      await loadClientDetail(clientId);
+      setContactFieldsUnlocked(false);
+    } finally {
+      setProfileSaving(false);
+    }
+  }, [clientId, profileDraft, loadClientDetail]);
+
+  const saveGoalTargets = React.useCallback(
+    async (g: ClientGoal) => {
+      if (!clientId) return;
+      const edit = goalEdits[g.id];
+      if (!edit) return;
+      setSavingGoalId(g.id);
+      try {
+        const isSessionGoal = g.targetSessions != null;
+        const rawTarget = edit.target.trim();
+        const payload: Record<string, unknown> = {
+          deadline: edit.deadline || null,
+        };
+        if (isSessionGoal) {
+          payload.targetSessions = rawTarget === "" ? null : parseInt(rawTarget, 10);
+        } else {
+          payload.targetValue = rawTarget === "" ? null : parseFloat(rawTarget);
+        }
+        const res = await fetch(`/api/coach/clients/${clientId}/goals/${g.id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          toast.error(json?.error ?? "Failed to save goal targets");
+          return;
+        }
+        toast.success("Goal targets updated");
+        await loadClientDetail(clientId);
+        await loadWorkouts(clientId);
+      } finally {
+        setSavingGoalId(null);
+      }
+    },
+    [clientId, goalEdits, loadClientDetail, loadWorkouts],
   );
 
 
@@ -323,7 +555,8 @@ export default function CoachClientsPage() {
       <div>
         <h1 className="text-lg font-semibold">My Clients</h1>
         <p className="text-sm text-muted-foreground">
-          View client goals and workouts (same as their view). Log sessions to their progress.
+          Record client details, nutrition targets, and goal weights; view goals and workouts; log sessions to their
+          progress.
         </p>
       </div>
 
@@ -359,9 +592,309 @@ export default function CoachClientsPage() {
                 <>
                   <section>
                     <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold">
+                      <User className="h-4 w-4" />
+                      Client profile &amp; nutrition
+                    </h3>
+                    <Card className="space-y-3 p-3 text-[11px]">
+                      <p className="text-[11px] text-muted-foreground">
+                        Record basics from your intake, set nutrition by objective, and how often they should train at the
+                        gym each week. Goal-specific kg or session targets are saved under each goal below.
+                      </p>
+                      {clientEmail && (
+                        <p className="text-[11px] text-muted-foreground">
+                          <span className="font-medium text-foreground">Email</span> {clientEmail}
+                        </p>
+                      )}
+                      <div className="space-y-2 rounded-md border border-dashed border-muted-foreground/30 bg-muted/15 p-2">
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <p className="text-[10px] leading-snug text-muted-foreground">
+                            Name and phone are the client&apos;s account details (same as their login profile).
+                            {contactFieldsUnlocked ? " Lock to cancel unsaved edits." : " Unlock to allow changes."}
+                          </p>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="xs"
+                            className="h-7 shrink-0 gap-1 px-2 text-[11px]"
+                            onClick={() => toggleContactLock()}
+                          >
+                            {contactFieldsUnlocked ? (
+                              <>
+                                <Lock className="h-3.5 w-3.5" aria-hidden />
+                                Lock
+                              </>
+                            ) : (
+                              <>
+                                <Unlock className="h-3.5 w-3.5" aria-hidden />
+                                Edit name &amp; phone
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-medium text-muted-foreground">Name</label>
+                            <Input
+                              className={cn(
+                                "h-7 text-[11px]",
+                                !contactFieldsUnlocked && "cursor-not-allowed bg-muted/50",
+                              )}
+                              readOnly={!contactFieldsUnlocked}
+                              aria-readonly={!contactFieldsUnlocked}
+                              value={profileDraft.userName}
+                              onChange={(e) =>
+                                setProfileDraft((p) => ({ ...p, userName: e.target.value }))
+                              }
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-medium text-muted-foreground">
+                              Phone <span className="font-normal">(client account)</span>
+                            </label>
+                            <Input
+                              type="tel"
+                              inputMode="tel"
+                              autoComplete="tel"
+                              className={cn(
+                                "h-7 text-[11px]",
+                                !contactFieldsUnlocked && "cursor-not-allowed bg-muted/50",
+                              )}
+                              readOnly={!contactFieldsUnlocked}
+                              aria-readonly={!contactFieldsUnlocked}
+                              placeholder={contactFieldsUnlocked ? "—" : "No phone on file"}
+                              value={profileDraft.userPhone}
+                              onChange={(e) =>
+                                setProfileDraft((p) => ({ ...p, userPhone: e.target.value }))
+                              }
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-medium text-muted-foreground">Weight (kg)</label>
+                          <Input
+                            type="number"
+                            min={0}
+                            step={0.1}
+                            className="h-7 text-[11px]"
+                            value={profileDraft.weight}
+                            onChange={(e) =>
+                              setProfileDraft((p) => ({ ...p, weight: e.target.value }))
+                            }
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-medium text-muted-foreground">Height (cm)</label>
+                          <Input
+                            type="number"
+                            min={0}
+                            step={0.1}
+                            className="h-7 text-[11px]"
+                            value={profileDraft.height}
+                            onChange={(e) =>
+                              setProfileDraft((p) => ({ ...p, height: e.target.value }))
+                            }
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-medium text-muted-foreground">Date of birth</label>
+                          <Input
+                            type="date"
+                            className="h-7 text-[11px]"
+                            value={profileDraft.dateOfBirth}
+                            onChange={(e) =>
+                              setProfileDraft((p) => ({ ...p, dateOfBirth: e.target.value }))
+                            }
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-medium text-muted-foreground">Gender</label>
+                          <select
+                            className="flex h-7 w-full rounded-md border border-input bg-transparent px-2 text-[11px]"
+                            value={profileDraft.gender}
+                            onChange={(e) => {
+                              const v = e.target.value;
+                              setProfileDraft((p) => ({
+                                ...p,
+                                gender:
+                                  v === "Male" || v === "Female" || v === ""
+                                    ? v
+                                    : "",
+                              }));
+                            }}
+                          >
+                            <option value="">— Select —</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                          </select>
+                        </div>
+                        <div className="space-y-1 sm:col-span-2">
+                          <label className="text-[10px] font-medium text-muted-foreground">Occupation</label>
+                          <Input
+                            className="h-7 text-[11px]"
+                            value={profileDraft.occupation}
+                            onChange={(e) =>
+                              setProfileDraft((p) => ({ ...p, occupation: e.target.value }))
+                            }
+                          />
+                        </div>
+                        <div className="space-y-1 sm:col-span-2">
+                          <label className="text-[10px] font-medium text-muted-foreground">Address</label>
+                          <AddressMapPicker
+                            address={profileDraft.address}
+                            onAddressChange={(address) =>
+                              setProfileDraft((p) => ({ ...p, address }))
+                            }
+                          />
+                        </div>
+                        <div className="space-y-1 sm:col-span-2">
+                          <label className="text-[10px] font-medium text-muted-foreground">Emergency contact</label>
+                          <Input
+                            className="h-7 text-[11px]"
+                            value={profileDraft.emergencyContact}
+                            onChange={(e) =>
+                              setProfileDraft((p) => ({ ...p, emergencyContact: e.target.value }))
+                            }
+                          />
+                        </div>
+                        <div className="space-y-1 sm:col-span-2">
+                          <label className="text-[10px] font-medium text-muted-foreground">Notes (medical, limitations, etc.)</label>
+                          <textarea
+                            className="flex min-h-[56px] w-full rounded-md border border-input bg-transparent px-2 py-1.5 text-[11px] shadow-xs outline-none"
+                            value={profileDraft.gymNotes}
+                            onChange={(e) =>
+                              setProfileDraft((p) => ({ ...p, gymNotes: e.target.value }))
+                            }
+                          />
+                        </div>
+                      </div>
+                      <div className="border-t pt-2">
+                        <div className="mb-2 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                          Nutrition guidance
+                        </div>
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          <div className="space-y-1 sm:col-span-2">
+                            <label className="text-[10px] font-medium text-muted-foreground">Primary objective</label>
+                            <select
+                              className="flex h-7 w-full rounded-md border border-input bg-transparent px-2 text-[11px]"
+                              value={profileDraft.nutritionObjective}
+                              onChange={(e) =>
+                                setProfileDraft((p) => ({ ...p, nutritionObjective: e.target.value }))
+                              }
+                            >
+                              <option value="">— Select —</option>
+                              <option value="WEIGHT_LOSS">Weight loss</option>
+                              <option value="SLIMMING">Slimming / toning</option>
+                              <option value="MUSCLE_GAIN">Muscle gain</option>
+                              <option value="GENERAL_FITNESS">General fitness</option>
+                              <option value="MAINTENANCE">Maintenance</option>
+                              <option value="OTHER">Other</option>
+                            </select>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-medium text-muted-foreground">Daily calories (kcal)</label>
+                            <Input
+                              type="number"
+                              min={0}
+                              step={1}
+                              className="h-7 text-[11px]"
+                              value={profileDraft.dailyCalorieTarget}
+                              onChange={(e) =>
+                                setProfileDraft((p) => ({ ...p, dailyCalorieTarget: e.target.value }))
+                              }
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-medium text-muted-foreground">Daily protein (g)</label>
+                            <Input
+                              type="number"
+                              min={0}
+                              step={1}
+                              className="h-7 text-[11px]"
+                              value={profileDraft.dailyProteinGrams}
+                              onChange={(e) =>
+                                setProfileDraft((p) => ({ ...p, dailyProteinGrams: e.target.value }))
+                              }
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="border-t pt-3">
+                        <div className="mb-2 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                          Gym frequency &amp; schedule
+                        </div>
+                        <p className="mb-2 text-[10px] text-muted-foreground">
+                          Recommended in-gym sessions per week (e.g. 2× when slimming, or a different cadence for other goals).
+                        </p>
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-medium text-muted-foreground">
+                              Sessions per week at the gym
+                            </label>
+                            <select
+                              className="flex h-7 w-full rounded-md border border-input bg-transparent px-2 text-[11px]"
+                              value={profileDraft.recommendedGymSessionsPerWeek}
+                              onChange={(e) =>
+                                setProfileDraft((p) => ({
+                                  ...p,
+                                  recommendedGymSessionsPerWeek: e.target.value,
+                                }))
+                              }
+                            >
+                              <option value="">— Not set —</option>
+                              {[1, 2, 3, 4, 5, 6, 7].map((n) => (
+                                <option key={n} value={String(n)}>
+                                  {n}× per week
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="space-y-1 sm:col-span-2">
+                            <label className="text-[10px] font-medium text-muted-foreground">
+                              Schedule notes (optional)
+                            </label>
+                            <textarea
+                              className="flex min-h-[52px] w-full rounded-md border border-input bg-transparent px-2 py-1.5 text-[11px] shadow-xs outline-none"
+                              placeholder="e.g. Tuesday &amp; Thursday evenings; optional Saturday cardio"
+                              value={profileDraft.workoutScheduleNotes}
+                              onChange={(e) =>
+                                setProfileDraft((p) => ({
+                                  ...p,
+                                  workoutScheduleNotes: e.target.value,
+                                }))
+                              }
+                            />
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex justify-end border-t pt-2">
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="h-7 text-[11px]"
+                          disabled={profileSaving}
+                          onClick={() => void saveProfile()}
+                        >
+                          {profileSaving ? "Saving…" : "Save profile & plan"}
+                        </Button>
+                      </div>
+                    </Card>
+                  </section>
+
+                  <section>
+                    <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold">
                       <Target className="h-4 w-4" />
                       Goals
                     </h3>
+                    <p className="mb-3 text-[11px] leading-snug text-muted-foreground">
+                      Nutrition and gym frequency above apply to the whole client. Each goal below is a separate target (from
+                      goals the client chose). Connect them by aligning themes — e.g. set{" "}
+                      <span className="font-medium text-foreground">Primary objective</span> and macros to match those goals,
+                      use <span className="font-medium text-foreground">Sessions per week</span> for how often they train,
+                      and use <span className="font-medium text-foreground">Coach-set targets</span> per goal for kg or
+                      session progress.
+                    </p>
                     {goals.length === 0 ? (
                       <p className="text-xs text-muted-foreground">No goals set.</p>
                     ) : (
@@ -444,6 +977,60 @@ export default function CoachClientsPage() {
                                   )}
                                 </dd>
                               </dl>
+                              <div className="mt-3 space-y-2 border-t pt-2">
+                                <div className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                                  Coach-set targets
+                                </div>
+                                <div className="grid gap-2 sm:grid-cols-2">
+                                  <div className="space-y-1">
+                                    <label className="text-[10px] text-muted-foreground">
+                                      {isSessionGoal ? "Target sessions" : "Target (kg)"}
+                                    </label>
+                                    <Input
+                                      type="number"
+                                      min={0}
+                                      step={isSessionGoal ? 1 : 0.1}
+                                      className="h-7 text-[11px]"
+                                      value={goalEdits[g.id]?.target ?? ""}
+                                      onChange={(e) =>
+                                        setGoalEdits((prev) => ({
+                                          ...prev,
+                                          [g.id]: {
+                                            deadline: prev[g.id]?.deadline ?? "",
+                                            target: e.target.value,
+                                          },
+                                        }))
+                                      }
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <label className="text-[10px] text-muted-foreground">Deadline</label>
+                                    <Input
+                                      type="date"
+                                      className="h-7 text-[11px]"
+                                      value={goalEdits[g.id]?.deadline ?? ""}
+                                      onChange={(e) =>
+                                        setGoalEdits((prev) => ({
+                                          ...prev,
+                                          [g.id]: {
+                                            target: prev[g.id]?.target ?? "",
+                                            deadline: e.target.value,
+                                          },
+                                        }))
+                                      }
+                                    />
+                                  </div>
+                                </div>
+                                <Button
+                                  type="button"
+                                  size="xs"
+                                  className="h-7 text-[11px]"
+                                  disabled={savingGoalId === g.id}
+                                  onClick={() => void saveGoalTargets(g)}
+                                >
+                                  {savingGoalId === g.id ? "Saving…" : "Save targets"}
+                                </Button>
+                              </div>
                               <div className="mt-3">
                                 <Button
                                   size="xs"

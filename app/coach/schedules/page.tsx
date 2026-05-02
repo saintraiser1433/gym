@@ -11,9 +11,11 @@ import { toast } from "sonner";
 
 type ScheduleEvent = {
   id: string;
+  /** Plain-text summary for agenda / screen readers (multiline). */
   title: string;
   start: Date;
   end: Date;
+  clientNames: string[];
   type?: string;
   capacity?: number | null;
   recurrence?: string | null;
@@ -21,12 +23,34 @@ type ScheduleEvent = {
 
 type AttendanceStatus = "none" | "checked_in" | "completed";
 
-const formatEventTitle = (
-  title: string,
-  start: Date,
-  end: Date,
-  coachLabel: string,
-) => `${title} • ${format(start, "h:mm a")} – ${format(end, "h:mm a")} • ${coachLabel}`;
+function buildAgendaTitle(start: Date, end: Date, clientNames: string[]) {
+  const timeRange = `${format(start, "h:mm a")} – ${format(end, "h:mm a")}`;
+  if (clientNames.length === 0) return timeRange;
+  return [timeRange, "Clients:", ...clientNames].join("\n");
+}
+
+function CoachScheduleEventComponent({ event }: { event: ScheduleEvent }) {
+  const timeRange = `${format(event.start, "h:mm a")} – ${format(event.end, "h:mm a")}`;
+  return (
+    <div className="flex max-h-full flex-col gap-0.5 overflow-hidden text-left leading-tight">
+      <div className="text-[10px] font-semibold">{timeRange}</div>
+      {event.clientNames.length > 0 ? (
+        <>
+          <div className="text-[9px] font-medium text-yellow-600 dark:text-yellow-400">Clients:</div>
+          <ul className="max-h-[80px] space-y-0 overflow-y-auto text-[9px]">
+            {event.clientNames.map((name) => (
+              <li key={name} className="truncate pl-0.5" title={name}>
+                {name}
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <span className="text-[9px] text-muted-foreground">No assigned clients yet</span>
+      )}
+    </div>
+  );
+}
 
 const locales = { "en-US": undefined };
 const localizer = dateFnsLocalizer({
@@ -55,6 +79,9 @@ export default function CoachSchedulesPage() {
       const res = await fetch("/api/coach/schedules", { cache: "no-store" });
       const json = await res.json();
       const data = json.data ?? [];
+      const roster: string[] = Array.isArray(json.assignedClientNames)
+        ? json.assignedClientNames
+        : [];
       setEvents(
         data.map(
           (s: {
@@ -72,10 +99,10 @@ export default function CoachSchedulesPage() {
             if (end.getTime() <= start.getTime()) end = new Date(start.getTime() + 60 * 60 * 1000);
             const startDayEnd = new Date(start); startDayEnd.setHours(23, 59, 59, 999);
             if (end > startDayEnd) end = startDayEnd;
-            const baseTitle = s.title ?? "Session";
             return {
               id: s.id,
-              title: formatEventTitle(baseTitle, start, rawEnd, "Me"),
+              title: buildAgendaTitle(start, rawEnd, roster),
+              clientNames: roster,
               start,
               end,
               type: s.type,
@@ -244,6 +271,11 @@ export default function CoachSchedulesPage() {
               popup
               dayPropGetter={dayPropGetter}
               onSelectEvent={(event) => handleSelectEvent(event as ScheduleEvent)}
+              components={{
+                event: (props) => (
+                  <CoachScheduleEventComponent event={props.event as ScheduleEvent} />
+                ),
+              }}
               style={{ height: "100%" }}
             />
           )}
@@ -254,9 +286,23 @@ export default function CoachSchedulesPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
           <div className="flex max-h-[90vh] w-full max-w-lg flex-col gap-4 overflow-auto rounded-lg bg-background p-4 shadow-lg">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-semibold">
-                {selectedEvent.title.split(" • ")[0]} — {format(selectedEvent.start, "h:mm a")} – {format(selectedEvent.end, "h:mm a")}
-              </h2>
+              <div className="space-y-2">
+                <h2 className="text-base font-semibold">
+                  {format(selectedEvent.start, "h:mm a")} – {format(selectedEvent.end, "h:mm a")}
+                </h2>
+                {selectedEvent.clientNames.length > 0 ? (
+                  <div className="text-sm">
+                    <p className="font-medium text-yellow-600 dark:text-yellow-400">Clients:</p>
+                    <ul className="mt-1 list-inside list-disc space-y-0.5 text-muted-foreground">
+                      {selectedEvent.clientNames.map((name) => (
+                        <li key={name}>{name}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <p className="text-xs text-muted-foreground">No premium clients assigned to you yet.</p>
+                )}
+              </div>
               <Button
                 size="sm"
                 variant="ghost"

@@ -48,11 +48,15 @@ function ScheduleEventComponent({ event }: { event: ScheduleEvent }) {
     Array.isArray(event.allowedMembershipTypes) &&
     event.allowedMembershipTypes.length === 1 &&
     event.allowedMembershipTypes[0] === "PREMIUM";
+  const label = event.baseTitle.trim();
   return (
-    <div className="flex flex-col gap-0.5 overflow-hidden text-left">
-      <span className="truncate font-medium" title={event.title}>
-        {event.baseTitle} · {timeRange}
+    <div className="flex flex-col gap-0.5 overflow-hidden text-left leading-tight">
+      <span className="text-[10px] font-semibold" title={event.title}>
+        {timeRange}
       </span>
+      {label ? (
+        <span className="truncate text-[10px] text-muted-foreground">{label}</span>
+      ) : null}
       <span className="text-[10px] opacity-90">Coach: {event.coachName ?? "Unassigned"}</span>
       {isPremiumOnly && (
         <span className="text-[10px] font-medium text-amber-600 dark:text-amber-400">Exclusive: Premium</span>
@@ -69,7 +73,6 @@ export default function AdminSchedulesPage() {
   const [editingSchedule, setEditingSchedule] = React.useState<ScheduleEvent | null>(null);
   const [slotDate, setSlotDate] = React.useState<Date | null>(null);
   const [formValues, setFormValues] = React.useState({
-    title: "",
     type: "CLASS",
     startTime: "",
     endTime: "",
@@ -107,10 +110,10 @@ export default function AdminSchedulesPage() {
     }
     const coachName = s.coach?.user?.name ?? "Unassigned";
     const timeRange = `${format(start, "h:mm a")} – ${format(rawEnd, "h:mm a")}`;
-    const baseTitle = s.title ?? "Session";
+    const baseTitle = (s.title ?? "").trim();
     return {
       id: s.id,
-      title: `${baseTitle} • ${timeRange} • ${coachName}`,
+      title: baseTitle ? `${baseTitle} • ${timeRange} • ${coachName}` : `${timeRange} • ${coachName}`,
       baseTitle,
       start,
       end,
@@ -162,7 +165,6 @@ export default function AdminSchedulesPage() {
     const startTime = format(start, "HH:mm");
     const endTime = format(end, "HH:mm");
     setFormValues({
-      title: "",
       type: "CLASS",
       startTime,
       endTime,
@@ -177,7 +179,6 @@ export default function AdminSchedulesPage() {
     setEditingSchedule(event);
     setSlotDate(startOfDay(event.start));
     setFormValues({
-      title: event.baseTitle,
       type: (event as any).type ?? "CLASS",
       startTime: format(event.start, "HH:mm"),
       endTime: format(event.end, "HH:mm"),
@@ -251,7 +252,7 @@ export default function AdminSchedulesPage() {
         const slots = slotsToCreate();
         const { start, end } = slots[0]!;
         const payload = {
-          title: formValues.title,
+          title: "",
           type: formValues.type,
           startTime: start.toISOString(),
           endTime: end.toISOString(),
@@ -286,7 +287,7 @@ export default function AdminSchedulesPage() {
       const canAssignCoach = formValues.allowedMembershipTypes?.includes("PREMIUM");
       for (const { start, end, coachId: slotCoachId } of slots) {
         const payload = {
-          title: formValues.title,
+          title: "",
           type: formValues.type,
           startTime: start.toISOString(),
           endTime: end.toISOString(),
@@ -420,10 +421,12 @@ export default function AdminSchedulesPage() {
                       className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border/60 bg-muted/30 p-2 text-[11px]"
                     >
                       <div className="min-w-0 flex-1">
-                        <span className="font-medium">{ev.baseTitle}</span>
-                        <span className="ml-1 text-muted-foreground">
+                        <span className="font-medium">
                           {format(ev.start, "h:mm a")} – {format(ev.end, "h:mm a")}
                         </span>
+                        {ev.baseTitle.trim() ? (
+                          <span className="ml-1 text-muted-foreground">· {ev.baseTitle.trim()}</span>
+                        ) : null}
                         <span className="ml-1 text-muted-foreground">· {ev.coachName ?? "Unassigned"}</span>
                       </div>
                       <div className="flex shrink-0 gap-1">
@@ -451,7 +454,8 @@ export default function AdminSchedulesPage() {
                             <AlertDialogHeader>
                               <AlertDialogTitle className="text-sm">Delete schedule?</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Remove &quot;{ev.baseTitle}&quot; ({format(ev.start, "h:mm a")} – {format(ev.end, "h:mm a")})?
+                                Remove this slot ({format(ev.start, "h:mm a")} – {format(ev.end, "h:mm a")}
+                                {ev.baseTitle.trim() ? ` — ${ev.baseTitle.trim()}` : ""})?
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
@@ -503,19 +507,6 @@ export default function AdminSchedulesPage() {
               {editingSchedule ? "Edit Schedule" : "New Schedule"}
             </h2>
             <form onSubmit={handleSubmit} className="space-y-3 text-[11px]">
-              <div className="space-y-1">
-                <label className="font-medium" htmlFor="title">
-                  Title
-                </label>
-                <Input
-                  id="title"
-                  name="title"
-                  value={formValues.title}
-                  onChange={handleFormChange}
-                  className="h-7 text-[11px]"
-                  required
-                />
-              </div>
               <div className="space-y-1">
                 <label className="font-medium" htmlFor="type">
                   Type
@@ -768,7 +759,12 @@ export default function AdminSchedulesPage() {
                           Delete schedule?
                         </AlertDialogTitle>
                         <AlertDialogDescription>
-                          This will remove &quot;{editingSchedule.title}&quot;. This action cannot be undone.
+                          This will remove the slot{" "}
+                          {format(editingSchedule.start, "h:mm a")} – {format(editingSchedule.end, "h:mm a")}
+                          {editingSchedule.baseTitle.trim()
+                            ? ` (${editingSchedule.baseTitle.trim()})`
+                            : ""}
+                          . This cannot be undone.
                         </AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>

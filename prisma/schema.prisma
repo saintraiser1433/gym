@@ -41,6 +41,14 @@ model ClientProfile {
   gender           String?
   occupation       String?
   gymNotes         String?   // other gym-related details (goals, medical, etc.)
+  /// Coach-set label for nutrition planning (e.g. WEIGHT_LOSS, SLIMMING, MUSCLE_GAIN).
+  nutritionObjective String?
+  dailyCalorieTarget Float?
+  dailyProteinGrams  Float?
+  /// Coach-recommended gym sessions per week (e.g. 2 for slimming, 4–5 for other goals).
+  recommendedGymSessionsPerWeek Int?
+  /// Optional detail: which days, times, or split (e.g. "Tue & Thu evenings").
+  workoutScheduleNotes          String?
   joinDate         DateTime  @default(now())
 
   user               User               @relation(fields: [userId], references: [id])

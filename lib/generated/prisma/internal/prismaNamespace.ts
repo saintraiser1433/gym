@@ -2119,6 +2119,11 @@ export const ClientProfileScalarFieldEnum = {
   gender: 'gender',
   occupation: 'occupation',
   gymNotes: 'gymNotes',
+  nutritionObjective: 'nutritionObjective',
+  dailyCalorieTarget: 'dailyCalorieTarget',
+  dailyProteinGrams: 'dailyProteinGrams',
+  recommendedGymSessionsPerWeek: 'recommendedGymSessionsPerWeek',
+  workoutScheduleNotes: 'workoutScheduleNotes',
   joinDate: 'joinDate',
   assignedCoachId: 'assignedCoachId'
 } as const
