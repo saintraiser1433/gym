@@ -60,6 +60,7 @@ model ClientProfile {
   workoutAssignments WorkoutAssignment[]
   assignedCoachId    String?
   assignedCoach      CoachProfile?      @relation("CoachAssignedClients", fields: [assignedCoachId], references: [id])
+  mealPlan           MealPlan?
 }
 
 model CoachProfile {
@@ -75,6 +76,22 @@ model CoachProfile {
   createdWorkouts  Workout[]
   assignedWorkouts WorkoutAssignment[]
   schedules        Schedule[]
+  mealPlans        MealPlan[]
+}
+
+model MealPlan {
+  id        String   @id @default(cuid())
+  clientId  String   @unique
+  coachId   String
+  title     String   @default("Meal plan")
+  content   String   @default("") @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  client ClientProfile @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  coach  CoachProfile  @relation(fields: [coachId], references: [id])
+
+  @@index([coachId])
 }
 
 model Membership {

@@ -6,7 +6,7 @@ import { DataTable, type Column } from "@/components/data-table";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Target, Dumbbell, User, Lock, Unlock } from "lucide-react";
+import { Target, Dumbbell, User, Lock, Unlock, UtensilsCrossed } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -166,6 +166,18 @@ export default function CoachClientsPage() {
   const [goalEdits, setGoalEdits] = React.useState<Record<string, { target: string; deadline: string }>>({});
   const [savingGoalId, setSavingGoalId] = React.useState<string | null>(null);
 
+  type CatalogGoal = { id: string; name: string; category: string; targetSessions: number | null };
+  const [catalogGoals, setCatalogGoals] = React.useState<CatalogGoal[]>([]);
+  const [newCoachGoalId, setNewCoachGoalId] = React.useState("");
+  const [newCoachTarget, setNewCoachTarget] = React.useState("");
+  const [newCoachDeadline, setNewCoachDeadline] = React.useState("");
+  const [savingNewCoachGoal, setSavingNewCoachGoal] = React.useState(false);
+  const [removingCoachGoalId, setRemovingCoachGoalId] = React.useState<string | null>(null);
+
+  const [mealPlanTitle, setMealPlanTitle] = React.useState("Meal plan");
+  const [mealPlanContent, setMealPlanContent] = React.useState("");
+  const [mealPlanSaving, setMealPlanSaving] = React.useState(false);
+
   const fetchData = React.useCallback(async () => {
     setLoading(true);
     try {
@@ -263,6 +275,8 @@ export default function CoachClientsPage() {
           };
         }
         setGoalEdits(ge);
+        setMealPlanTitle(d.mealPlan?.title ?? "Meal plan");
+        setMealPlanContent(d.mealPlan?.content ?? "");
       }
     } finally {
       setDetailLoading(false);
@@ -324,8 +338,37 @@ export default function CoachClientsPage() {
       setWorkouts([]);
       setProgress([]);
       setLogWorkout(null);
+      setMealPlanTitle("Meal plan");
+      setMealPlanContent("");
+      setNewCoachGoalId("");
+      setNewCoachTarget("");
+      setNewCoachDeadline("");
       await loadClientDetail(id);
-      await Promise.all([loadWorkouts(id), loadProgress(id)]);
+      await Promise.all([
+        loadWorkouts(id),
+        loadProgress(id),
+        fetch("/api/coach/workout-goals", { cache: "no-store" })
+          .then((r) => r.json())
+          .then((j) => {
+            const rows = Array.isArray(j.data) ? j.data : [];
+            setCatalogGoals(
+              rows.map(
+                (g: {
+                  id: string;
+                  name: string;
+                  category: string;
+                  targetSessions?: number | null;
+                }) => ({
+                  id: g.id,
+                  name: g.name,
+                  category: g.category,
+                  targetSessions: g.targetSessions ?? null,
+                }),
+              ),
+            );
+          })
+          .catch(() => setCatalogGoals([])),
+      ]);
     },
     [loadClientDetail, loadWorkouts, loadProgress],
   );
@@ -427,6 +470,105 @@ export default function CoachClientsPage() {
     [clientId, goalEdits, loadClientDetail, loadWorkouts],
   );
 
+  const saveMealPlan = React.useCallback(async () => {
+    if (!clientId) return;
+    setMealPlanSaving(true);
+    try {
+      const res = await fetch(`/api/coach/clients/${clientId}/meal-plan`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: mealPlanTitle.trim() || "Meal plan",
+          content: mealPlanContent,
+        }),
+      });
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        toast.error(json?.error ?? "Failed to save meal plan");
+        return;
+      }
+      toast.success("Meal plan saved");
+      await loadClientDetail(clientId);
+    } finally {
+      setMealPlanSaving(false);
+    }
+  }, [clientId, mealPlanTitle, mealPlanContent, loadClientDetail]);
+
+  const submitNewCoachGoal = React.useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!clientId || !newCoachGoalId) {
+        toast.error("Choose a goal from the list");
+        return;
+      }
+      setSavingNewCoachGoal(true);
+      try {
+        const sel = catalogGoals.find((c) => c.id === newCoachGoalId);
+        const sessionGoal = sel != null && sel.targetSessions != null;
+        const payload: {
+          goalId: string;
+          targetValue?: number;
+          targetSessions?: number;
+          deadline?: string;
+        } = { goalId: newCoachGoalId };
+        if (newCoachTarget.trim()) {
+          if (sessionGoal) payload.targetSessions = parseInt(newCoachTarget, 10);
+          else payload.targetValue = Number(newCoachTarget);
+        }
+        if (newCoachDeadline) payload.deadline = newCoachDeadline;
+        const res = await fetch(`/api/coach/clients/${clientId}/goals`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          toast.error(json?.error ?? "Could not add goal");
+          return;
+        }
+        toast.success("Goal assigned");
+        setNewCoachGoalId("");
+        setNewCoachTarget("");
+        setNewCoachDeadline("");
+        await loadClientDetail(clientId);
+        await loadWorkouts(clientId);
+      } finally {
+        setSavingNewCoachGoal(false);
+      }
+    },
+    [
+      clientId,
+      newCoachGoalId,
+      newCoachTarget,
+      newCoachDeadline,
+      catalogGoals,
+      loadClientDetail,
+      loadWorkouts,
+    ],
+  );
+
+  const removeCoachGoal = React.useCallback(
+    async (clientGoalId: string) => {
+      if (!clientId) return;
+      setRemovingCoachGoalId(clientGoalId);
+      try {
+        const res = await fetch(`/api/coach/clients/${clientId}/goals/${clientGoalId}`, {
+          method: "DELETE",
+        });
+        const json = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          toast.error(json?.error ?? "Could not remove goal");
+          return;
+        }
+        toast.success("Goal removed");
+        await loadClientDetail(clientId);
+        await loadWorkouts(clientId);
+      } finally {
+        setRemovingCoachGoalId(null);
+      }
+    },
+    [clientId, loadClientDetail, loadWorkouts],
+  );
 
   const handleOpenLog = React.useCallback(
     async (w: GoalWorkout) => {
@@ -871,19 +1013,128 @@ export default function CoachClientsPage() {
 
                   <section>
                     <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold">
+                      <UtensilsCrossed className="h-4 w-4" />
+                      Meal plan
+                    </h3>
+                    <p className="mb-2 text-[11px] leading-snug text-muted-foreground">
+                      Write a plan your client can read in their app (meals, portions, timing — plain text is fine).
+                    </p>
+                    <Card className="space-y-2 p-3 text-[11px]">
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-medium text-muted-foreground">Title</label>
+                        <Input
+                          className="h-7 text-[11px]"
+                          value={mealPlanTitle}
+                          onChange={(e) => setMealPlanTitle(e.target.value)}
+                          placeholder="Meal plan"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <label className="text-[10px] font-medium text-muted-foreground">Plan</label>
+                        <textarea
+                          className="flex min-h-[120px] w-full rounded-md border border-input bg-transparent px-2 py-1.5 text-[11px] shadow-xs outline-none"
+                          value={mealPlanContent}
+                          onChange={(e) => setMealPlanContent(e.target.value)}
+                          placeholder={"Breakfast: …\nLunch: …\nSnacks: …"}
+                        />
+                      </div>
+                      <div className="flex justify-end">
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="h-7 text-[11px]"
+                          disabled={mealPlanSaving}
+                          onClick={() => void saveMealPlan()}
+                        >
+                          {mealPlanSaving ? "Saving…" : "Save meal plan"}
+                        </Button>
+                      </div>
+                    </Card>
+                  </section>
+
+                  <section>
+                    <h3 className="mb-2 flex items-center gap-1.5 text-sm font-semibold">
                       <Target className="h-4 w-4" />
                       Goals
                     </h3>
                     <p className="mb-3 text-[11px] leading-snug text-muted-foreground">
-                      Nutrition and gym frequency above apply to the whole client. Each goal below is a separate target (from
-                      goals the client chose). Connect them by aligning themes — e.g. set{" "}
-                      <span className="font-medium text-foreground">Primary objective</span> and macros to match those goals,
-                      use <span className="font-medium text-foreground">Sessions per week</span> for how often they train,
-                      and use <span className="font-medium text-foreground">Coach-set targets</span> per goal for kg or
-                      session progress.
+                      You assign workout goals from the catalog (premium / coached clients don&apos;t pick their own). Align
+                      with <span className="font-medium text-foreground">Primary objective</span>, macros, and{" "}
+                      <span className="font-medium text-foreground">Sessions per week</span> above. Use{" "}
+                      <span className="font-medium text-foreground">Coach-set targets</span> per goal for kg or session
+                      progress.
                     </p>
+                    <Card className="mb-3 space-y-2 p-3 text-[11px]">
+                      <h4 className="text-xs font-semibold">Assign a goal</h4>
+                      <form onSubmit={submitNewCoachGoal} className="grid gap-2 sm:grid-cols-3">
+                        <div className="space-y-1 sm:col-span-1">
+                          <label className="font-medium">Goal</label>
+                          <select
+                            className="flex h-7 w-full rounded-md border border-input bg-transparent px-2 text-[11px]"
+                            value={newCoachGoalId}
+                            onChange={(e) => setNewCoachGoalId(e.target.value)}
+                          >
+                            <option value="">Select goal</option>
+                            {catalogGoals.map((cg) => (
+                              <option key={cg.id} value={cg.id}>
+                                {cg.name} ({formatCategory(cg.category)})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="font-medium">
+                            Target (optional)
+                            {newCoachGoalId
+                              ? catalogGoals.find((c) => c.id === newCoachGoalId)?.targetSessions != null
+                                ? " — sessions"
+                                : " — kg / units"
+                              : ""}
+                          </label>
+                          <Input
+                            type="number"
+                            min={0}
+                            step={
+                              newCoachGoalId &&
+                              catalogGoals.find((c) => c.id === newCoachGoalId)?.targetSessions != null
+                                ? 1
+                                : 0.1
+                            }
+                            className="h-7 text-[11px]"
+                            value={newCoachTarget}
+                            onChange={(e) => setNewCoachTarget(e.target.value)}
+                            placeholder={
+                              newCoachGoalId &&
+                              catalogGoals.find((c) => c.id === newCoachGoalId)?.targetSessions != null
+                                ? "e.g. 12"
+                                : "e.g. 10"
+                            }
+                          />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="font-medium">Deadline (optional)</label>
+                          <Input
+                            type="date"
+                            className="h-7 text-[11px]"
+                            value={newCoachDeadline}
+                            onChange={(e) => setNewCoachDeadline(e.target.value)}
+                            min={new Date().toISOString().slice(0, 10)}
+                          />
+                        </div>
+                        <div className="flex items-end justify-end sm:col-span-3">
+                          <Button
+                            type="submit"
+                            size="xs"
+                            className="h-7 px-3 text-[11px]"
+                            disabled={savingNewCoachGoal}
+                          >
+                            {savingNewCoachGoal ? "Saving…" : "Add goal"}
+                          </Button>
+                        </div>
+                      </form>
+                    </Card>
                     {goals.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">No goals set.</p>
+                      <p className="text-xs text-muted-foreground">No goals assigned yet. Add one above.</p>
                     ) : (
                       <div className="grid gap-3 sm:grid-cols-2">
                         {goals.map((g) => {
@@ -1018,7 +1269,17 @@ export default function CoachClientsPage() {
                                   {savingGoalId === g.id ? "Saving…" : "Save targets"}
                                 </Button>
                               </div>
-                              <div className="mt-3">
+                              <div className="mt-3 flex flex-wrap gap-2">
+                                <Button
+                                  type="button"
+                                  size="xs"
+                                  variant="ghost"
+                                  className="h-7 px-2 text-[11px] text-destructive hover:text-destructive"
+                                  disabled={removingCoachGoalId === g.id}
+                                  onClick={() => void removeCoachGoal(g.id)}
+                                >
+                                  {removingCoachGoalId === g.id ? "Removing…" : "Remove goal"}
+                                </Button>
                                 <Button
                                   size="xs"
                                   variant="outline"
@@ -1056,7 +1317,7 @@ export default function CoachClientsPage() {
                       <p className="text-xs text-muted-foreground">Loading…</p>
                     ) : workouts.length === 0 ? (
                       <p className="text-xs text-muted-foreground">
-                        No workouts linked to goals. Client adds goals in Goals to see workouts here.
+                        No workouts linked to goals yet. Assign goals above so workouts from those goals appear here.
                       </p>
                     ) : (
                       <div className="grid gap-3 sm:grid-cols-2">

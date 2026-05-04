@@ -146,6 +146,7 @@ export async function GET(_req: Request, { params }: Params) {
     where: { id, assignedCoachId: coach.id },
     include: {
       user: true,
+      mealPlan: true,
       goals: { include: { goal: true }, orderBy: { deadline: "asc" } },
       workoutAssignments: {
         include: { workout: { select: { id: true, name: true } } },

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireClient } from "@/lib/auth";
+import { isClientGoalsManagedByCoach } from "@/lib/client-goals-access";
 
 type Context = { params: Promise<{ id: string }> };
 
@@ -19,6 +20,13 @@ export async function DELETE(req: NextRequest, context: Context) {
     return NextResponse.json(
       { error: "Client profile not found" },
       { status: 404 },
+    );
+  }
+
+  if (await isClientGoalsManagedByCoach(userId)) {
+    return NextResponse.json(
+      { error: "Your coach manages your goals. Contact your coach to remove one." },
+      { status: 403 },
     );
   }
 

@@ -108,3 +108,41 @@ export async function PATCH(req: Request, { params }: Params) {
 
   return NextResponse.json({ data: updated });
 }
+
+/** Coach removes a goal assignment from this client. */
+export async function DELETE(_req: Request, { params }: Params) {
+  const { id: clientId, clientGoalId } = await params;
+  const session = await requireCoach();
+  const userId = (session.user as { id?: string }).id as string;
+
+  const coach = await prisma.coachProfile.findUnique({
+    where: { userId },
+    select: { id: true },
+  });
+
+  if (!coach) {
+    return NextResponse.json({ error: "Coach profile not found" }, { status: 404 });
+  }
+
+  const client = await prisma.clientProfile.findFirst({
+    where: { id: clientId, assignedCoachId: coach.id },
+    select: { id: true },
+  });
+
+  if (!client) {
+    return NextResponse.json({ error: "Client not found" }, { status: 404 });
+  }
+
+  const existing = await prisma.clientGoal.findFirst({
+    where: { id: clientGoalId, clientId },
+    select: { id: true },
+  });
+
+  if (!existing) {
+    return NextResponse.json({ error: "Goal not found" }, { status: 404 });
+  }
+
+  await prisma.clientGoal.delete({ where: { id: clientGoalId } });
+
+  return NextResponse.json({ ok: true });
+}

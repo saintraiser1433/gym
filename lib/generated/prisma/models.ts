@@ -11,6 +11,7 @@
 export type * from './models/User'
 export type * from './models/ClientProfile'
 export type * from './models/CoachProfile'
+export type * from './models/MealPlan'
 export type * from './models/Membership'
 export type * from './models/ClientMembership'
 export type * from './models/MembershipRenewal'

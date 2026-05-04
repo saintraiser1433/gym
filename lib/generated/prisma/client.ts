@@ -55,6 +55,11 @@ export type ClientProfile = Prisma.ClientProfileModel
  */
 export type CoachProfile = Prisma.CoachProfileModel
 /**
+ * Model MealPlan
+ * 
+ */
+export type MealPlan = Prisma.MealPlanModel
+/**
  * Model Membership
  * 
  */

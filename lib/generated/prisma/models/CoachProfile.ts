@@ -229,6 +229,7 @@ export type CoachProfileWhereInput = {
   createdWorkouts?: Prisma.WorkoutListRelationFilter
   assignedWorkouts?: Prisma.WorkoutAssignmentListRelationFilter
   schedules?: Prisma.ScheduleListRelationFilter
+  mealPlans?: Prisma.MealPlanListRelationFilter
 }
 
 export type CoachProfileOrderByWithRelationInput = {
@@ -243,6 +244,7 @@ export type CoachProfileOrderByWithRelationInput = {
   createdWorkouts?: Prisma.WorkoutOrderByRelationAggregateInput
   assignedWorkouts?: Prisma.WorkoutAssignmentOrderByRelationAggregateInput
   schedules?: Prisma.ScheduleOrderByRelationAggregateInput
+  mealPlans?: Prisma.MealPlanOrderByRelationAggregateInput
 }
 
 export type CoachProfileWhereUniqueInput = Prisma.AtLeast<{
@@ -260,6 +262,7 @@ export type CoachProfileWhereUniqueInput = Prisma.AtLeast<{
   createdWorkouts?: Prisma.WorkoutListRelationFilter
   assignedWorkouts?: Prisma.WorkoutAssignmentListRelationFilter
   schedules?: Prisma.ScheduleListRelationFilter
+  mealPlans?: Prisma.MealPlanListRelationFilter
 }, "id" | "userId">
 
 export type CoachProfileOrderByWithAggregationInput = {
@@ -299,6 +302,7 @@ export type CoachProfileCreateInput = {
   createdWorkouts?: Prisma.WorkoutCreateNestedManyWithoutCreatedByInput
   assignedWorkouts?: Prisma.WorkoutAssignmentCreateNestedManyWithoutAssignedByInput
   schedules?: Prisma.ScheduleCreateNestedManyWithoutCoachInput
+  mealPlans?: Prisma.MealPlanCreateNestedManyWithoutCoachInput
 }
 
 export type CoachProfileUncheckedCreateInput = {
@@ -312,6 +316,7 @@ export type CoachProfileUncheckedCreateInput = {
   createdWorkouts?: Prisma.WorkoutUncheckedCreateNestedManyWithoutCreatedByInput
   assignedWorkouts?: Prisma.WorkoutAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutCoachInput
+  mealPlans?: Prisma.MealPlanUncheckedCreateNestedManyWithoutCoachInput
 }
 
 export type CoachProfileUpdateInput = {
@@ -325,6 +330,7 @@ export type CoachProfileUpdateInput = {
   createdWorkouts?: Prisma.WorkoutUpdateManyWithoutCreatedByNestedInput
   assignedWorkouts?: Prisma.WorkoutAssignmentUpdateManyWithoutAssignedByNestedInput
   schedules?: Prisma.ScheduleUpdateManyWithoutCoachNestedInput
+  mealPlans?: Prisma.MealPlanUpdateManyWithoutCoachNestedInput
 }
 
 export type CoachProfileUncheckedUpdateInput = {
@@ -338,6 +344,7 @@ export type CoachProfileUncheckedUpdateInput = {
   createdWorkouts?: Prisma.WorkoutUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedWorkouts?: Prisma.WorkoutAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutCoachNestedInput
+  mealPlans?: Prisma.MealPlanUncheckedUpdateManyWithoutCoachNestedInput
 }
 
 export type CoachProfileCreateManyInput = {
@@ -459,6 +466,20 @@ export type CoachProfileUpdateOneWithoutAssignedClientsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CoachProfileUpdateToOneWithWhereWithoutAssignedClientsInput, Prisma.CoachProfileUpdateWithoutAssignedClientsInput>, Prisma.CoachProfileUncheckedUpdateWithoutAssignedClientsInput>
 }
 
+export type CoachProfileCreateNestedOneWithoutMealPlansInput = {
+  create?: Prisma.XOR<Prisma.CoachProfileCreateWithoutMealPlansInput, Prisma.CoachProfileUncheckedCreateWithoutMealPlansInput>
+  connectOrCreate?: Prisma.CoachProfileCreateOrConnectWithoutMealPlansInput
+  connect?: Prisma.CoachProfileWhereUniqueInput
+}
+
+export type CoachProfileUpdateOneRequiredWithoutMealPlansNestedInput = {
+  create?: Prisma.XOR<Prisma.CoachProfileCreateWithoutMealPlansInput, Prisma.CoachProfileUncheckedCreateWithoutMealPlansInput>
+  connectOrCreate?: Prisma.CoachProfileCreateOrConnectWithoutMealPlansInput
+  upsert?: Prisma.CoachProfileUpsertWithoutMealPlansInput
+  connect?: Prisma.CoachProfileWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CoachProfileUpdateToOneWithWhereWithoutMealPlansInput, Prisma.CoachProfileUpdateWithoutMealPlansInput>, Prisma.CoachProfileUncheckedUpdateWithoutMealPlansInput>
+}
+
 export type CoachProfileCreateNestedOneWithoutCreatedWorkoutsInput = {
   create?: Prisma.XOR<Prisma.CoachProfileCreateWithoutCreatedWorkoutsInput, Prisma.CoachProfileUncheckedCreateWithoutCreatedWorkoutsInput>
   connectOrCreate?: Prisma.CoachProfileCreateOrConnectWithoutCreatedWorkoutsInput
@@ -515,6 +536,7 @@ export type CoachProfileCreateWithoutUserInput = {
   createdWorkouts?: Prisma.WorkoutCreateNestedManyWithoutCreatedByInput
   assignedWorkouts?: Prisma.WorkoutAssignmentCreateNestedManyWithoutAssignedByInput
   schedules?: Prisma.ScheduleCreateNestedManyWithoutCoachInput
+  mealPlans?: Prisma.MealPlanCreateNestedManyWithoutCoachInput
 }
 
 export type CoachProfileUncheckedCreateWithoutUserInput = {
@@ -527,6 +549,7 @@ export type CoachProfileUncheckedCreateWithoutUserInput = {
   createdWorkouts?: Prisma.WorkoutUncheckedCreateNestedManyWithoutCreatedByInput
   assignedWorkouts?: Prisma.WorkoutAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutCoachInput
+  mealPlans?: Prisma.MealPlanUncheckedCreateNestedManyWithoutCoachInput
 }
 
 export type CoachProfileCreateOrConnectWithoutUserInput = {
@@ -555,6 +578,7 @@ export type CoachProfileUpdateWithoutUserInput = {
   createdWorkouts?: Prisma.WorkoutUpdateManyWithoutCreatedByNestedInput
   assignedWorkouts?: Prisma.WorkoutAssignmentUpdateManyWithoutAssignedByNestedInput
   schedules?: Prisma.ScheduleUpdateManyWithoutCoachNestedInput
+  mealPlans?: Prisma.MealPlanUpdateManyWithoutCoachNestedInput
 }
 
 export type CoachProfileUncheckedUpdateWithoutUserInput = {
@@ -567,6 +591,7 @@ export type CoachProfileUncheckedUpdateWithoutUserInput = {
   createdWorkouts?: Prisma.WorkoutUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedWorkouts?: Prisma.WorkoutAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutCoachNestedInput
+  mealPlans?: Prisma.MealPlanUncheckedUpdateManyWithoutCoachNestedInput
 }
 
 export type CoachProfileCreateWithoutAssignedClientsInput = {
@@ -579,6 +604,7 @@ export type CoachProfileCreateWithoutAssignedClientsInput = {
   createdWorkouts?: Prisma.WorkoutCreateNestedManyWithoutCreatedByInput
   assignedWorkouts?: Prisma.WorkoutAssignmentCreateNestedManyWithoutAssignedByInput
   schedules?: Prisma.ScheduleCreateNestedManyWithoutCoachInput
+  mealPlans?: Prisma.MealPlanCreateNestedManyWithoutCoachInput
 }
 
 export type CoachProfileUncheckedCreateWithoutAssignedClientsInput = {
@@ -591,6 +617,7 @@ export type CoachProfileUncheckedCreateWithoutAssignedClientsInput = {
   createdWorkouts?: Prisma.WorkoutUncheckedCreateNestedManyWithoutCreatedByInput
   assignedWorkouts?: Prisma.WorkoutAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutCoachInput
+  mealPlans?: Prisma.MealPlanUncheckedCreateNestedManyWithoutCoachInput
 }
 
 export type CoachProfileCreateOrConnectWithoutAssignedClientsInput = {
@@ -619,6 +646,7 @@ export type CoachProfileUpdateWithoutAssignedClientsInput = {
   createdWorkouts?: Prisma.WorkoutUpdateManyWithoutCreatedByNestedInput
   assignedWorkouts?: Prisma.WorkoutAssignmentUpdateManyWithoutAssignedByNestedInput
   schedules?: Prisma.ScheduleUpdateManyWithoutCoachNestedInput
+  mealPlans?: Prisma.MealPlanUpdateManyWithoutCoachNestedInput
 }
 
 export type CoachProfileUncheckedUpdateWithoutAssignedClientsInput = {
@@ -628,6 +656,75 @@ export type CoachProfileUncheckedUpdateWithoutAssignedClientsInput = {
   bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   certifications?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   yearsExperience?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  createdWorkouts?: Prisma.WorkoutUncheckedUpdateManyWithoutCreatedByNestedInput
+  assignedWorkouts?: Prisma.WorkoutAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutCoachNestedInput
+  mealPlans?: Prisma.MealPlanUncheckedUpdateManyWithoutCoachNestedInput
+}
+
+export type CoachProfileCreateWithoutMealPlansInput = {
+  id?: string
+  specialization?: string | null
+  bio?: string | null
+  certifications?: string | null
+  yearsExperience?: number | null
+  user: Prisma.UserCreateNestedOneWithoutCoachProfileInput
+  assignedClients?: Prisma.ClientProfileCreateNestedManyWithoutAssignedCoachInput
+  createdWorkouts?: Prisma.WorkoutCreateNestedManyWithoutCreatedByInput
+  assignedWorkouts?: Prisma.WorkoutAssignmentCreateNestedManyWithoutAssignedByInput
+  schedules?: Prisma.ScheduleCreateNestedManyWithoutCoachInput
+}
+
+export type CoachProfileUncheckedCreateWithoutMealPlansInput = {
+  id?: string
+  userId: string
+  specialization?: string | null
+  bio?: string | null
+  certifications?: string | null
+  yearsExperience?: number | null
+  assignedClients?: Prisma.ClientProfileUncheckedCreateNestedManyWithoutAssignedCoachInput
+  createdWorkouts?: Prisma.WorkoutUncheckedCreateNestedManyWithoutCreatedByInput
+  assignedWorkouts?: Prisma.WorkoutAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutCoachInput
+}
+
+export type CoachProfileCreateOrConnectWithoutMealPlansInput = {
+  where: Prisma.CoachProfileWhereUniqueInput
+  create: Prisma.XOR<Prisma.CoachProfileCreateWithoutMealPlansInput, Prisma.CoachProfileUncheckedCreateWithoutMealPlansInput>
+}
+
+export type CoachProfileUpsertWithoutMealPlansInput = {
+  update: Prisma.XOR<Prisma.CoachProfileUpdateWithoutMealPlansInput, Prisma.CoachProfileUncheckedUpdateWithoutMealPlansInput>
+  create: Prisma.XOR<Prisma.CoachProfileCreateWithoutMealPlansInput, Prisma.CoachProfileUncheckedCreateWithoutMealPlansInput>
+  where?: Prisma.CoachProfileWhereInput
+}
+
+export type CoachProfileUpdateToOneWithWhereWithoutMealPlansInput = {
+  where?: Prisma.CoachProfileWhereInput
+  data: Prisma.XOR<Prisma.CoachProfileUpdateWithoutMealPlansInput, Prisma.CoachProfileUncheckedUpdateWithoutMealPlansInput>
+}
+
+export type CoachProfileUpdateWithoutMealPlansInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  specialization?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certifications?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yearsExperience?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  user?: Prisma.UserUpdateOneRequiredWithoutCoachProfileNestedInput
+  assignedClients?: Prisma.ClientProfileUpdateManyWithoutAssignedCoachNestedInput
+  createdWorkouts?: Prisma.WorkoutUpdateManyWithoutCreatedByNestedInput
+  assignedWorkouts?: Prisma.WorkoutAssignmentUpdateManyWithoutAssignedByNestedInput
+  schedules?: Prisma.ScheduleUpdateManyWithoutCoachNestedInput
+}
+
+export type CoachProfileUncheckedUpdateWithoutMealPlansInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  specialization?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  bio?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  certifications?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  yearsExperience?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  assignedClients?: Prisma.ClientProfileUncheckedUpdateManyWithoutAssignedCoachNestedInput
   createdWorkouts?: Prisma.WorkoutUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedWorkouts?: Prisma.WorkoutAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutCoachNestedInput
@@ -643,6 +740,7 @@ export type CoachProfileCreateWithoutCreatedWorkoutsInput = {
   assignedClients?: Prisma.ClientProfileCreateNestedManyWithoutAssignedCoachInput
   assignedWorkouts?: Prisma.WorkoutAssignmentCreateNestedManyWithoutAssignedByInput
   schedules?: Prisma.ScheduleCreateNestedManyWithoutCoachInput
+  mealPlans?: Prisma.MealPlanCreateNestedManyWithoutCoachInput
 }
 
 export type CoachProfileUncheckedCreateWithoutCreatedWorkoutsInput = {
@@ -655,6 +753,7 @@ export type CoachProfileUncheckedCreateWithoutCreatedWorkoutsInput = {
   assignedClients?: Prisma.ClientProfileUncheckedCreateNestedManyWithoutAssignedCoachInput
   assignedWorkouts?: Prisma.WorkoutAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutCoachInput
+  mealPlans?: Prisma.MealPlanUncheckedCreateNestedManyWithoutCoachInput
 }
 
 export type CoachProfileCreateOrConnectWithoutCreatedWorkoutsInput = {
@@ -683,6 +782,7 @@ export type CoachProfileUpdateWithoutCreatedWorkoutsInput = {
   assignedClients?: Prisma.ClientProfileUpdateManyWithoutAssignedCoachNestedInput
   assignedWorkouts?: Prisma.WorkoutAssignmentUpdateManyWithoutAssignedByNestedInput
   schedules?: Prisma.ScheduleUpdateManyWithoutCoachNestedInput
+  mealPlans?: Prisma.MealPlanUpdateManyWithoutCoachNestedInput
 }
 
 export type CoachProfileUncheckedUpdateWithoutCreatedWorkoutsInput = {
@@ -695,6 +795,7 @@ export type CoachProfileUncheckedUpdateWithoutCreatedWorkoutsInput = {
   assignedClients?: Prisma.ClientProfileUncheckedUpdateManyWithoutAssignedCoachNestedInput
   assignedWorkouts?: Prisma.WorkoutAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutCoachNestedInput
+  mealPlans?: Prisma.MealPlanUncheckedUpdateManyWithoutCoachNestedInput
 }
 
 export type CoachProfileCreateWithoutAssignedWorkoutsInput = {
@@ -707,6 +808,7 @@ export type CoachProfileCreateWithoutAssignedWorkoutsInput = {
   assignedClients?: Prisma.ClientProfileCreateNestedManyWithoutAssignedCoachInput
   createdWorkouts?: Prisma.WorkoutCreateNestedManyWithoutCreatedByInput
   schedules?: Prisma.ScheduleCreateNestedManyWithoutCoachInput
+  mealPlans?: Prisma.MealPlanCreateNestedManyWithoutCoachInput
 }
 
 export type CoachProfileUncheckedCreateWithoutAssignedWorkoutsInput = {
@@ -719,6 +821,7 @@ export type CoachProfileUncheckedCreateWithoutAssignedWorkoutsInput = {
   assignedClients?: Prisma.ClientProfileUncheckedCreateNestedManyWithoutAssignedCoachInput
   createdWorkouts?: Prisma.WorkoutUncheckedCreateNestedManyWithoutCreatedByInput
   schedules?: Prisma.ScheduleUncheckedCreateNestedManyWithoutCoachInput
+  mealPlans?: Prisma.MealPlanUncheckedCreateNestedManyWithoutCoachInput
 }
 
 export type CoachProfileCreateOrConnectWithoutAssignedWorkoutsInput = {
@@ -747,6 +850,7 @@ export type CoachProfileUpdateWithoutAssignedWorkoutsInput = {
   assignedClients?: Prisma.ClientProfileUpdateManyWithoutAssignedCoachNestedInput
   createdWorkouts?: Prisma.WorkoutUpdateManyWithoutCreatedByNestedInput
   schedules?: Prisma.ScheduleUpdateManyWithoutCoachNestedInput
+  mealPlans?: Prisma.MealPlanUpdateManyWithoutCoachNestedInput
 }
 
 export type CoachProfileUncheckedUpdateWithoutAssignedWorkoutsInput = {
@@ -759,6 +863,7 @@ export type CoachProfileUncheckedUpdateWithoutAssignedWorkoutsInput = {
   assignedClients?: Prisma.ClientProfileUncheckedUpdateManyWithoutAssignedCoachNestedInput
   createdWorkouts?: Prisma.WorkoutUncheckedUpdateManyWithoutCreatedByNestedInput
   schedules?: Prisma.ScheduleUncheckedUpdateManyWithoutCoachNestedInput
+  mealPlans?: Prisma.MealPlanUncheckedUpdateManyWithoutCoachNestedInput
 }
 
 export type CoachProfileCreateWithoutSchedulesInput = {
@@ -771,6 +876,7 @@ export type CoachProfileCreateWithoutSchedulesInput = {
   assignedClients?: Prisma.ClientProfileCreateNestedManyWithoutAssignedCoachInput
   createdWorkouts?: Prisma.WorkoutCreateNestedManyWithoutCreatedByInput
   assignedWorkouts?: Prisma.WorkoutAssignmentCreateNestedManyWithoutAssignedByInput
+  mealPlans?: Prisma.MealPlanCreateNestedManyWithoutCoachInput
 }
 
 export type CoachProfileUncheckedCreateWithoutSchedulesInput = {
@@ -783,6 +889,7 @@ export type CoachProfileUncheckedCreateWithoutSchedulesInput = {
   assignedClients?: Prisma.ClientProfileUncheckedCreateNestedManyWithoutAssignedCoachInput
   createdWorkouts?: Prisma.WorkoutUncheckedCreateNestedManyWithoutCreatedByInput
   assignedWorkouts?: Prisma.WorkoutAssignmentUncheckedCreateNestedManyWithoutAssignedByInput
+  mealPlans?: Prisma.MealPlanUncheckedCreateNestedManyWithoutCoachInput
 }
 
 export type CoachProfileCreateOrConnectWithoutSchedulesInput = {
@@ -811,6 +918,7 @@ export type CoachProfileUpdateWithoutSchedulesInput = {
   assignedClients?: Prisma.ClientProfileUpdateManyWithoutAssignedCoachNestedInput
   createdWorkouts?: Prisma.WorkoutUpdateManyWithoutCreatedByNestedInput
   assignedWorkouts?: Prisma.WorkoutAssignmentUpdateManyWithoutAssignedByNestedInput
+  mealPlans?: Prisma.MealPlanUpdateManyWithoutCoachNestedInput
 }
 
 export type CoachProfileUncheckedUpdateWithoutSchedulesInput = {
@@ -823,6 +931,7 @@ export type CoachProfileUncheckedUpdateWithoutSchedulesInput = {
   assignedClients?: Prisma.ClientProfileUncheckedUpdateManyWithoutAssignedCoachNestedInput
   createdWorkouts?: Prisma.WorkoutUncheckedUpdateManyWithoutCreatedByNestedInput
   assignedWorkouts?: Prisma.WorkoutAssignmentUncheckedUpdateManyWithoutAssignedByNestedInput
+  mealPlans?: Prisma.MealPlanUncheckedUpdateManyWithoutCoachNestedInput
 }
 
 
@@ -835,6 +944,7 @@ export type CoachProfileCountOutputType = {
   createdWorkouts: number
   assignedWorkouts: number
   schedules: number
+  mealPlans: number
 }
 
 export type CoachProfileCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -842,6 +952,7 @@ export type CoachProfileCountOutputTypeSelect<ExtArgs extends runtime.Types.Exte
   createdWorkouts?: boolean | CoachProfileCountOutputTypeCountCreatedWorkoutsArgs
   assignedWorkouts?: boolean | CoachProfileCountOutputTypeCountAssignedWorkoutsArgs
   schedules?: boolean | CoachProfileCountOutputTypeCountSchedulesArgs
+  mealPlans?: boolean | CoachProfileCountOutputTypeCountMealPlansArgs
 }
 
 /**
@@ -882,6 +993,13 @@ export type CoachProfileCountOutputTypeCountSchedulesArgs<ExtArgs extends runtim
   where?: Prisma.ScheduleWhereInput
 }
 
+/**
+ * CoachProfileCountOutputType without action
+ */
+export type CoachProfileCountOutputTypeCountMealPlansArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MealPlanWhereInput
+}
+
 
 export type CoachProfileSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -895,6 +1013,7 @@ export type CoachProfileSelect<ExtArgs extends runtime.Types.Extensions.Internal
   createdWorkouts?: boolean | Prisma.CoachProfile$createdWorkoutsArgs<ExtArgs>
   assignedWorkouts?: boolean | Prisma.CoachProfile$assignedWorkoutsArgs<ExtArgs>
   schedules?: boolean | Prisma.CoachProfile$schedulesArgs<ExtArgs>
+  mealPlans?: boolean | Prisma.CoachProfile$mealPlansArgs<ExtArgs>
   _count?: boolean | Prisma.CoachProfileCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["coachProfile"]>
 
@@ -934,6 +1053,7 @@ export type CoachProfileInclude<ExtArgs extends runtime.Types.Extensions.Interna
   createdWorkouts?: boolean | Prisma.CoachProfile$createdWorkoutsArgs<ExtArgs>
   assignedWorkouts?: boolean | Prisma.CoachProfile$assignedWorkoutsArgs<ExtArgs>
   schedules?: boolean | Prisma.CoachProfile$schedulesArgs<ExtArgs>
+  mealPlans?: boolean | Prisma.CoachProfile$mealPlansArgs<ExtArgs>
   _count?: boolean | Prisma.CoachProfileCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CoachProfileIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -951,6 +1071,7 @@ export type $CoachProfilePayload<ExtArgs extends runtime.Types.Extensions.Intern
     createdWorkouts: Prisma.$WorkoutPayload<ExtArgs>[]
     assignedWorkouts: Prisma.$WorkoutAssignmentPayload<ExtArgs>[]
     schedules: Prisma.$SchedulePayload<ExtArgs>[]
+    mealPlans: Prisma.$MealPlanPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1358,6 +1479,7 @@ export interface Prisma__CoachProfileClient<T, Null = never, ExtArgs extends run
   createdWorkouts<T extends Prisma.CoachProfile$createdWorkoutsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CoachProfile$createdWorkoutsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkoutPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assignedWorkouts<T extends Prisma.CoachProfile$assignedWorkoutsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CoachProfile$assignedWorkoutsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkoutAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   schedules<T extends Prisma.CoachProfile$schedulesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CoachProfile$schedulesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SchedulePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  mealPlans<T extends Prisma.CoachProfile$mealPlansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CoachProfile$mealPlansArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MealPlanPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1882,6 +2004,30 @@ export type CoachProfile$schedulesArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.ScheduleScalarFieldEnum | Prisma.ScheduleScalarFieldEnum[]
+}
+
+/**
+ * CoachProfile.mealPlans
+ */
+export type CoachProfile$mealPlansArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MealPlan
+   */
+  select?: Prisma.MealPlanSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MealPlan
+   */
+  omit?: Prisma.MealPlanOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MealPlanInclude<ExtArgs> | null
+  where?: Prisma.MealPlanWhereInput
+  orderBy?: Prisma.MealPlanOrderByWithRelationInput | Prisma.MealPlanOrderByWithRelationInput[]
+  cursor?: Prisma.MealPlanWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MealPlanScalarFieldEnum | Prisma.MealPlanScalarFieldEnum[]
 }
 
 /**

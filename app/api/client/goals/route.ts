@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireClient } from "@/lib/auth";
 import { notifyCoach } from "@/lib/notifications";
+import { isClientGoalsManagedByCoach } from "@/lib/client-goals-access";
 
 export async function GET() {
   const session = await requireClient();
@@ -12,8 +13,10 @@ export async function GET() {
     select: { id: true },
   });
 
+  const coachManagedGoals = await isClientGoalsManagedByCoach(userId);
+
   if (!profile) {
-    return NextResponse.json({ data: [] });
+    return NextResponse.json({ data: [], coachManagedGoals });
   }
 
   const goals = await prisma.clientGoal.findMany({
@@ -60,6 +63,7 @@ export async function GET() {
       ...cg,
       updates: (cg as { updates?: { id: string; message: string; createdAt: Date }[] }).updates ?? [],
     })),
+    coachManagedGoals,
   });
 }
 
@@ -77,6 +81,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       { error: "Client profile not found" },
       { status: 404 },
+    );
+  }
+
+  if (await isClientGoalsManagedByCoach(userId)) {
+    return NextResponse.json(
+      { error: "Your coach sets your goals. Contact your coach to change them." },
+      { status: 403 },
     );
   }
 

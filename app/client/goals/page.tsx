@@ -50,6 +50,7 @@ export default function ClientGoalsPage() {
   const [removing, setRemoving] = React.useState(false);
   const [feedbackByGoalId, setFeedbackByGoalId] = React.useState<Record<string, string>>({});
   const [savingFeedbackGoalId, setSavingFeedbackGoalId] = React.useState<string | null>(null);
+  const [coachManagedGoals, setCoachManagedGoals] = React.useState(false);
 
   React.useEffect(() => {
     const load = async () => {
@@ -60,6 +61,7 @@ export default function ClientGoalsPage() {
         ]);
         const availJson = await availRes.json();
         const mineJson = await mineRes.json();
+        setCoachManagedGoals(mineJson.coachManagedGoals === true);
         setAvailable(
           (Array.isArray(availJson.data) ? availJson.data : []).map((g: { id: string; name: string; category: string }) => ({
             id: g.id,
@@ -230,7 +232,9 @@ export default function ClientGoalsPage() {
         <div>
           <h1 className="text-lg font-semibold">My Workout Goals</h1>
           <p className="text-sm text-muted-foreground">
-            Select your personal workout goals and track high-level progress.
+            {coachManagedGoals
+              ? "Your coach assigns your goals. Track progress and workouts below."
+              : "Select your personal workout goals and track high-level progress."}
           </p>
         </div>
 
@@ -238,6 +242,7 @@ export default function ClientGoalsPage() {
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : (
         <>
+          {!coachManagedGoals && (
           <Card className="p-3">
             <h2 className="mb-2 text-sm font-semibold">Add a new goal</h2>
             <form
@@ -303,12 +308,15 @@ export default function ClientGoalsPage() {
               </div>
             </form>
           </Card>
+          )}
 
           <div className="space-y-2">
             <h2 className="text-sm font-semibold">My goals</h2>
             {selected.length === 0 ? (
               <Card className="p-4 text-sm text-muted-foreground">
-                You don&apos;t have any goals yet. Add one above.
+                {coachManagedGoals
+                  ? "Your coach hasn’t assigned goals yet. Check back after your coach updates your plan."
+                  : "You don\u2019t have any goals yet. Add one above."}
               </Card>
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -390,6 +398,7 @@ export default function ClientGoalsPage() {
                             View workouts
                           </Link>
                         </Button>
+                        {!coachManagedGoals && (
                         <AlertDialog
                           open={removeGoalId === g.id}
                           onOpenChange={(open) => !open && setRemoveGoalId(null)}
@@ -430,6 +439,7 @@ export default function ClientGoalsPage() {
                             Remove
                           </Button>
                         </AlertDialog>
+                        )}
                       </div>
                       <div className="mt-3 space-y-2 border-t pt-2">
                         <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">

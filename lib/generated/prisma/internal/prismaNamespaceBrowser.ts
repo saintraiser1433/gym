@@ -54,6 +54,7 @@ export const ModelName = {
   User: 'User',
   ClientProfile: 'ClientProfile',
   CoachProfile: 'CoachProfile',
+  MealPlan: 'MealPlan',
   Membership: 'Membership',
   ClientMembership: 'ClientMembership',
   MembershipRenewal: 'MembershipRenewal',
@@ -140,6 +141,19 @@ export const CoachProfileScalarFieldEnum = {
 } as const
 
 export type CoachProfileScalarFieldEnum = (typeof CoachProfileScalarFieldEnum)[keyof typeof CoachProfileScalarFieldEnum]
+
+
+export const MealPlanScalarFieldEnum = {
+  id: 'id',
+  clientId: 'clientId',
+  coachId: 'coachId',
+  title: 'title',
+  content: 'content',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MealPlanScalarFieldEnum = (typeof MealPlanScalarFieldEnum)[keyof typeof MealPlanScalarFieldEnum]
 
 
 export const MembershipScalarFieldEnum = {

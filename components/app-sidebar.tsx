@@ -8,6 +8,7 @@ import {
   CalendarClock,
   CreditCard,
   Activity,
+  UtensilsCrossed,
 } from "lucide-react"
 import { useSession } from "next-auth/react"
 import Link from "next/link"
@@ -120,6 +121,7 @@ function getNavItems(role?: string, hasActiveMembership?: boolean): NavItem[] {
     if (hasActiveMembership) {
       items.push(
         { title: "Goals", url: "/client/goals", icon: Activity },
+        { title: "Meal plan", url: "/client/meal-plan", icon: UtensilsCrossed },
         { title: "Schedules", url: "/client/schedules", icon: CalendarClock },
         { title: "Attendance", url: "/client/attendance", icon: CalendarClock },
       );
