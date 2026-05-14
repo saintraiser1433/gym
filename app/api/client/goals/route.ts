@@ -1,7 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireClient } from "@/lib/auth";
-import { notifyCoach } from "@/lib/notifications";
 import { isClientGoalsManagedByCoach } from "@/lib/client-goals-access";
 
 export async function GET() {
@@ -67,72 +66,18 @@ export async function GET() {
   });
 }
 
-export async function POST(req: NextRequest) {
-  const session = await requireClient();
-  const userId = (session.user as { id?: string }).id as string;
-  const body = await req.json();
-
-  const profile = await prisma.clientProfile.findUnique({
-    where: { userId },
-    include: { user: { select: { name: true } } },
-  });
-
-  if (!profile) {
-    return NextResponse.json(
-      { error: "Client profile not found" },
-      { status: 404 },
-    );
-  }
-
-  if (await isClientGoalsManagedByCoach(userId)) {
-    return NextResponse.json(
-      { error: "Your coach sets your goals. Contact your coach to change them." },
-      { status: 403 },
-    );
-  }
-
-  const goalRecord = await prisma.workoutGoal.findUnique({
-    where: { id: body.goalId },
-  });
-  if (!goalRecord) {
-    return NextResponse.json({ error: "Goal not found" }, { status: 404 });
-  }
-  const targetSessionsFromGoal = (goalRecord as { targetSessions?: number | null }).targetSessions ?? null;
-
-  const deadline = body.deadline ? new Date(body.deadline) : null;
-  if (deadline) {
-    const startOfToday = new Date();
-    startOfToday.setHours(0, 0, 0, 0);
-    if (deadline < startOfToday) {
-      return NextResponse.json(
-        { error: "Deadline must be today or a future date, not a past date." },
-        { status: 400 },
-      );
-    }
-  }
-
-  const goal = await prisma.clientGoal.create({
-    data: {
-      clientId: profile.id,
-      goalId: body.goalId,
-      targetValue: body.targetValue ?? null,
-      targetSessions: targetSessionsFromGoal,
-      deadline,
+/**
+ * Self-assignment of goals is disabled.
+ * Goals are managed exclusively by the coach or admin.
+ */
+export async function POST() {
+  await requireClient();
+  return NextResponse.json(
+    {
+      error:
+        "Clients can no longer set their own goals. Please contact your coach or the gym admin.",
     },
-    include: { goal: { select: { name: true } } },
-  });
-
-  if (profile.assignedCoachId) {
-    const clientName = profile.user?.name ?? "A client";
-    await notifyCoach(
-      profile.assignedCoachId,
-      "CLIENT_GOAL_SET",
-      "Client set a goal",
-      `${clientName} set a new goal${goal.goal?.name ? `: ${goal.goal.name}` : ""}.`,
-      { clientId: profile.id, goalId: goal.id },
-    );
-  }
-
-  return NextResponse.json(goal, { status: 201 });
+    { status: 403 },
+  );
 }
 

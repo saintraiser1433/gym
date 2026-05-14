@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CrosCal — System Flow &amp; New Features</title>
+  <style>
+    :root {
+      --ink: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --orange: #ea580c;
+      --orange-bg: #fff7ed;
+      --new-bg: #fefce8;
+      --new-border: #facc15;
+      --new-title: #854d0e;
+      --card: #f8fafc;
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      font-size: 12.5px;
+      line-height: 1.55;
+      color: var(--ink);
+      background: #fff;
+    }
+    .cover {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 48px;
+      background: linear-gradient(145deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      color: #fff;
+      page-break-after: always;
+    }
+    .cover .badge {
+      background: var(--orange);
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .cover h1 { font-size: 2.2rem; margin: 0 0 8px; font-weight: 800; letter-spacing: -0.02em; }
+    .cover h1 span { color: var(--orange); }
+    .cover p.sub { max-width: 520px; color: #94a3b8; font-size: 14px; margin: 0 0 24px; }
+    .cover .meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px 24px;
+      justify-content: center;
+      font-size: 11px;
+      color: #94a3b8;
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 14px 22px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.04);
+    }
+    .cover .meta b { color: #fff; }
+
+    .page { max-width: 820px; margin: 0 auto; padding: 32px 40px 48px; }
+
+    h2 {
+      font-size: 1.35rem;
+      margin: 28px 0 10px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid var(--orange);
+      color: var(--ink);
+    }
+    h3 { font-size: 1.05rem; margin: 18px 0 6px; color: var(--ink); }
+    h4 { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--orange); margin: 14px 0 6px; }
+    p { margin: 6px 0; }
+    ul, ol { margin: 6px 0; padding-left: 22px; }
+    li { margin: 3px 0; }
+    code {
+      font-family: ui-monospace, Consolas, monospace;
+      font-size: 11px;
+      background: #f1f5f9;
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: #c2410c;
+    }
+    .muted { color: var(--muted); }
+
+    .toc {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px 24px;
+      background: var(--card);
+      margin: 16px 0;
+    }
+    .toc ol { margin: 0; }
+
+    /* Highlight new features */
+    .new-block {
+      background: var(--new-bg);
+      border: 2px solid var(--new-border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin: 12px 0;
+      page-break-inside: avoid;
+    }
+    .new-block .new-label {
+      display: inline-block;
+      background: var(--new-border);
+      color: var(--new-title);
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+    }
+    .new-block h3 { margin: 0 0 6px; font-size: 1rem; color: var(--new-title); }
+    .new-block ul { margin: 6px 0 0; }
+
+    .step {
+      border-left: 4px solid var(--orange);
+      padding: 8px 0 8px 14px;
+      margin: 8px 0;
+      background: #fafafa;
+      border-radius: 0 6px 6px 0;
+      page-break-inside: avoid;
+    }
+    .step strong { color: var(--orange); }
+
+    .flow-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 12px 0;
+      font-size: 11.5px;
+      background: #fff;
+    }
+    .flow-box .row { margin: 4px 0; }
+    .arrow { color: var(--orange); font-weight: 700; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+      margin: 10px 0;
+    }
+    th, td { border: 1px solid var(--line); padding: 7px 9px; text-align: left; vertical-align: top; }
+    th { background: var(--orange-bg); color: #9a3412; font-weight: 700; }
+
+    .break-before { page-break-before: always; }
+
+    @page { margin: 16mm 14mm; size: A4; }
+    @media print {
+      .page { padding: 0; }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+
+<section class="cover">
+  <span class="badge">Documentation</span>
+  <h1>CrosCal Fitness<br /><span>System Flow &amp; New Features</span></h1>
+  <p class="sub">
+    Step-by-step navigation from first visit to logout, plus a highlighted summary of
+    Smart Goal Plan and related enhancements.
+  </p>
+  <div class="meta">
+    <span><b>Product</b> CrosCal Gym Management</span>
+    <span><b>Format</b> HTML + PDF export</span>
+    <span><b>Roles</b> Admin · Coach · Client</span>
+  </div>
+</section>
+
+<div class="page">
+
+  <h2>Contents</h2>
+  <div class="toc">
+    <ol>
+      <li><a href="#new">New features (highlighted)</a></li>
+      <li><a href="#flow">End-to-end system flow (start → end)</a></li>
+      <li><a href="#roles">Flows by role</a></li>
+      <li><a href="#seed">Demo data &amp; seed script</a></li>
+      <li><a href="#export">How this PDF was generated</a></li>
+    </ol>
+  </div>
+
+  <!-- ========== NEW FEATURES ========== -->
+  <h2 id="new">1. New features <span class="muted" style="font-weight:400;font-size:12px;">(highlighted)</span></h2>
+  <p class="muted">These capabilities were added around the <strong>Smart Goal Plan</strong> initiative and full database seeding.</p>
+
+  <div class="new-block">
+    <span class="new-label">New</span>
+    <h3>Smart nutrition &amp; BMR (Coach → Client)</h3>
+    <ul>
+      <li><strong>BMR &amp; TDEE</strong> — Mifflin–St Jeor BMR from height, weight, date of birth, and gender; TDEE from activity level (Sedentary → Very active).</li>
+      <li><strong>Activity level</strong> — Stored on the client profile; drives TDEE.</li>
+      <li><strong>Auto-fill macros</strong> — One-click suggestion for daily calories, protein, carbs, and fat from goal + weight + TDEE (<code>lib/bmr.ts</code>).</li>
+      <li><strong>Carbs &amp; fat (grams)</strong> — Coach can edit and save; client dashboard shows full macro breakdown with protein.</li>
+      <li><strong>Workout recommendation card</strong> — For selected objectives (e.g. weight loss, muscle gain), shows suggested workout <em>type</em>, <em>frequency</em>, and <em>intensity</em>.</li>
+    </ul>
+    <p class="muted" style="margin-top:8px;"><strong>Where:</strong> Coach → <em>My Clients</em> → open a client → profile / nutrition section.</p>
+  </div>
+
+  <div class="new-block">
+    <span class="new-label">New</span>
+    <h3>Client goals are coach/admin only</h3>
+    <ul>
+      <li>Clients <strong>cannot</strong> add or remove their own workout goals via the API or UI.</li>
+      <li>Goals page is <strong>view-only</strong> with a short notice; progress updates and “View workouts” remain.</li>
+    </ul>
+    <p class="muted" style="margin-top:8px;"><strong>Where:</strong> Client → <em>My Workout Goals</em>; API <code>POST /api/client/goals</code> and <code>DELETE …/goals/:id</code> return 403.</p>
+  </div>
+
+  <div class="new-block">
+    <span class="new-label">New</span>
+    <h3>Admin workouts: filter by goal</h3>
+    <ul>
+      <li>Toolbar <strong>Goal</strong> dropdown: all goals, no goal linked, or a specific workout goal.</li>
+      <li>API returns each workout’s linked goals for filtering.</li>
+    </ul>
+    <p class="muted" style="margin-top:8px;"><strong>Where:</strong> Admin → <em>Workouts</em>.</p>
+  </div>
+
+  <div class="new-block">
+    <span class="new-label">New</span>
+    <h3>Full relational seed</h3>
+    <ul>
+      <li><code>npm run seed</code> resets demo data and recreates <strong>all modules</strong> with valid foreign keys: users, profiles, memberships, renewals, equipment, exercises, workouts, media, equipment links, workout goals, goal–workout links, client goals, updates, progress, assignments, schedules, attendance, payments, meal plans, notifications.</li>
+      <li>Extra account: <code>pending@croscal.local</code> (INACTIVE client) for admin approval testing.</li>
+    </ul>
+    <p class="muted" style="margin-top:8px;"><strong>Warning:</strong> Seed clears application tables; use only on dev/local databases.</p>
+  </div>
+
+  <!-- ========== END TO END FLOW ========== -->
+  <h2 id="flow" class="break-before">2. End-to-end system flow (start → end)</h2>
+
+  <h3>Phase A — Entry &amp; authentication</h3>
+  <div class="flow-box">
+    <div class="row"><strong>1.</strong> User opens the app root <code>/</code> <span class="arrow">→</span> redirect to <code>/auth/sign-in</code>.</div>
+    <div class="row"><strong>2.</strong> New gym member: <em>Register as a client</em> <code>/auth/register</code> <span class="arrow">→</span> submits profile <span class="arrow">→</span> account is <strong>INACTIVE</strong> until an admin approves.</div>
+    <div class="row"><strong>3.</strong> Returning user: email + password <span class="arrow">→</span> NextAuth session created.</div>
+    <div class="row"><strong>4.</strong> After login, redirect by role: <strong>Admin</strong> <code>/admin/analytics</code> · <strong>Coach</strong> <code>/coach/dashboard</code> · <strong>Client</strong> <code>/client/dashboard</code>.</div>
+  </div>
+
+  <h3>Phase B — Client journey (typical)</h3>
+  <div class="step"><strong>5.</strong> Client lands on <strong>Dashboard</strong> — membership summary, attendance chart, QR for check-in, coach plan card (when coach + data exist).</div>
+  <div class="step"><strong>6.</strong> <strong>Memberships</strong> — choose plan (Basic / Premium). Premium enables coach assignment and coach-managed experience.</div>
+  <div class="step"><strong>7.</strong> <strong>Payments</strong> — admin records payment; when status is completed, membership becomes active.</div>
+  <div class="step"><strong>8.</strong> With active membership, sidebar unlocks: <em>Goals</em>, <em>Meal plan</em>, <em>Schedules</em>, <em>Attendance</em> (plus payments).</div>
+  <div class="step"><strong>9.</strong> <strong>Check-in</strong> — show QR on dashboard (or check in from a scheduled session). Coach/admin scans QR or records manual attendance.</div>
+  <div class="step"><strong>10.</strong> <strong>Workouts</strong> — follow assigned programs linked to coach-set goals.</div>
+  <div class="step"><strong>11.</strong> <strong>Goals</strong> — view assigned goals, progress bars, post progress notes for coach. <em>(Adding/removing goals: coach/admin only — new.)</em></div>
+  <div class="step"><strong>12.</strong> <strong>Meal plan</strong> — read-only text from coach.</div>
+  <div class="step"><strong>13.</strong> <strong>Schedules / Attendance</strong> — upcoming sessions and history.</div>
+
+  <h3>Phase C — Coach journey (typical)</h3>
+  <div class="step"><strong>14.</strong> <strong>My Dashboard</strong> — counts and charts for assigned clients and sessions.</div>
+  <div class="step"><strong>15.</strong> <strong>My Clients</strong> — open client drawer: profile, nutrition &amp; smart plan <em>(BMR, TDEE, auto macros, recommendations — new)</em>, assign catalog goals, meal plan, workouts, log session progress.</div>
+  <div class="step"><strong>16.</strong> <strong>Schedules</strong> — create or edit sessions (day/time for clients).</div>
+
+  <h3>Phase D — Admin journey (typical)</h3>
+  <div class="step"><strong>17.</strong> <strong>Analytics</strong> — members, active memberships, today’s attendance, revenue charts.</div>
+  <div class="step"><strong>18.</strong> <strong>Accounts</strong> — approve/reject registrations; manage users.</div>
+  <div class="step"><strong>19.</strong> <strong>Memberships</strong> — define products; <strong>Client memberships</strong> — sell/assign; <strong>Coach assignments</strong> — link premium clients to coaches.</div>
+  <div class="step"><strong>20.</strong> <strong>Payments &amp; Renewals</strong> — record money movement and expiring memberships.</div>
+  <div class="step"><strong>21.</strong> <strong>Workout goals &amp; Workouts</strong> — catalog goals, link workouts to goals by day; filter workout list by goal <em>(new)</em>.</div>
+  <div class="step"><strong>22.</strong> <strong>Schedules &amp; Attendance</strong> — facility calendar and check-in monitoring.</div>
+  <div class="step"><strong>23.</strong> <strong>Equipment</strong> — inventory for workouts.</div>
+
+  <h3>Phase E — Exit</h3>
+  <div class="flow-box">
+    <div class="row"><strong>24.</strong> Sidebar footer → user menu → <strong>Log out</strong> <span class="arrow">→</span> session ends <span class="arrow">→</span> <code>/auth/sign-in</code>.</div>
+    <div class="row"><strong>25.</strong> Protected routes (<code>/admin/*</code>, <code>/coach/*</code>, <code>/client/*</code>) redirect to sign-in if unauthenticated or wrong role.</div>
+  </div>
+
+  <!-- ========== BY ROLE ========== -->
+  <h2 id="roles" class="break-before">3. Flows by role (quick reference)</h2>
+  <table>
+    <thead>
+      <tr><th>Role</th><th>Primary entry</th><th>Main sidebar destinations</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Admin</strong></td>
+        <td><code>/admin/analytics</code></td>
+        <td>Accounts, Schedules, Attendance, Memberships, Client memberships, Coach assignments, Renewals, Payments, Workout goals, Client goals, Workouts, Equipment</td>
+      </tr>
+      <tr>
+        <td><strong>Coach</strong></td>
+        <td><code>/coach/dashboard</code></td>
+        <td>My Clients, Schedules</td>
+      </tr>
+      <tr>
+        <td><strong>Client</strong></td>
+        <td><code>/client/dashboard</code></td>
+        <td>Dashboard, Memberships; if active membership: Goals, Meal plan, Schedules, Attendance; Payments</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- ========== SEED ========== -->
+  <h2 id="seed" class="break-before">4. Demo data &amp; seed script</h2>
+  <p>After <code>npx prisma migrate dev</code> (or <code>db push</code>) and <code>npx prisma generate</code>:</p>
+  <pre style="background:#0f172a;color:#e2e8f0;padding:12px 14px;border-radius:8px;font-size:11px;overflow:auto;">npm run seed</pre>
+  <table>
+    <thead><tr><th>Account</th><th>Email</th><th>Password</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Admin</td><td><code>admin@croscal.local</code></td><td><code>admin123</code></td><td>Full admin UI</td></tr>
+      <tr><td>Coach</td><td><code>coach@croscal.local</code></td><td><code>coach123</code></td><td>Linked to demo client + meal plan + schedules</td></tr>
+      <tr><td>Client</td><td><code>client@croscal.local</code></td><td><code>client123</code></td><td>Premium membership, goals, progress, payments</td></tr>
+      <tr><td>Pending</td><td><code>pending@croscal.local</code></td><td><code>client123</code></td><td>INACTIVE — for “approve account” admin flow</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="export" class="break-before">5. How to regenerate this PDF</h2>
+  <ol>
+    <li>Edit <code>docs/system-flow-and-features.html</code> if needed.</li>
+    <li>On Windows, from the project root:
+      <pre style="background:#f1f5f9;padding:10px 12px;border-radius:6px;font-size:11px;">&amp; "C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe" `
+  --headless --disable-gpu --print-to-pdf-no-header `
+  --print-to-pdf="E:\hernan\gy\gym\docs\system-flow-and-features.pdf" `
+  "file:///E:/hernan/gy/gym/docs/system-flow-and-features.html"</pre>
+    </li>
+    <li>Or print from a browser: open the HTML file → Print → Save as PDF.</li>
+  </ol>
+
+  <p class="muted" style="margin-top:24px;">© CrosCal Fitness — internal system guide. Generated for documentation export.</p>
+</div>
+</body>
+</html>

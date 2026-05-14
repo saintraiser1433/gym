@@ -1,0 +1,853 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>CrosCal Fitness — System Operation Guide</title>
+<style>
+  :root {
+    --orange: #ea580c;
+    --orange-soft: #fff1e6;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --line: #e5e7eb;
+    --bg: #ffffff;
+    --card: #f8fafc;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  .page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 28px 32px 36px;
+  }
+
+  /* Cover */
+  .cover {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 95vh;
+    text-align: center;
+    page-break-after: always;
+    background:
+      radial-gradient(ellipse at top right, rgba(234,88,12,0.18), transparent 60%),
+      radial-gradient(ellipse at bottom left, rgba(234,88,12,0.10), transparent 60%),
+      linear-gradient(135deg, #0b0f17, #0f172a);
+    color: #fff;
+    padding: 48px;
+    border-radius: 0;
+  }
+  .cover .tag {
+    color: var(--orange);
+    font-size: 11px;
+    letter-spacing: 4px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+  .cover h1 {
+    font-size: 44px;
+    margin: 12px 0 6px;
+    letter-spacing: -1px;
+    font-weight: 900;
+    line-height: 1.05;
+  }
+  .cover h1 span { color: var(--orange); }
+  .cover .sub {
+    color: #cbd5e1;
+    max-width: 480px;
+    margin: 12px auto 24px;
+    font-size: 13px;
+  }
+  .cover .meta {
+    display: inline-flex;
+    gap: 24px;
+    padding: 12px 18px;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+    font-size: 11px;
+    color: #94a3b8;
+  }
+  .cover .meta b { color: #fff; font-weight: 600; }
+  .cover .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--orange);
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+
+  /* Headings */
+  h2 {
+    font-size: 22px;
+    margin: 28px 0 6px;
+    color: var(--ink);
+    border-bottom: 2px solid var(--orange);
+    padding-bottom: 6px;
+    letter-spacing: -0.3px;
+  }
+  h3 {
+    font-size: 15px;
+    margin: 18px 0 6px;
+    color: var(--ink);
+  }
+  h4 {
+    font-size: 13px;
+    margin: 14px 0 4px;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+  p { margin: 6px 0; }
+  ul, ol { padding-left: 20px; margin: 6px 0; }
+  li { margin: 2px 0; }
+  code {
+    background: #f1f5f9;
+    color: #be3a11;
+    padding: 1px 5px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  .muted { color: var(--muted); }
+
+  /* Components */
+  .callout {
+    border-left: 3px solid var(--orange);
+    background: var(--orange-soft);
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin: 10px 0;
+    font-size: 12px;
+  }
+  .callout b { color: var(--orange); }
+
+  .card {
+    border: 1px solid var(--line);
+    background: var(--card);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 10px 0;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .role-card {
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--orange);
+    border-radius: 8px;
+    padding: 12px;
+    background: #fff;
+  }
+  .role-card h4 { margin: 0 0 6px; color: var(--ink); }
+  .role-card .role-tag {
+    display: inline-block;
+    background: var(--orange);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .role-card ul { padding-left: 16px; margin: 8px 0 0; }
+
+  /* Flow diagram */
+  .flow {
+    border: 1px solid var(--line);
+    background: #fff;
+    border-radius: 10px;
+    padding: 18px;
+    margin: 14px 0;
+  }
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 6px 0;
+    flex-wrap: wrap;
+  }
+  .node {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--line);
+    background: #fff;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .node.start { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
+  .node.end { background: #fee2e2; border-color: #fecaca; color: #991b1b; }
+  .node.auth { background: #eff6ff; border-color: #bfdbfe; color: #1e3a8a; }
+  .node.admin { background: #fef3c7; border-color: #fde68a; color: #92400e; }
+  .node.coach { background: #ede9fe; border-color: #ddd6fe; color: #5b21b6; }
+  .node.client { background: var(--orange-soft); border-color: #fed7aa; color: #9a3412; }
+  .arrow { color: var(--orange); font-weight: 700; }
+
+  /* Steps */
+  .step {
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--orange);
+    border-radius: 6px;
+    padding: 10px 14px;
+    background: #fff;
+    margin: 8px 0;
+    position: relative;
+  }
+  .step .step-no {
+    display: inline-block;
+    background: var(--orange);
+    color: #fff;
+    width: 22px;
+    height: 22px;
+    line-height: 22px;
+    text-align: center;
+    border-radius: 50%;
+    font-size: 11px;
+    font-weight: 800;
+    margin-right: 8px;
+  }
+  .step .step-title { font-weight: 700; font-size: 13px; }
+  .step .step-body { margin-top: 4px; font-size: 12px; color: #334155; }
+  .step .step-path {
+    display: inline-block;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background: #0f172a;
+    color: #fff;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    margin-left: 6px;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+    font-size: 11.5px;
+  }
+  th, td {
+    border: 1px solid var(--line);
+    padding: 6px 8px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th {
+    background: var(--orange-soft);
+    color: var(--orange);
+    font-weight: 700;
+    font-size: 10.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  tr:nth-child(even) td { background: #fafbfc; }
+
+  .toc {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 16px 22px;
+    background: var(--card);
+    margin: 14px 0 22px;
+  }
+  .toc ol { margin: 4px 0 0; padding-left: 22px; }
+  .toc li { margin: 3px 0; }
+
+  /* Page break helpers */
+  .break-before { page-break-before: always; }
+  .break-after { page-break-after: always; }
+  .avoid-break { page-break-inside: avoid; }
+
+  /* Footer / header on print */
+  @page {
+    margin: 18mm 14mm;
+    size: A4;
+  }
+
+  /* Print tuning */
+  @media print {
+    body { font-size: 11.5px; }
+    .page { padding: 0; }
+    .cover { min-height: 100vh; }
+    a { color: var(--ink); text-decoration: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===================== COVER PAGE ===================== -->
+<section class="cover">
+  <span class="badge">User Guide</span>
+  <span class="tag">CrosCal Fitness</span>
+  <h1>System Operation<br/><span>Guide</span></h1>
+  <p class="sub">Step-by-step navigation flow for Admin, Coach, and Client users — from login to logout, end to end.</p>
+  <div class="meta">
+    <span><b>Version:</b> 1.0</span>
+    <span><b>Stack:</b> Next.js · Prisma · NextAuth</span>
+    <span><b>Roles:</b> Admin · Coach · Client</span>
+  </div>
+</section>
+
+<div class="page">
+
+<!-- ===================== TABLE OF CONTENTS ===================== -->
+<h2>Contents</h2>
+<div class="toc">
+  <ol>
+    <li>System Overview</li>
+    <li>Roles &amp; Permissions</li>
+    <li>End-to-End Navigation Flow</li>
+    <li>Getting Started (First-Time Setup)</li>
+    <li>Step-by-Step: Client Workflow</li>
+    <li>Step-by-Step: Coach Workflow</li>
+    <li>Step-by-Step: Admin Workflow</li>
+    <li>Common Tasks Reference</li>
+    <li>Logout &amp; Session Handling</li>
+    <li>Troubleshooting</li>
+  </ol>
+</div>
+
+<!-- ===================== 1. SYSTEM OVERVIEW ===================== -->
+<h2>1. System Overview</h2>
+<p>
+  <b>CrosCal Fitness</b> is a web-based gym management system that handles
+  member registration, memberships, attendance (QR-based check-in),
+  coach-client assignments, workout &amp; meal plans, payments, and
+  analytics. It is a Next.js application that runs on
+  <code>http://localhost:3000</code> in development.
+</p>
+
+<div class="card">
+  <h4>Key Features</h4>
+  <ul>
+    <li>Role-based dashboards for Admin, Coach, and Client</li>
+    <li>Admin approval workflow for new client registrations</li>
+    <li>Membership plans (Basic / Premium) and renewals</li>
+    <li>QR-code attendance: client shows QR, coach/admin scans</li>
+    <li>Workout library, goals tracking, and meal plans</li>
+    <li>Coach assignment per client, with personalised plans</li>
+    <li>Real-time analytics for revenue and attendance</li>
+  </ul>
+</div>
+
+<h3>Default Demo Accounts</h3>
+<table>
+  <thead><tr><th>Role</th><th>Email</th><th>Password</th><th>Lands on</th></tr></thead>
+  <tbody>
+    <tr><td>Admin</td><td><code>admin@croscal.local</code></td><td><code>admin123</code></td><td><code>/admin/analytics</code></td></tr>
+    <tr><td>Coach</td><td><code>coach@croscal.local</code></td><td><code>coach123</code></td><td><code>/coach/dashboard</code></td></tr>
+    <tr><td>Client</td><td><code>client@croscal.local</code></td><td><code>client123</code></td><td><code>/client/dashboard</code></td></tr>
+  </tbody>
+</table>
+
+<!-- ===================== 2. ROLES ===================== -->
+<h2>2. Roles &amp; Permissions</h2>
+<div class="grid">
+  <div class="role-card">
+    <span class="role-tag">Admin</span>
+    <h4>The Owner</h4>
+    <p class="muted" style="font-size:11px;">Approves accounts and runs the gym.</p>
+    <ul>
+      <li>Approve / reject sign-ups</li>
+      <li>Manage memberships &amp; pricing</li>
+      <li>Assign coaches to clients</li>
+      <li>Record payments &amp; renewals</li>
+      <li>Manage workouts &amp; equipment</li>
+      <li>View revenue / attendance analytics</li>
+    </ul>
+  </div>
+  <div class="role-card">
+    <span class="role-tag">Coach</span>
+    <h4>The Trainer</h4>
+    <p class="muted" style="font-size:11px;">Guides their assigned clients.</p>
+    <ul>
+      <li>See assigned clients</li>
+      <li>Create / manage session schedules</li>
+      <li>Set workout &amp; nutrition plans</li>
+      <li>Scan client QR to check them in</li>
+      <li>Track client progress</li>
+    </ul>
+  </div>
+  <div class="role-card">
+    <span class="role-tag">Client</span>
+    <h4>The Member</h4>
+    <p class="muted" style="font-size:11px;">Trains and tracks progress.</p>
+    <ul>
+      <li>Buy / renew membership</li>
+      <li>Check in via personal QR</li>
+      <li>View workouts &amp; meal plan</li>
+      <li>Track goals &amp; attendance</li>
+      <li>View payment history</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===================== 3. END-TO-END FLOW ===================== -->
+<h2>3. End-to-End Navigation Flow</h2>
+<p>
+  The diagram below shows the full path users take through CrosCal — from
+  the very first visit on <code>/</code> to logging out. Routes are protected
+  by middleware: a user can only enter the area that matches their role.
+</p>
+
+<div class="flow avoid-break">
+  <h4>A. Entry &amp; Authentication</h4>
+  <div class="flow-row">
+    <span class="node start">Visit /</span>
+    <span class="arrow">→</span>
+    <span class="node auth">Redirect to /auth/sign-in</span>
+    <span class="arrow">→</span>
+    <span class="node auth">Sign-in form</span>
+  </div>
+  <div class="flow-row">
+    <span class="muted">New user?</span>
+    <span class="arrow">→</span>
+    <span class="node auth">/auth/register</span>
+    <span class="arrow">→</span>
+    <span class="node admin">Awaits admin approval</span>
+    <span class="arrow">→</span>
+    <span class="node auth">Sign in</span>
+  </div>
+
+  <h4>B. Role-Based Routing (after login)</h4>
+  <div class="flow-row">
+    <span class="node auth">Login success</span>
+    <span class="arrow">→</span>
+    <span class="node admin">ADMIN → /admin/analytics</span>
+  </div>
+  <div class="flow-row">
+    <span class="node auth">Login success</span>
+    <span class="arrow">→</span>
+    <span class="node coach">COACH → /coach/dashboard</span>
+  </div>
+  <div class="flow-row">
+    <span class="node auth">Login success</span>
+    <span class="arrow">→</span>
+    <span class="node client">CLIENT → /client/dashboard</span>
+  </div>
+
+  <h4>C. Client Day-to-Day Flow</h4>
+  <div class="flow-row">
+    <span class="node client">Dashboard</span>
+    <span class="arrow">→</span>
+    <span class="node client">Buy Membership</span>
+    <span class="arrow">→</span>
+    <span class="node client">Pay</span>
+    <span class="arrow">→</span>
+    <span class="node admin">Admin approves payment</span>
+    <span class="arrow">→</span>
+    <span class="node client">Access unlocked</span>
+  </div>
+  <div class="flow-row">
+    <span class="node client">Show QR at gym</span>
+    <span class="arrow">→</span>
+    <span class="node coach">Coach/Admin scans</span>
+    <span class="arrow">→</span>
+    <span class="node client">Attendance logged</span>
+    <span class="arrow">→</span>
+    <span class="node client">Workout / Goals</span>
+  </div>
+
+  <h4>D. Coach Daily Flow</h4>
+  <div class="flow-row">
+    <span class="node coach">Dashboard</span>
+    <span class="arrow">→</span>
+    <span class="node coach">My Clients</span>
+    <span class="arrow">→</span>
+    <span class="node coach">Set plan / schedule</span>
+    <span class="arrow">→</span>
+    <span class="node coach">Scan client QR</span>
+  </div>
+
+  <h4>E. Admin Operational Flow</h4>
+  <div class="flow-row">
+    <span class="node admin">Analytics</span>
+    <span class="arrow">→</span>
+    <span class="node admin">Approve Accounts</span>
+    <span class="arrow">→</span>
+    <span class="node admin">Sell Membership</span>
+    <span class="arrow">→</span>
+    <span class="node admin">Assign Coach</span>
+    <span class="arrow">→</span>
+    <span class="node admin">Record Payment</span>
+    <span class="arrow">→</span>
+    <span class="node admin">Renewals</span>
+  </div>
+
+  <h4>F. Exit</h4>
+  <div class="flow-row">
+    <span class="node client">Any page</span>
+    <span class="arrow">→</span>
+    <span class="node auth">Sidebar user menu → Log out</span>
+    <span class="arrow">→</span>
+    <span class="node end">Back to /auth/sign-in</span>
+  </div>
+</div>
+
+<!-- ===================== 4. GETTING STARTED ===================== -->
+<h2 class="break-before">4. Getting Started (First-Time Setup)</h2>
+<p>Use this once to bring the system online on a fresh machine.</p>
+
+<div class="step">
+  <span class="step-no">1</span><span class="step-title">Install dependencies</span>
+  <div class="step-body">
+    Open a terminal in the project folder and run <code>npm install</code>.
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">2</span><span class="step-title">Configure environment</span>
+  <div class="step-body">
+    Set <code>DATABASE_URL</code> and <code>NEXTAUTH_SECRET</code> in the <code>.env</code> file.
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">3</span><span class="step-title">Apply database schema</span>
+  <div class="step-body">
+    Run <code>npm run migrate</code> (uses Prisma). Then <code>npm run generate</code>.
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">4</span><span class="step-title">Seed demo data</span>
+  <div class="step-body">
+    Run <code>npm run seed</code>. This creates the admin / coach / client demo accounts.
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">5</span><span class="step-title">Start the server</span>
+  <div class="step-body">
+    Run <code>npm run dev</code> and open <code>http://localhost:3000</code> in your browser.
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">6</span><span class="step-title">Sign in</span>
+  <div class="step-body">
+    You will be redirected to <code>/auth/sign-in</code>. Use the demo credentials in §1.
+  </div>
+</div>
+
+<!-- ===================== 5. CLIENT WORKFLOW ===================== -->
+<h2 class="break-before">5. Step-by-Step: Client Workflow</h2>
+<p>This is the journey of a member from the moment they discover the gym to a fully active training routine.</p>
+
+<h3>5.1 Register an Account</h3>
+<div class="step">
+  <span class="step-no">1</span><span class="step-title">Open the sign-in page</span><span class="step-path">/auth/sign-in</span>
+  <div class="step-body">Click <b>“Register as a client”</b> at the bottom of the form.</div>
+</div>
+<div class="step">
+  <span class="step-no">2</span><span class="step-title">Fill the registration form</span><span class="step-path">/auth/register</span>
+  <div class="step-body">
+    Enter <b>name</b>, <b>email</b>, <b>password</b>, plus optional personal info
+    (phone, date of birth, gender, occupation, address pinned on the map, emergency
+    contact, and fitness notes).
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">3</span><span class="step-title">Submit and wait for approval</span>
+  <div class="step-body">
+    The account is created with <b>INACTIVE</b> status. The admin must approve it before
+    you can sign in. You'll see a green confirmation banner.
+  </div>
+</div>
+
+<h3>5.2 First Login &amp; Buy a Membership</h3>
+<div class="step">
+  <span class="step-no">4</span><span class="step-title">Sign in</span><span class="step-path">/auth/sign-in</span>
+  <div class="step-body">Use your registered email and password. You land on the <b>Client Dashboard</b>.</div>
+</div>
+<div class="step">
+  <span class="step-no">5</span><span class="step-title">View dashboard</span><span class="step-path">/client/dashboard</span>
+  <div class="step-body">
+    The dashboard shows: <b>current membership</b>, <b>check-ins this month</b>,
+    <b>goal progress</b>, attendance chart, today's workout, and your personal <b>QR code</b>.
+    With no membership yet, most cards show "—".
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">6</span><span class="step-title">Choose a membership plan</span><span class="step-path">/client/memberships</span>
+  <div class="step-body">
+    Use the sidebar → <b>Memberships</b>. Pick <b>Basic</b> or <b>Premium</b>
+    (Premium includes a coach). Submit to request enrolment.
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">7</span><span class="step-title">Pay at the front desk</span><span class="step-path">/client/payments</span>
+  <div class="step-body">
+    Payment is recorded by the admin. Track its status under <b>Payments</b>.
+    Once the admin marks payment <i>completed</i>, your membership becomes <b>ACTIVE</b>.
+  </div>
+</div>
+
+<h3>5.3 Daily Use — Check-in &amp; Train</h3>
+<div class="step">
+  <span class="step-no">8</span><span class="step-title">Check in at the gym</span><span class="step-path">/client/dashboard</span>
+  <div class="step-body">
+    Scroll to the <b>My QR code</b> card. Show it to the coach/admin at the entrance.
+    They scan it and your attendance is logged automatically. Alternatively, open
+    <b>Schedules</b>, click a session, then press <i>Check in</i>.
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">9</span><span class="step-title">Follow today's workout</span><span class="step-path">/client/workouts</span>
+  <div class="step-body">
+    Use the <b>Workout player</b> on the dashboard or open the <b>Workouts</b> page
+    to see your assigned routines step-by-step.
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">10</span><span class="step-title">Track goals</span><span class="step-path">/client/goals</span>
+  <div class="step-body">
+    Open <b>Goals</b> from the sidebar to update progress on assigned goals.
+    Completed goals raise the "goals" counter on your dashboard.
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">11</span><span class="step-title">Follow the meal plan</span><span class="step-path">/client/meal-plan</span>
+  <div class="step-body">
+    If you have a coach (Premium), your daily calorie / protein targets and
+    weekly nutrition advice appear here and on the dashboard's <b>“Your coach's plan”</b> card.
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">12</span><span class="step-title">View schedule &amp; attendance</span><span class="step-path">/client/schedules · /client/attendance</span>
+  <div class="step-body">
+    See upcoming gym sessions in <b>Schedules</b>, and your historical check-ins
+    under <b>Attendance</b>.
+  </div>
+</div>
+
+<div class="callout">
+  <b>Note:</b> Without an active membership, the sidebar hides Goals, Meal Plan,
+  Schedules and Attendance. Buying or renewing a membership re-enables them.
+</div>
+
+<!-- ===================== 6. COACH WORKFLOW ===================== -->
+<h2 class="break-before">6. Step-by-Step: Coach Workflow</h2>
+
+<div class="step">
+  <span class="step-no">1</span><span class="step-title">Sign in</span><span class="step-path">/auth/sign-in</span>
+  <div class="step-body">Coach is auto-redirected to <code>/coach/dashboard</code>.</div>
+</div>
+<div class="step">
+  <span class="step-no">2</span><span class="step-title">Review the dashboard</span><span class="step-path">/coach/dashboard</span>
+  <div class="step-body">
+    See total <b>assigned clients</b>, <b>today's sessions</b>, plus sessions and
+    attendance charts for the last 4 weeks.
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">3</span><span class="step-title">Open My Clients</span><span class="step-path">/coach/clients</span>
+  <div class="step-body">
+    Browse the clients assigned to you. Click a client to view profile,
+    history, and set their plan (nutrition objective, daily calories,
+    protein, weekly gym sessions, schedule notes).
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">4</span><span class="step-title">Manage schedules</span><span class="step-path">/coach/schedules</span>
+  <div class="step-body">
+    Create or edit upcoming sessions for your clients on the calendar.
+    Each session appears on the client's <b>Schedules</b> page.
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">5</span><span class="step-title">Check a client in</span>
+  <div class="step-body">
+    On a session's details, open the <b>QR scanner</b>. Point the camera at the
+    client's QR code (shown on their dashboard). Attendance is saved instantly.
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">6</span><span class="step-title">Log out</span>
+  <div class="step-body">Sidebar → user avatar (bottom-left) → <b>Log out</b>.</div>
+</div>
+
+<!-- ===================== 7. ADMIN WORKFLOW ===================== -->
+<h2 class="break-before">7. Step-by-Step: Admin Workflow</h2>
+
+<h3>7.1 Daily Operations</h3>
+<div class="step">
+  <span class="step-no">1</span><span class="step-title">Sign in as admin</span><span class="step-path">/auth/sign-in</span>
+  <div class="step-body">Auto-redirects to <code>/admin/analytics</code>.</div>
+</div>
+<div class="step">
+  <span class="step-no">2</span><span class="step-title">Check analytics</span><span class="step-path">/admin/analytics</span>
+  <div class="step-body">
+    Review KPIs: <b>Total Members</b>, <b>Active Memberships</b>,
+    <b>Today's Attendance</b>, and <b>Revenue This Month</b>, plus attendance
+    (14 days) and revenue (6 months) charts.
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">3</span><span class="step-title">Approve new sign-ups</span><span class="step-path">/admin/accounts</span>
+  <div class="step-body">
+    Switch to the <b>Pending</b> tab. For each row, click the green checkmark to
+    activate the account, or the ban icon to reject. You can also create or edit
+    Admin / Coach accounts from this screen.
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">4</span><span class="step-title">Maintain membership plans</span><span class="step-path">/admin/memberships</span>
+  <div class="step-body">
+    Add, edit, or archive membership plans (name, type, price, duration). These
+    plans appear to clients on their Memberships page.
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">5</span><span class="step-title">Sell a membership to a client</span><span class="step-path">/admin/client-memberships</span>
+  <div class="step-body">
+    Pick the client, pick a plan, set the start date. The client immediately
+    sees the active membership on their dashboard.
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">6</span><span class="step-title">Assign a coach</span><span class="step-path">/admin/coach-assignments</span>
+  <div class="step-body">
+    For Premium members, attach a coach. This unlocks the
+    <b>“From your coach”</b> card on the client dashboard and gives the coach
+    access to that client.
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">7</span><span class="step-title">Record a payment</span><span class="step-path">/admin/payments</span>
+  <div class="step-body">
+    Add a payment for a client (cash / card / transfer) and mark it
+    <b>COMPLETED</b>. The membership becomes active and revenue charts update.
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">8</span><span class="step-title">Handle renewals</span><span class="step-path">/admin/renewals</span>
+  <div class="step-body">
+    See memberships that are expiring soon. Process renewal &amp; payment in one click.
+  </div>
+</div>
+
+<h3>7.2 Schedules &amp; Attendance</h3>
+<div class="step">
+  <span class="step-no">9</span><span class="step-title">Open Schedules</span><span class="step-path">/admin/schedules</span>
+  <div class="step-body">
+    Master calendar of every coach session and class. Add, edit, reschedule, or cancel sessions.
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">10</span><span class="step-title">Open Attendance</span><span class="step-path">/admin/attendance</span>
+  <div class="step-body">
+    Live feed of all check-ins. Use the QR scanner here for walk-in check-ins.
+  </div>
+</div>
+
+<h3>7.3 Library &amp; Inventory</h3>
+<div class="step">
+  <span class="step-no">11</span><span class="step-title">Manage workouts</span><span class="step-path">/admin/workouts</span>
+  <div class="step-body">
+    Create workout templates with exercises, sets and reps. Coaches assign these to clients.
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">12</span><span class="step-title">Manage goals</span><span class="step-path">/admin/goals · /admin/client-goals</span>
+  <div class="step-body">
+    Define reusable workout goals, then attach them to clients under <b>Client Goals</b>.
+  </div>
+</div>
+<div class="step">
+  <span class="step-no">13</span><span class="step-title">Track equipment</span><span class="step-path">/admin/equipment</span>
+  <div class="step-body">Add machines, weights and accessories with availability status.</div>
+</div>
+
+<!-- ===================== 8. COMMON TASKS ===================== -->
+<h2 class="break-before">8. Common Tasks Reference</h2>
+<table>
+  <thead>
+    <tr><th>Task</th><th>Role</th><th>Where to go</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Approve a new client</td><td>Admin</td><td>Sidebar → Accounts → <i>Pending</i> tab → ✓</td></tr>
+    <tr><td>Sell a membership</td><td>Admin</td><td>Sidebar → Client Memberships → New</td></tr>
+    <tr><td>Assign a coach</td><td>Admin</td><td>Sidebar → Coach Assignments → New</td></tr>
+    <tr><td>Record a payment</td><td>Admin</td><td>Sidebar → Payments → Add</td></tr>
+    <tr><td>Renew a membership</td><td>Admin</td><td>Sidebar → Renewals → Renew</td></tr>
+    <tr><td>Set a client's meal plan</td><td>Coach</td><td>Sidebar → My Clients → client → Plan</td></tr>
+    <tr><td>Create a session</td><td>Coach/Admin</td><td>Sidebar → Schedules → New</td></tr>
+    <tr><td>Check a client in</td><td>Coach/Admin</td><td>Schedule → session → QR scan</td></tr>
+    <tr><td>Buy a membership</td><td>Client</td><td>Sidebar → Memberships → Subscribe</td></tr>
+    <tr><td>Check in (self)</td><td>Client</td><td>Dashboard → show QR code</td></tr>
+    <tr><td>See workout</td><td>Client</td><td>Dashboard → Today's workout</td></tr>
+    <tr><td>Update goal progress</td><td>Client</td><td>Sidebar → Goals → row → Update</td></tr>
+  </tbody>
+</table>
+
+<!-- ===================== 9. LOGOUT ===================== -->
+<h2>9. Logout &amp; Session Handling</h2>
+<ul>
+  <li>Logout is in the <b>bottom-left of every page</b>: click your avatar → <b>Log out</b>.</li>
+  <li>You are returned to <code>/auth/sign-in</code>.</li>
+  <li>Sessions are JWT-based; sign out from one tab signs out all tabs once they refresh.</li>
+  <li>Visiting another role's URL while logged in (e.g. a coach opening <code>/admin/*</code>) immediately redirects to <code>/auth/sign-in</code>.</li>
+</ul>
+
+<!-- ===================== 10. TROUBLESHOOTING ===================== -->
+<h2>10. Troubleshooting</h2>
+<table>
+  <thead><tr><th>Symptom</th><th>Cause</th><th>Fix</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>"Invalid email or password" after registering</td>
+      <td>Account is still <code>INACTIVE</code>; admin has not approved you.</td>
+      <td>Ask an admin to open <code>/admin/accounts</code> → Pending → Approve.</td>
+    </tr>
+    <tr>
+      <td>Goals / Meal plan / Schedules missing from client sidebar</td>
+      <td>No active membership.</td>
+      <td>Admin records a paid membership, or client purchases &amp; admin confirms payment.</td>
+    </tr>
+    <tr>
+      <td>QR scan doesn't check in</td>
+      <td>Client has no membership, or session belongs to a different coach.</td>
+      <td>Verify membership is <code>ACTIVE</code> and the coach is assigned.</td>
+    </tr>
+    <tr>
+      <td>Admin can't see revenue</td>
+      <td>No payments recorded with status <code>COMPLETED</code>.</td>
+      <td>Open <code>/admin/payments</code> and mark payments completed.</td>
+    </tr>
+    <tr>
+      <td>Redirect loop to /auth/sign-in</td>
+      <td>Session expired or wrong role for that URL.</td>
+      <td>Sign in again with the correct role's credentials.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <b>You're done.</b> Follow the same flow each visit: <i>sign in → land on dashboard
+  → use sidebar to navigate → log out</i>. That is the entire end-to-end navigation of the system.
+</div>
+
+</div>
+</body>
+</html>

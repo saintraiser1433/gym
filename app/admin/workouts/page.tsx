@@ -54,7 +54,10 @@ type WorkoutRow = {
     order: number;
   }[];
   equipment?: WorkoutEquipment[];
+  goals?: { id: string; name: string }[];
 };
+
+type GoalOption = { id: string; name: string; category?: string };
 
 const DIFFICULTY_OPTIONS = ["Beginner", "Intermediate", "Hard"] as const;
 type DifficultyTab = "All" | (typeof DIFFICULTY_OPTIONS)[number];
@@ -102,6 +105,8 @@ const secondsToMediaEntryTime = (totalSeconds: number) => {
 
 export default function AdminWorkoutsPage() {
   const [difficultyTab, setDifficultyTab] = React.useState<DifficultyTab>("All");
+  const [goalFilter, setGoalFilter] = React.useState<string>("ALL");
+  const [goalsList, setGoalsList] = React.useState<GoalOption[]>([]);
   const [rows, setRows] = React.useState<WorkoutRow[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [dialogOpen, setDialogOpen] = React.useState(false);
@@ -134,7 +139,7 @@ export default function AdminWorkoutsPage() {
         credentials: "include",
       });
       const text = await res.text();
-      let json: { data?: WorkoutRow[]; equipment?: { id: string; name: string; measureTypes?: string[] }[]; error?: string } | null = null;
+      let json: { data?: WorkoutRow[]; equipment?: { id: string; name: string; measureTypes?: string[] }[]; goals?: GoalOption[]; error?: string } | null = null;
       if (text) {
         try {
           json = JSON.parse(text);
@@ -150,6 +155,9 @@ export default function AdminWorkoutsPage() {
       setRows(json?.data ?? []);
       if (Array.isArray(json?.equipment)) {
         setEquipmentList(json.equipment.map((e) => ({ id: e.id, name: e.name, measureTypes: e.measureTypes ?? ["PER_PCS"] })));
+      }
+      if (Array.isArray(json?.goals)) {
+        setGoalsList(json.goals.map((g) => ({ id: g.id, name: g.name, category: g.category })));
       }
     } finally {
       setLoading(false);
@@ -380,10 +388,20 @@ export default function AdminWorkoutsPage() {
     }
   };
 
-  const filteredRows =
-    difficultyTab === "All"
-      ? rows
-      : rows.filter((r) => (r.difficulty ?? "").toLowerCase() === difficultyTab.toLowerCase());
+  const filteredRows = React.useMemo(() => {
+    let out = rows;
+    if (difficultyTab !== "All") {
+      out = out.filter((r) => (r.difficulty ?? "").toLowerCase() === difficultyTab.toLowerCase());
+    }
+    if (goalFilter !== "ALL") {
+      if (goalFilter === "NONE") {
+        out = out.filter((r) => !r.goals || r.goals.length === 0);
+      } else {
+        out = out.filter((r) => (r.goals ?? []).some((g) => g.id === goalFilter));
+      }
+    }
+    return out;
+  }, [rows, difficultyTab, goalFilter]);
 
   const columns: Column<WorkoutRow>[] = [
     { key: "name", header: "Name" },
@@ -477,21 +495,42 @@ export default function AdminWorkoutsPage() {
         </Button>
       </div>
 
-      <div className="flex gap-1 rounded-md border bg-muted/30 p-1">
-        {(["All", ...DIFFICULTY_OPTIONS] as const).map((tab) => (
-          <button
-            key={tab}
-            type="button"
-            onClick={() => setDifficultyTab(tab)}
-            className={`rounded px-3 py-1.5 text-xs font-medium transition-colors ${
-              difficultyTab === tab
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
+      <div className="flex flex-wrap items-center gap-2">
+        <div className="flex gap-1 rounded-md border bg-muted/30 p-1">
+          {(["All", ...DIFFICULTY_OPTIONS] as const).map((tab) => (
+            <button
+              key={tab}
+              type="button"
+              onClick={() => setDifficultyTab(tab)}
+              className={`rounded px-3 py-1.5 text-xs font-medium transition-colors ${
+                difficultyTab === tab
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
+        <div className="ml-auto flex items-center gap-2">
+          <label className="text-[11px] font-medium text-muted-foreground" htmlFor="goal-filter">
+            Goal
+          </label>
+          <Select value={goalFilter} onValueChange={setGoalFilter}>
+            <SelectTrigger id="goal-filter" className="h-8 w-[220px] text-[11px]">
+              <SelectValue placeholder="All goals" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All goals</SelectItem>
+              <SelectItem value="NONE">No goal linked</SelectItem>
+              {goalsList.map((g) => (
+                <SelectItem key={g.id} value={g.id}>
+                  {g.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <Card className="p-3">

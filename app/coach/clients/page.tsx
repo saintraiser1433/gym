@@ -6,9 +6,21 @@ import { DataTable, type Column } from "@/components/data-table";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Target, Dumbbell, User, Lock, Unlock, UtensilsCrossed } from "lucide-react";
+import { Target, Dumbbell, User, Lock, Unlock, UtensilsCrossed, Flame, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import {
+  ACTIVITY_LEVELS,
+  ageFromDob,
+  autoMacros,
+  bmiCategory,
+  calcBmi,
+  calcBmr,
+  calcTdee,
+  goalRecommendation,
+  type ActivityLevel,
+  type GoalCategory,
+} from "@/lib/bmr";
 
 /** Stored values are exactly Male / Female for coach intake. */
 function normalizeGenderForSelect(raw: unknown): "" | "Male" | "Female" {
@@ -131,8 +143,11 @@ export default function CoachClientsPage() {
     emergencyContact: string;
     gymNotes: string;
     nutritionObjective: string;
+    activityLevel: string;
     dailyCalorieTarget: string;
     dailyProteinGrams: string;
+    dailyCarbsGrams: string;
+    dailyFatGrams: string;
     recommendedGymSessionsPerWeek: string;
     workoutScheduleNotes: string;
   };
@@ -149,8 +164,11 @@ export default function CoachClientsPage() {
     emergencyContact: "",
     gymNotes: "",
     nutritionObjective: "",
+    activityLevel: "SEDENTARY",
     dailyCalorieTarget: "",
     dailyProteinGrams: "",
+    dailyCarbsGrams: "",
+    dailyFatGrams: "",
     recommendedGymSessionsPerWeek: "",
     workoutScheduleNotes: "",
   });
@@ -228,10 +246,15 @@ export default function CoachClientsPage() {
           emergencyContact: d.emergencyContact ?? "",
           gymNotes: d.gymNotes ?? "",
           nutritionObjective: d.nutritionObjective ?? "",
+          activityLevel: d.activityLevel ?? "SEDENTARY",
           dailyCalorieTarget:
             d.dailyCalorieTarget != null ? String(d.dailyCalorieTarget) : "",
           dailyProteinGrams:
             d.dailyProteinGrams != null ? String(d.dailyProteinGrams) : "",
+          dailyCarbsGrams:
+            d.dailyCarbsGrams != null ? String(d.dailyCarbsGrams) : "",
+          dailyFatGrams:
+            d.dailyFatGrams != null ? String(d.dailyFatGrams) : "",
           recommendedGymSessionsPerWeek:
             d.recommendedGymSessionsPerWeek != null
               ? String(d.recommendedGymSessionsPerWeek)
@@ -387,6 +410,53 @@ export default function CoachClientsPage() {
     }
   }, [contactFieldsUnlocked]);
 
+  const bmrDerived = React.useMemo(() => {
+    const weight = profileDraft.weight === "" ? null : parseFloat(profileDraft.weight);
+    const height = profileDraft.height === "" ? null : parseFloat(profileDraft.height);
+    const age = ageFromDob(profileDraft.dateOfBirth || null);
+    const bmr = calcBmr(weight, height, age, profileDraft.gender || null);
+    const tdee = calcTdee(bmr, (profileDraft.activityLevel || "SEDENTARY") as ActivityLevel);
+    const bmi = calcBmi(weight, height);
+    const bmiTag = bmiCategory(bmi);
+    return { weight, height, age, bmr, tdee, bmi, bmiTag };
+  }, [
+    profileDraft.weight,
+    profileDraft.height,
+    profileDraft.dateOfBirth,
+    profileDraft.gender,
+    profileDraft.activityLevel,
+  ]);
+
+  const goalForMacros: GoalCategory | null = React.useMemo(() => {
+    const v = profileDraft.nutritionObjective;
+    if (!v) return null;
+    if (v === "WEIGHT_LOSS" || v === "SLIMMING") return "WEIGHT_LOSS";
+    if (v === "MUSCLE_GAIN") return "MUSCLE_GAIN";
+    if (v === "GENERAL_FITNESS" || v === "MAINTENANCE") return "GENERAL_FITNESS";
+    return null;
+  }, [profileDraft.nutritionObjective]);
+
+  const workoutRec = React.useMemo(
+    () => goalRecommendation(goalForMacros),
+    [goalForMacros],
+  );
+
+  const applyAutoMacros = React.useCallback(() => {
+    const macros = autoMacros(goalForMacros, bmrDerived.weight, bmrDerived.tdee);
+    if (!macros) {
+      toast.error("Set weight, height, date of birth, gender, activity level, and objective first.");
+      return;
+    }
+    setProfileDraft((p) => ({
+      ...p,
+      dailyCalorieTarget: String(macros.calories),
+      dailyProteinGrams: String(macros.proteinG),
+      dailyCarbsGrams: String(macros.carbsG),
+      dailyFatGrams: String(macros.fatG),
+    }));
+    toast.success("Auto-filled macros from BMR / goal.");
+  }, [goalForMacros, bmrDerived.weight, bmrDerived.tdee]);
+
   const saveProfile = React.useCallback(async () => {
     if (!clientId) return;
     setProfileSaving(true);
@@ -402,6 +472,7 @@ export default function CoachClientsPage() {
           weight: profileDraft.weight === "" ? null : parseFloat(profileDraft.weight),
           height: profileDraft.height === "" ? null : parseFloat(profileDraft.height),
           nutritionObjective: profileDraft.nutritionObjective || null,
+          activityLevel: profileDraft.activityLevel || null,
           dailyCalorieTarget:
             profileDraft.dailyCalorieTarget === ""
               ? null
@@ -410,6 +481,14 @@ export default function CoachClientsPage() {
             profileDraft.dailyProteinGrams === ""
               ? null
               : parseFloat(profileDraft.dailyProteinGrams),
+          dailyCarbsGrams:
+            profileDraft.dailyCarbsGrams === ""
+              ? null
+              : parseFloat(profileDraft.dailyCarbsGrams),
+          dailyFatGrams:
+            profileDraft.dailyFatGrams === ""
+              ? null
+              : parseFloat(profileDraft.dailyFatGrams),
           recommendedGymSessionsPerWeek:
             profileDraft.recommendedGymSessionsPerWeek === ""
               ? null
@@ -899,6 +978,103 @@ export default function CoachClientsPage() {
                         </div>
                       </div>
                       <div className="border-t pt-2">
+                        <div className="mb-2 flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                          <Flame className="h-3 w-3 text-orange-500" />
+                          Smart plan (BMR &amp; goal-based)
+                        </div>
+                        <div className="grid gap-2 rounded-md border bg-muted/30 p-2 sm:grid-cols-4">
+                          <div className="space-y-0.5">
+                            <p className="text-[9px] uppercase text-muted-foreground">BMR</p>
+                            <p className="text-[12px] font-semibold">
+                              {bmrDerived.bmr != null ? `${bmrDerived.bmr} kcal` : "—"}
+                            </p>
+                          </div>
+                          <div className="space-y-0.5">
+                            <p className="text-[9px] uppercase text-muted-foreground">TDEE</p>
+                            <p className="text-[12px] font-semibold">
+                              {bmrDerived.tdee != null ? `${bmrDerived.tdee} kcal` : "—"}
+                            </p>
+                          </div>
+                          <div className="space-y-0.5">
+                            <p className="text-[9px] uppercase text-muted-foreground">BMI</p>
+                            <p className="text-[12px] font-semibold">
+                              {bmrDerived.bmi != null ? bmrDerived.bmi : "—"}
+                              {bmrDerived.bmiTag && (
+                                <span className="ml-1 text-[9px] font-normal text-muted-foreground">
+                                  ({bmrDerived.bmiTag.toLowerCase()})
+                                </span>
+                              )}
+                            </p>
+                          </div>
+                          <div className="space-y-0.5">
+                            <p className="text-[9px] uppercase text-muted-foreground">Age</p>
+                            <p className="text-[12px] font-semibold">
+                              {bmrDerived.age != null ? `${bmrDerived.age} y` : "—"}
+                            </p>
+                          </div>
+                        </div>
+                        <p className="mt-1 text-[10px] text-muted-foreground">
+                          Auto-calculated from height, weight, date of birth, gender, and activity level. Mifflin-St Jeor formula.
+                        </p>
+                        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-medium text-muted-foreground">Activity level</label>
+                            <select
+                              className="flex h-7 w-full rounded-md border border-input bg-transparent px-2 text-[11px]"
+                              value={profileDraft.activityLevel}
+                              onChange={(e) =>
+                                setProfileDraft((p) => ({ ...p, activityLevel: e.target.value }))
+                              }
+                            >
+                              {ACTIVITY_LEVELS.map((a) => (
+                                <option key={a.value} value={a.value}>
+                                  {a.label}
+                                </option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="flex items-end">
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="outline"
+                              className="h-7 w-full gap-1 text-[11px]"
+                              onClick={applyAutoMacros}
+                              disabled={
+                                bmrDerived.tdee == null ||
+                                bmrDerived.weight == null ||
+                                !goalForMacros
+                              }
+                            >
+                              <Sparkles className="h-3 w-3 text-orange-500" />
+                              Auto-fill macros from goal
+                            </Button>
+                          </div>
+                        </div>
+                        {workoutRec && (
+                          <div className="mt-2 rounded-md border border-orange-200 bg-orange-50 p-2 text-[11px] text-orange-900 dark:border-orange-500/30 dark:bg-orange-500/10 dark:text-orange-200">
+                            <div className="mb-1 flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide">
+                              <Dumbbell className="h-3 w-3" />
+                              Recommended workout plan
+                            </div>
+                            <div className="grid gap-1 sm:grid-cols-3">
+                              <div>
+                                <p className="text-[9px] uppercase opacity-70">Type</p>
+                                <p className="font-medium">{workoutRec.workoutType}</p>
+                              </div>
+                              <div>
+                                <p className="text-[9px] uppercase opacity-70">Frequency</p>
+                                <p className="font-medium">{workoutRec.frequency}</p>
+                              </div>
+                              <div>
+                                <p className="text-[9px] uppercase opacity-70">Intensity</p>
+                                <p className="font-medium">{workoutRec.intensity}</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <div className="border-t pt-2">
                         <div className="mb-2 text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
                           Nutrition guidance
                         </div>
@@ -944,6 +1120,32 @@ export default function CoachClientsPage() {
                               value={profileDraft.dailyProteinGrams}
                               onChange={(e) =>
                                 setProfileDraft((p) => ({ ...p, dailyProteinGrams: e.target.value }))
+                              }
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-medium text-muted-foreground">Daily carbs (g)</label>
+                            <Input
+                              type="number"
+                              min={0}
+                              step={1}
+                              className="h-7 text-[11px]"
+                              value={profileDraft.dailyCarbsGrams}
+                              onChange={(e) =>
+                                setProfileDraft((p) => ({ ...p, dailyCarbsGrams: e.target.value }))
+                              }
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-[10px] font-medium text-muted-foreground">Daily fat (g)</label>
+                            <Input
+                              type="number"
+                              min={0}
+                              step={1}
+                              className="h-7 text-[11px]"
+                              value={profileDraft.dailyFatGrams}
+                              onChange={(e) =>
+                                setProfileDraft((p) => ({ ...p, dailyFatGrams: e.target.value }))
                               }
                             />
                           </div>

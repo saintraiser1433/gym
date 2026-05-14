@@ -27,6 +27,8 @@ type CoachPlan = {
   nutritionObjective: string | null;
   dailyCalorieTarget: number | null;
   dailyProteinGrams: number | null;
+  dailyCarbsGrams: number | null;
+  dailyFatGrams: number | null;
   recommendedGymSessionsPerWeek: number | null;
   workoutScheduleNotes: string | null;
   coachName: string | null;
@@ -93,6 +95,8 @@ export default function ClientDashboardPage() {
             nutritionObjective: d.nutritionObjective ?? null,
             dailyCalorieTarget: d.dailyCalorieTarget ?? null,
             dailyProteinGrams: d.dailyProteinGrams ?? null,
+            dailyCarbsGrams: d.dailyCarbsGrams ?? null,
+            dailyFatGrams: d.dailyFatGrams ?? null,
             recommendedGymSessionsPerWeek: d.recommendedGymSessionsPerWeek ?? null,
             workoutScheduleNotes: d.workoutScheduleNotes ?? null,
             coachName: d.coachName ?? null,
@@ -148,6 +152,8 @@ export default function ClientDashboardPage() {
         (coachPlan.nutritionObjective ||
           coachPlan.dailyCalorieTarget != null ||
           coachPlan.dailyProteinGrams != null ||
+          coachPlan.dailyCarbsGrams != null ||
+          coachPlan.dailyFatGrams != null ||
           coachPlan.recommendedGymSessionsPerWeek != null ||
           (coachPlan.workoutScheduleNotes && coachPlan.workoutScheduleNotes.trim())) && (
           <div className="rounded-md border bg-card p-4">
@@ -158,7 +164,9 @@ export default function ClientDashboardPage() {
             </div>
             {(coachPlan.nutritionObjective ||
               coachPlan.dailyCalorieTarget != null ||
-              coachPlan.dailyProteinGrams != null) && (
+              coachPlan.dailyProteinGrams != null ||
+              coachPlan.dailyCarbsGrams != null ||
+              coachPlan.dailyFatGrams != null) && (
               <div className="mt-4">
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Nutrition</h3>
                 <dl className="mt-2 grid gap-2 text-sm sm:grid-cols-2">
@@ -174,11 +182,27 @@ export default function ClientDashboardPage() {
                         : "—"}
                     </dd>
                   </div>
-                  <div className="sm:col-span-2">
+                  <div>
                     <dt className="text-xs text-muted-foreground">Daily protein</dt>
                     <dd>
                       {coachPlan.dailyProteinGrams != null
                         ? `${Math.round(coachPlan.dailyProteinGrams)} g`
+                        : "—"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt className="text-xs text-muted-foreground">Daily carbs</dt>
+                    <dd>
+                      {coachPlan.dailyCarbsGrams != null
+                        ? `${Math.round(coachPlan.dailyCarbsGrams)} g`
+                        : "—"}
+                    </dd>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <dt className="text-xs text-muted-foreground">Daily fat</dt>
+                    <dd>
+                      {coachPlan.dailyFatGrams != null
+                        ? `${Math.round(coachPlan.dailyFatGrams)} g`
                         : "—"}
                     </dd>
                   </div>

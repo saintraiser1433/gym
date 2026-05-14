@@ -1,50 +1,17 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { NextResponse } from "next/server";
 import { requireClient } from "@/lib/auth";
-import { isClientGoalsManagedByCoach } from "@/lib/client-goals-access";
 
-type Context = { params: Promise<{ id: string }> };
-
-/** Delete one of the client's goals. */
-export async function DELETE(req: NextRequest, context: Context) {
-  const session = await requireClient();
-  const userId = (session.user as any).id as string;
-  const { id } = await context.params;
-
-  const profile = await prisma.clientProfile.findUnique({
-    where: { userId },
-    select: { id: true },
-  });
-
-  if (!profile) {
-    return NextResponse.json(
-      { error: "Client profile not found" },
-      { status: 404 },
-    );
-  }
-
-  if (await isClientGoalsManagedByCoach(userId)) {
-    return NextResponse.json(
-      { error: "Your coach manages your goals. Contact your coach to remove one." },
-      { status: 403 },
-    );
-  }
-
-  const goal = await prisma.clientGoal.findFirst({
-    where: { id, clientId: profile.id },
-    select: { id: true },
-  });
-
-  if (!goal) {
-    return NextResponse.json(
-      { error: "Goal not found" },
-      { status: 404 },
-    );
-  }
-
-  await prisma.clientGoal.delete({
-    where: { id: goal.id },
-  });
-
-  return NextResponse.json({ success: true });
+/**
+ * Self-removal of goals is disabled.
+ * Goals are managed exclusively by the coach or admin.
+ */
+export async function DELETE() {
+  await requireClient();
+  return NextResponse.json(
+    {
+      error:
+        "Clients can no longer remove their own goals. Please contact your coach or the gym admin.",
+    },
+    { status: 403 },
+  );
 }

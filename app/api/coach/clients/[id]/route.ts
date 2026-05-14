@@ -57,6 +57,27 @@ export async function PATCH(req: Request, { params }: Params) {
     profileData.dailyCalorieTarget = parseOptionalFloat(body.dailyCalorieTarget) ?? null;
   if ("dailyProteinGrams" in body)
     profileData.dailyProteinGrams = parseOptionalFloat(body.dailyProteinGrams) ?? null;
+  if ("dailyCarbsGrams" in body)
+    profileData.dailyCarbsGrams = parseOptionalFloat(body.dailyCarbsGrams) ?? null;
+  if ("dailyFatGrams" in body)
+    profileData.dailyFatGrams = parseOptionalFloat(body.dailyFatGrams) ?? null;
+
+  if ("activityLevel" in body) {
+    const a = body.activityLevel;
+    if (a === null || a === undefined || a === "") {
+      profileData.activityLevel = null;
+    } else {
+      const v = String(a).trim().toUpperCase();
+      const allowed = ["SEDENTARY", "LIGHT", "MODERATE", "VERY_ACTIVE"];
+      if (!allowed.includes(v)) {
+        return NextResponse.json(
+          { error: "Invalid activityLevel" },
+          { status: 400 },
+        );
+      }
+      profileData.activityLevel = v;
+    }
+  }
 
   if ("recommendedGymSessionsPerWeek" in body) {
     const v = parseOptionalInt(body.recommendedGymSessionsPerWeek);

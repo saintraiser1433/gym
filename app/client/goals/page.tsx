@@ -4,25 +4,10 @@ import * as React from "react";
 import Link from "next/link";
 import { RequireMembership } from "@/components/require-membership";
 import { Card } from "@/components/ui/card";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-
-type AvailableGoal = {
-  id: string;
-  name: string;
-  category: string;
-};
+import { Lock } from "lucide-react";
 
 type ClientGoal = {
   id: string;
@@ -39,36 +24,16 @@ type ClientGoal = {
 };
 
 export default function ClientGoalsPage() {
-  const [available, setAvailable] = React.useState<AvailableGoal[]>([]);
   const [selected, setSelected] = React.useState<ClientGoal[]>([]);
   const [loading, setLoading] = React.useState(true);
-  const [savingId, setSavingId] = React.useState<string | null>(null);
-  const [newTarget, setNewTarget] = React.useState("");
-  const [newDeadline, setNewDeadline] = React.useState("");
-  const [selectedGoalId, setSelectedGoalId] = React.useState("");
-  const [removeGoalId, setRemoveGoalId] = React.useState<string | null>(null);
-  const [removing, setRemoving] = React.useState(false);
   const [feedbackByGoalId, setFeedbackByGoalId] = React.useState<Record<string, string>>({});
   const [savingFeedbackGoalId, setSavingFeedbackGoalId] = React.useState<string | null>(null);
-  const [coachManagedGoals, setCoachManagedGoals] = React.useState(false);
 
   React.useEffect(() => {
     const load = async () => {
       try {
-        const [availRes, mineRes] = await Promise.all([
-          fetch("/api/client/goals/available", { cache: "no-store" }),
-          fetch("/api/client/goals", { cache: "no-store" }),
-        ]);
-        const availJson = await availRes.json();
+        const mineRes = await fetch("/api/client/goals", { cache: "no-store" });
         const mineJson = await mineRes.json();
-        setCoachManagedGoals(mineJson.coachManagedGoals === true);
-        setAvailable(
-          (Array.isArray(availJson.data) ? availJson.data : []).map((g: { id: string; name: string; category: string }) => ({
-            id: g.id,
-            name: g.name,
-            category: g.category,
-          })),
-        );
         setSelected(
           (Array.isArray(mineJson.data) ? mineJson.data : []).map((cg: {
             id: string;
@@ -117,83 +82,6 @@ export default function ClientGoalsPage() {
       .map((p) => p.charAt(0) + p.slice(1).toLowerCase())
       .join(" ");
 
-  const handleAddGoal = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedGoalId) {
-      toast.error("Please choose a goal");
-      return;
-    }
-    const existing = selected.find((g) => g.goalId === selectedGoalId);
-    if (existing) {
-      toast.error("You already selected this goal");
-      return;
-    }
-    setSavingId("new");
-    try {
-      const payload: { goalId: string; targetValue?: number; deadline?: string } = { goalId: selectedGoalId };
-      if (newTarget) payload.targetValue = Number(newTarget);
-      if (newDeadline) payload.deadline = newDeadline;
-      const res = await fetch("/api/client/goals", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const json = await res.json();
-      if (!res.ok) {
-        toast.error(json.error ?? "Failed to save goal");
-        return;
-      }
-      const g = available.find((a) => a.id === selectedGoalId);
-      setSelected((prev) => [
-        ...prev,
-        {
-          id: json.id as string,
-          goalId: selectedGoalId,
-          name: g?.name ?? "Goal",
-          category: g?.category ?? "",
-          targetValue: payload.targetValue ?? null,
-          targetSessions: json.targetSessions ?? null,
-          currentValue: null,
-          deadline: payload.deadline
-            ? new Date(payload.deadline).toLocaleDateString()
-            : null,
-          status: "ACTIVE",
-        },
-      ]);
-      setSelectedGoalId("");
-      setNewTarget("");
-      setNewDeadline("");
-      toast.success("Goal added");
-    } catch {
-      toast.error("Failed to save goal");
-    } finally {
-      setSavingId(null);
-    }
-  };
-
-  const handleRemoveGoal = async () => {
-    if (!removeGoalId) return;
-    setRemoving(true);
-    try {
-      const res = await fetch(`/api/client/goals/${removeGoalId}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
-      const json = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        toast.error(json.error ?? "Failed to remove goal");
-        return;
-      }
-      setSelected((prev) => prev.filter((g) => g.id !== removeGoalId));
-      setRemoveGoalId(null);
-      toast.success("Goal removed");
-    } catch {
-      toast.error("Failed to remove goal");
-    } finally {
-      setRemoving(false);
-    }
-  };
-
   const saveFeedback = async (goalId: string) => {
     const message = (feedbackByGoalId[goalId] ?? "").trim();
     if (!message) {
@@ -232,91 +120,28 @@ export default function ClientGoalsPage() {
         <div>
           <h1 className="text-lg font-semibold">My Workout Goals</h1>
           <p className="text-sm text-muted-foreground">
-            {coachManagedGoals
-              ? "Your coach assigns your goals. Track progress and workouts below."
-              : "Select your personal workout goals and track high-level progress."}
+            Your goals are set by your coach or the admin. Track your progress here and post
+            updates for your coach.
           </p>
         </div>
 
-      {loading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
-      ) : (
-        <>
-          {!coachManagedGoals && (
-          <Card className="p-3">
-            <h2 className="mb-2 text-sm font-semibold">Add a new goal</h2>
-            <form
-              onSubmit={handleAddGoal}
-              className="grid gap-2 text-[11px] sm:grid-cols-3"
-            >
-              <div className="space-y-1 sm:col-span-1">
-                <label className="font-medium" htmlFor="goal">
-                  Goal
-                </label>
-                <select
-                  id="goal"
-                  className="h-7 w-full rounded-md border bg-transparent px-2 text-[11px]"
-                  value={selectedGoalId}
-                  onChange={(e) => setSelectedGoalId(e.target.value)}
-                >
-                  <option value="">Select goal</option>
-                  {available.map((g) => (
-                    <option key={g.id} value={g.id}>
-                      {g.name} ({formatCategory(g.category)})
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="space-y-1">
-                <label className="font-medium" htmlFor="target">
-                  Target (optional)
-                </label>
-                <Input
-                  id="target"
-                  type="number"
-                  className="h-7 text-[11px]"
-                  value={newTarget}
-                  onChange={(e) => setNewTarget(e.target.value)}
-                  placeholder="e.g. 10 kg"
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="font-medium" htmlFor="deadline">
-                  Deadline (optional)
-                </label>
-                <Input
-                  id="deadline"
-                  type="date"
-                  className="h-7 text-[11px]"
-                  value={newDeadline}
-                  onChange={(e) => setNewDeadline(e.target.value)}
-                  min={new Date().toISOString().slice(0, 10)}
-                />
-                <p className="text-[10px] text-muted-foreground">
-                  Must be today or a future date.
-                </p>
-              </div>
-              <div className="flex items-end justify-end sm:col-span-3">
-                <Button
-                  type="submit"
-                  size="xs"
-                  className="h-7 px-3 text-[11px]"
-                  disabled={savingId !== null}
-                >
-                  {savingId ? "Saving..." : "Add goal"}
-                </Button>
-              </div>
-            </form>
-          </Card>
-          )}
+        <Card className="flex items-center gap-2 p-3 text-[12px] text-muted-foreground">
+          <Lock className="h-3.5 w-3.5 text-orange-500" />
+          <span>
+            Goals on this page are <strong>view-only</strong>. To start, change, or remove a goal,
+            contact your coach or the gym admin.
+          </span>
+        </Card>
 
+        {loading ? (
+          <p className="text-sm text-muted-foreground">Loading…</p>
+        ) : (
           <div className="space-y-2">
             <h2 className="text-sm font-semibold">My goals</h2>
             {selected.length === 0 ? (
               <Card className="p-4 text-sm text-muted-foreground">
-                {coachManagedGoals
-                  ? "Your coach hasn’t assigned goals yet. Check back after your coach updates your plan."
-                  : "You don\u2019t have any goals yet. Add one above."}
+                No goals have been assigned to you yet. Your coach or admin will set these up for
+                you.
               </Card>
             ) : (
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -398,48 +223,6 @@ export default function ClientGoalsPage() {
                             View workouts
                           </Link>
                         </Button>
-                        {!coachManagedGoals && (
-                        <AlertDialog
-                          open={removeGoalId === g.id}
-                          onOpenChange={(open) => !open && setRemoveGoalId(null)}
-                        >
-                          <AlertDialogContent>
-                            <AlertDialogHeader>
-                              <AlertDialogTitle>Remove goal</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                Remove &quot;{g.name}&quot; from your goals? This cannot be undone.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <AlertDialogFooter>
-                              <AlertDialogCancel
-                                disabled={removing}
-                                className={buttonVariants({ variant: "outline", size: "sm" })}
-                              >
-                                Cancel
-                              </AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  void handleRemoveGoal();
-                                }}
-                                disabled={removing}
-                                className={buttonVariants({ variant: "destructive", size: "sm" })}
-                              >
-                                {removing ? "Removing…" : "Remove"}
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                          <Button
-                            type="button"
-                            size="xs"
-                            variant="ghost"
-                            className="h-7 px-2 text-[11px] text-destructive hover:text-destructive"
-                            onClick={() => setRemoveGoalId(g.id)}
-                          >
-                            Remove
-                          </Button>
-                        </AlertDialog>
-                        )}
                       </div>
                       <div className="mt-3 space-y-2 border-t pt-2">
                         <div className="text-[10px] font-medium text-muted-foreground uppercase tracking-wide">
@@ -490,10 +273,8 @@ export default function ClientGoalsPage() {
               </div>
             )}
           </div>
-        </>
-      )}
+        )}
       </div>
     </RequireMembership>
   );
 }
-

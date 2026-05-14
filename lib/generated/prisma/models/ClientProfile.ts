@@ -32,6 +32,8 @@ export type ClientProfileAvgAggregateOutputType = {
   dailyCalorieTarget: number | null
   dailyProteinGrams: number | null
   recommendedGymSessionsPerWeek: number | null
+  dailyCarbsGrams: number | null
+  dailyFatGrams: number | null
 }
 
 export type ClientProfileSumAggregateOutputType = {
@@ -40,6 +42,8 @@ export type ClientProfileSumAggregateOutputType = {
   dailyCalorieTarget: number | null
   dailyProteinGrams: number | null
   recommendedGymSessionsPerWeek: number | null
+  dailyCarbsGrams: number | null
+  dailyFatGrams: number | null
 }
 
 export type ClientProfileMinAggregateOutputType = {
@@ -58,6 +62,9 @@ export type ClientProfileMinAggregateOutputType = {
   dailyProteinGrams: number | null
   recommendedGymSessionsPerWeek: number | null
   workoutScheduleNotes: string | null
+  activityLevel: string | null
+  dailyCarbsGrams: number | null
+  dailyFatGrams: number | null
   joinDate: Date | null
   assignedCoachId: string | null
 }
@@ -78,6 +85,9 @@ export type ClientProfileMaxAggregateOutputType = {
   dailyProteinGrams: number | null
   recommendedGymSessionsPerWeek: number | null
   workoutScheduleNotes: string | null
+  activityLevel: string | null
+  dailyCarbsGrams: number | null
+  dailyFatGrams: number | null
   joinDate: Date | null
   assignedCoachId: string | null
 }
@@ -98,6 +108,9 @@ export type ClientProfileCountAggregateOutputType = {
   dailyProteinGrams: number
   recommendedGymSessionsPerWeek: number
   workoutScheduleNotes: number
+  activityLevel: number
+  dailyCarbsGrams: number
+  dailyFatGrams: number
   joinDate: number
   assignedCoachId: number
   _all: number
@@ -110,6 +123,8 @@ export type ClientProfileAvgAggregateInputType = {
   dailyCalorieTarget?: true
   dailyProteinGrams?: true
   recommendedGymSessionsPerWeek?: true
+  dailyCarbsGrams?: true
+  dailyFatGrams?: true
 }
 
 export type ClientProfileSumAggregateInputType = {
@@ -118,6 +133,8 @@ export type ClientProfileSumAggregateInputType = {
   dailyCalorieTarget?: true
   dailyProteinGrams?: true
   recommendedGymSessionsPerWeek?: true
+  dailyCarbsGrams?: true
+  dailyFatGrams?: true
 }
 
 export type ClientProfileMinAggregateInputType = {
@@ -136,6 +153,9 @@ export type ClientProfileMinAggregateInputType = {
   dailyProteinGrams?: true
   recommendedGymSessionsPerWeek?: true
   workoutScheduleNotes?: true
+  activityLevel?: true
+  dailyCarbsGrams?: true
+  dailyFatGrams?: true
   joinDate?: true
   assignedCoachId?: true
 }
@@ -156,6 +176,9 @@ export type ClientProfileMaxAggregateInputType = {
   dailyProteinGrams?: true
   recommendedGymSessionsPerWeek?: true
   workoutScheduleNotes?: true
+  activityLevel?: true
+  dailyCarbsGrams?: true
+  dailyFatGrams?: true
   joinDate?: true
   assignedCoachId?: true
 }
@@ -176,6 +199,9 @@ export type ClientProfileCountAggregateInputType = {
   dailyProteinGrams?: true
   recommendedGymSessionsPerWeek?: true
   workoutScheduleNotes?: true
+  activityLevel?: true
+  dailyCarbsGrams?: true
+  dailyFatGrams?: true
   joinDate?: true
   assignedCoachId?: true
   _all?: true
@@ -283,6 +309,9 @@ export type ClientProfileGroupByOutputType = {
   dailyProteinGrams: number | null
   recommendedGymSessionsPerWeek: number | null
   workoutScheduleNotes: string | null
+  activityLevel: string | null
+  dailyCarbsGrams: number | null
+  dailyFatGrams: number | null
   joinDate: Date
   assignedCoachId: string | null
   _count: ClientProfileCountAggregateOutputType | null
@@ -326,6 +355,9 @@ export type ClientProfileWhereInput = {
   dailyProteinGrams?: Prisma.FloatNullableFilter<"ClientProfile"> | number | null
   recommendedGymSessionsPerWeek?: Prisma.IntNullableFilter<"ClientProfile"> | number | null
   workoutScheduleNotes?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
+  activityLevel?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
+  dailyCarbsGrams?: Prisma.FloatNullableFilter<"ClientProfile"> | number | null
+  dailyFatGrams?: Prisma.FloatNullableFilter<"ClientProfile"> | number | null
   joinDate?: Prisma.DateTimeFilter<"ClientProfile"> | Date | string
   assignedCoachId?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -355,6 +387,9 @@ export type ClientProfileOrderByWithRelationInput = {
   dailyProteinGrams?: Prisma.SortOrderInput | Prisma.SortOrder
   recommendedGymSessionsPerWeek?: Prisma.SortOrderInput | Prisma.SortOrder
   workoutScheduleNotes?: Prisma.SortOrderInput | Prisma.SortOrder
+  activityLevel?: Prisma.SortOrderInput | Prisma.SortOrder
+  dailyCarbsGrams?: Prisma.SortOrderInput | Prisma.SortOrder
+  dailyFatGrams?: Prisma.SortOrderInput | Prisma.SortOrder
   joinDate?: Prisma.SortOrder
   assignedCoachId?: Prisma.SortOrderInput | Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
@@ -387,6 +422,9 @@ export type ClientProfileWhereUniqueInput = Prisma.AtLeast<{
   dailyProteinGrams?: Prisma.FloatNullableFilter<"ClientProfile"> | number | null
   recommendedGymSessionsPerWeek?: Prisma.IntNullableFilter<"ClientProfile"> | number | null
   workoutScheduleNotes?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
+  activityLevel?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
+  dailyCarbsGrams?: Prisma.FloatNullableFilter<"ClientProfile"> | number | null
+  dailyFatGrams?: Prisma.FloatNullableFilter<"ClientProfile"> | number | null
   joinDate?: Prisma.DateTimeFilter<"ClientProfile"> | Date | string
   assignedCoachId?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
@@ -416,6 +454,9 @@ export type ClientProfileOrderByWithAggregationInput = {
   dailyProteinGrams?: Prisma.SortOrderInput | Prisma.SortOrder
   recommendedGymSessionsPerWeek?: Prisma.SortOrderInput | Prisma.SortOrder
   workoutScheduleNotes?: Prisma.SortOrderInput | Prisma.SortOrder
+  activityLevel?: Prisma.SortOrderInput | Prisma.SortOrder
+  dailyCarbsGrams?: Prisma.SortOrderInput | Prisma.SortOrder
+  dailyFatGrams?: Prisma.SortOrderInput | Prisma.SortOrder
   joinDate?: Prisma.SortOrder
   assignedCoachId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ClientProfileCountOrderByAggregateInput
@@ -444,6 +485,9 @@ export type ClientProfileScalarWhereWithAggregatesInput = {
   dailyProteinGrams?: Prisma.FloatNullableWithAggregatesFilter<"ClientProfile"> | number | null
   recommendedGymSessionsPerWeek?: Prisma.IntNullableWithAggregatesFilter<"ClientProfile"> | number | null
   workoutScheduleNotes?: Prisma.StringNullableWithAggregatesFilter<"ClientProfile"> | string | null
+  activityLevel?: Prisma.StringNullableWithAggregatesFilter<"ClientProfile"> | string | null
+  dailyCarbsGrams?: Prisma.FloatNullableWithAggregatesFilter<"ClientProfile"> | number | null
+  dailyFatGrams?: Prisma.FloatNullableWithAggregatesFilter<"ClientProfile"> | number | null
   joinDate?: Prisma.DateTimeWithAggregatesFilter<"ClientProfile"> | Date | string
   assignedCoachId?: Prisma.StringNullableWithAggregatesFilter<"ClientProfile"> | string | null
 }
@@ -463,6 +507,9 @@ export type ClientProfileCreateInput = {
   dailyProteinGrams?: number | null
   recommendedGymSessionsPerWeek?: number | null
   workoutScheduleNotes?: string | null
+  activityLevel?: string | null
+  dailyCarbsGrams?: number | null
+  dailyFatGrams?: number | null
   joinDate?: Date | string
   user: Prisma.UserCreateNestedOneWithoutClientProfileInput
   memberships?: Prisma.ClientMembershipCreateNestedManyWithoutClientInput
@@ -491,6 +538,9 @@ export type ClientProfileUncheckedCreateInput = {
   dailyProteinGrams?: number | null
   recommendedGymSessionsPerWeek?: number | null
   workoutScheduleNotes?: string | null
+  activityLevel?: string | null
+  dailyCarbsGrams?: number | null
+  dailyFatGrams?: number | null
   joinDate?: Date | string
   assignedCoachId?: string | null
   memberships?: Prisma.ClientMembershipUncheckedCreateNestedManyWithoutClientInput
@@ -517,6 +567,9 @@ export type ClientProfileUpdateInput = {
   dailyProteinGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendedGymSessionsPerWeek?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workoutScheduleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyCarbsGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  dailyFatGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutClientProfileNestedInput
   memberships?: Prisma.ClientMembershipUpdateManyWithoutClientNestedInput
@@ -545,6 +598,9 @@ export type ClientProfileUncheckedUpdateInput = {
   dailyProteinGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendedGymSessionsPerWeek?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workoutScheduleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyCarbsGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  dailyFatGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignedCoachId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memberships?: Prisma.ClientMembershipUncheckedUpdateManyWithoutClientNestedInput
@@ -572,6 +628,9 @@ export type ClientProfileCreateManyInput = {
   dailyProteinGrams?: number | null
   recommendedGymSessionsPerWeek?: number | null
   workoutScheduleNotes?: string | null
+  activityLevel?: string | null
+  dailyCarbsGrams?: number | null
+  dailyFatGrams?: number | null
   joinDate?: Date | string
   assignedCoachId?: string | null
 }
@@ -591,6 +650,9 @@ export type ClientProfileUpdateManyMutationInput = {
   dailyProteinGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendedGymSessionsPerWeek?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workoutScheduleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyCarbsGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  dailyFatGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -610,6 +672,9 @@ export type ClientProfileUncheckedUpdateManyInput = {
   dailyProteinGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendedGymSessionsPerWeek?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workoutScheduleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyCarbsGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  dailyFatGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignedCoachId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -635,6 +700,9 @@ export type ClientProfileCountOrderByAggregateInput = {
   dailyProteinGrams?: Prisma.SortOrder
   recommendedGymSessionsPerWeek?: Prisma.SortOrder
   workoutScheduleNotes?: Prisma.SortOrder
+  activityLevel?: Prisma.SortOrder
+  dailyCarbsGrams?: Prisma.SortOrder
+  dailyFatGrams?: Prisma.SortOrder
   joinDate?: Prisma.SortOrder
   assignedCoachId?: Prisma.SortOrder
 }
@@ -645,6 +713,8 @@ export type ClientProfileAvgOrderByAggregateInput = {
   dailyCalorieTarget?: Prisma.SortOrder
   dailyProteinGrams?: Prisma.SortOrder
   recommendedGymSessionsPerWeek?: Prisma.SortOrder
+  dailyCarbsGrams?: Prisma.SortOrder
+  dailyFatGrams?: Prisma.SortOrder
 }
 
 export type ClientProfileMaxOrderByAggregateInput = {
@@ -663,6 +733,9 @@ export type ClientProfileMaxOrderByAggregateInput = {
   dailyProteinGrams?: Prisma.SortOrder
   recommendedGymSessionsPerWeek?: Prisma.SortOrder
   workoutScheduleNotes?: Prisma.SortOrder
+  activityLevel?: Prisma.SortOrder
+  dailyCarbsGrams?: Prisma.SortOrder
+  dailyFatGrams?: Prisma.SortOrder
   joinDate?: Prisma.SortOrder
   assignedCoachId?: Prisma.SortOrder
 }
@@ -683,6 +756,9 @@ export type ClientProfileMinOrderByAggregateInput = {
   dailyProteinGrams?: Prisma.SortOrder
   recommendedGymSessionsPerWeek?: Prisma.SortOrder
   workoutScheduleNotes?: Prisma.SortOrder
+  activityLevel?: Prisma.SortOrder
+  dailyCarbsGrams?: Prisma.SortOrder
+  dailyFatGrams?: Prisma.SortOrder
   joinDate?: Prisma.SortOrder
   assignedCoachId?: Prisma.SortOrder
 }
@@ -693,6 +769,8 @@ export type ClientProfileSumOrderByAggregateInput = {
   dailyCalorieTarget?: Prisma.SortOrder
   dailyProteinGrams?: Prisma.SortOrder
   recommendedGymSessionsPerWeek?: Prisma.SortOrder
+  dailyCarbsGrams?: Prisma.SortOrder
+  dailyFatGrams?: Prisma.SortOrder
 }
 
 export type ClientProfileListRelationFilter = {
@@ -917,6 +995,9 @@ export type ClientProfileCreateWithoutUserInput = {
   dailyProteinGrams?: number | null
   recommendedGymSessionsPerWeek?: number | null
   workoutScheduleNotes?: string | null
+  activityLevel?: string | null
+  dailyCarbsGrams?: number | null
+  dailyFatGrams?: number | null
   joinDate?: Date | string
   memberships?: Prisma.ClientMembershipCreateNestedManyWithoutClientInput
   goals?: Prisma.ClientGoalCreateNestedManyWithoutClientInput
@@ -943,6 +1024,9 @@ export type ClientProfileUncheckedCreateWithoutUserInput = {
   dailyProteinGrams?: number | null
   recommendedGymSessionsPerWeek?: number | null
   workoutScheduleNotes?: string | null
+  activityLevel?: string | null
+  dailyCarbsGrams?: number | null
+  dailyFatGrams?: number | null
   joinDate?: Date | string
   assignedCoachId?: string | null
   memberships?: Prisma.ClientMembershipUncheckedCreateNestedManyWithoutClientInput
@@ -985,6 +1069,9 @@ export type ClientProfileUpdateWithoutUserInput = {
   dailyProteinGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendedGymSessionsPerWeek?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workoutScheduleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyCarbsGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  dailyFatGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.ClientMembershipUpdateManyWithoutClientNestedInput
   goals?: Prisma.ClientGoalUpdateManyWithoutClientNestedInput
@@ -1011,6 +1098,9 @@ export type ClientProfileUncheckedUpdateWithoutUserInput = {
   dailyProteinGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendedGymSessionsPerWeek?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workoutScheduleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyCarbsGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  dailyFatGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignedCoachId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memberships?: Prisma.ClientMembershipUncheckedUpdateManyWithoutClientNestedInput
@@ -1037,6 +1127,9 @@ export type ClientProfileCreateWithoutAssignedCoachInput = {
   dailyProteinGrams?: number | null
   recommendedGymSessionsPerWeek?: number | null
   workoutScheduleNotes?: string | null
+  activityLevel?: string | null
+  dailyCarbsGrams?: number | null
+  dailyFatGrams?: number | null
   joinDate?: Date | string
   user: Prisma.UserCreateNestedOneWithoutClientProfileInput
   memberships?: Prisma.ClientMembershipCreateNestedManyWithoutClientInput
@@ -1064,6 +1157,9 @@ export type ClientProfileUncheckedCreateWithoutAssignedCoachInput = {
   dailyProteinGrams?: number | null
   recommendedGymSessionsPerWeek?: number | null
   workoutScheduleNotes?: string | null
+  activityLevel?: string | null
+  dailyCarbsGrams?: number | null
+  dailyFatGrams?: number | null
   joinDate?: Date | string
   memberships?: Prisma.ClientMembershipUncheckedCreateNestedManyWithoutClientInput
   goals?: Prisma.ClientGoalUncheckedCreateNestedManyWithoutClientInput
@@ -1119,6 +1215,9 @@ export type ClientProfileScalarWhereInput = {
   dailyProteinGrams?: Prisma.FloatNullableFilter<"ClientProfile"> | number | null
   recommendedGymSessionsPerWeek?: Prisma.IntNullableFilter<"ClientProfile"> | number | null
   workoutScheduleNotes?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
+  activityLevel?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
+  dailyCarbsGrams?: Prisma.FloatNullableFilter<"ClientProfile"> | number | null
+  dailyFatGrams?: Prisma.FloatNullableFilter<"ClientProfile"> | number | null
   joinDate?: Prisma.DateTimeFilter<"ClientProfile"> | Date | string
   assignedCoachId?: Prisma.StringNullableFilter<"ClientProfile"> | string | null
 }
@@ -1138,6 +1237,9 @@ export type ClientProfileCreateWithoutMealPlanInput = {
   dailyProteinGrams?: number | null
   recommendedGymSessionsPerWeek?: number | null
   workoutScheduleNotes?: string | null
+  activityLevel?: string | null
+  dailyCarbsGrams?: number | null
+  dailyFatGrams?: number | null
   joinDate?: Date | string
   user: Prisma.UserCreateNestedOneWithoutClientProfileInput
   memberships?: Prisma.ClientMembershipCreateNestedManyWithoutClientInput
@@ -1165,6 +1267,9 @@ export type ClientProfileUncheckedCreateWithoutMealPlanInput = {
   dailyProteinGrams?: number | null
   recommendedGymSessionsPerWeek?: number | null
   workoutScheduleNotes?: string | null
+  activityLevel?: string | null
+  dailyCarbsGrams?: number | null
+  dailyFatGrams?: number | null
   joinDate?: Date | string
   assignedCoachId?: string | null
   memberships?: Prisma.ClientMembershipUncheckedCreateNestedManyWithoutClientInput
@@ -1206,6 +1311,9 @@ export type ClientProfileUpdateWithoutMealPlanInput = {
   dailyProteinGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendedGymSessionsPerWeek?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workoutScheduleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyCarbsGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  dailyFatGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutClientProfileNestedInput
   memberships?: Prisma.ClientMembershipUpdateManyWithoutClientNestedInput
@@ -1233,6 +1341,9 @@ export type ClientProfileUncheckedUpdateWithoutMealPlanInput = {
   dailyProteinGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendedGymSessionsPerWeek?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workoutScheduleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyCarbsGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  dailyFatGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignedCoachId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memberships?: Prisma.ClientMembershipUncheckedUpdateManyWithoutClientNestedInput
@@ -1258,6 +1369,9 @@ export type ClientProfileCreateWithoutMembershipsInput = {
   dailyProteinGrams?: number | null
   recommendedGymSessionsPerWeek?: number | null
   workoutScheduleNotes?: string | null
+  activityLevel?: string | null
+  dailyCarbsGrams?: number | null
+  dailyFatGrams?: number | null
   joinDate?: Date | string
   user: Prisma.UserCreateNestedOneWithoutClientProfileInput
   goals?: Prisma.ClientGoalCreateNestedManyWithoutClientInput
@@ -1285,6 +1399,9 @@ export type ClientProfileUncheckedCreateWithoutMembershipsInput = {
   dailyProteinGrams?: number | null
   recommendedGymSessionsPerWeek?: number | null
   workoutScheduleNotes?: string | null
+  activityLevel?: string | null
+  dailyCarbsGrams?: number | null
+  dailyFatGrams?: number | null
   joinDate?: Date | string
   assignedCoachId?: string | null
   goals?: Prisma.ClientGoalUncheckedCreateNestedManyWithoutClientInput
@@ -1326,6 +1443,9 @@ export type ClientProfileUpdateWithoutMembershipsInput = {
   dailyProteinGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendedGymSessionsPerWeek?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workoutScheduleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyCarbsGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  dailyFatGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutClientProfileNestedInput
   goals?: Prisma.ClientGoalUpdateManyWithoutClientNestedInput
@@ -1353,6 +1473,9 @@ export type ClientProfileUncheckedUpdateWithoutMembershipsInput = {
   dailyProteinGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendedGymSessionsPerWeek?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workoutScheduleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyCarbsGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  dailyFatGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignedCoachId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   goals?: Prisma.ClientGoalUncheckedUpdateManyWithoutClientNestedInput
@@ -1378,6 +1501,9 @@ export type ClientProfileCreateWithoutGoalsInput = {
   dailyProteinGrams?: number | null
   recommendedGymSessionsPerWeek?: number | null
   workoutScheduleNotes?: string | null
+  activityLevel?: string | null
+  dailyCarbsGrams?: number | null
+  dailyFatGrams?: number | null
   joinDate?: Date | string
   user: Prisma.UserCreateNestedOneWithoutClientProfileInput
   memberships?: Prisma.ClientMembershipCreateNestedManyWithoutClientInput
@@ -1405,6 +1531,9 @@ export type ClientProfileUncheckedCreateWithoutGoalsInput = {
   dailyProteinGrams?: number | null
   recommendedGymSessionsPerWeek?: number | null
   workoutScheduleNotes?: string | null
+  activityLevel?: string | null
+  dailyCarbsGrams?: number | null
+  dailyFatGrams?: number | null
   joinDate?: Date | string
   assignedCoachId?: string | null
   memberships?: Prisma.ClientMembershipUncheckedCreateNestedManyWithoutClientInput
@@ -1446,6 +1575,9 @@ export type ClientProfileUpdateWithoutGoalsInput = {
   dailyProteinGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendedGymSessionsPerWeek?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workoutScheduleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyCarbsGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  dailyFatGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutClientProfileNestedInput
   memberships?: Prisma.ClientMembershipUpdateManyWithoutClientNestedInput
@@ -1473,6 +1605,9 @@ export type ClientProfileUncheckedUpdateWithoutGoalsInput = {
   dailyProteinGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendedGymSessionsPerWeek?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workoutScheduleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyCarbsGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  dailyFatGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignedCoachId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memberships?: Prisma.ClientMembershipUncheckedUpdateManyWithoutClientNestedInput
@@ -1498,6 +1633,9 @@ export type ClientProfileCreateWithoutWorkoutAssignmentsInput = {
   dailyProteinGrams?: number | null
   recommendedGymSessionsPerWeek?: number | null
   workoutScheduleNotes?: string | null
+  activityLevel?: string | null
+  dailyCarbsGrams?: number | null
+  dailyFatGrams?: number | null
   joinDate?: Date | string
   user: Prisma.UserCreateNestedOneWithoutClientProfileInput
   memberships?: Prisma.ClientMembershipCreateNestedManyWithoutClientInput
@@ -1525,6 +1663,9 @@ export type ClientProfileUncheckedCreateWithoutWorkoutAssignmentsInput = {
   dailyProteinGrams?: number | null
   recommendedGymSessionsPerWeek?: number | null
   workoutScheduleNotes?: string | null
+  activityLevel?: string | null
+  dailyCarbsGrams?: number | null
+  dailyFatGrams?: number | null
   joinDate?: Date | string
   assignedCoachId?: string | null
   memberships?: Prisma.ClientMembershipUncheckedCreateNestedManyWithoutClientInput
@@ -1566,6 +1707,9 @@ export type ClientProfileUpdateWithoutWorkoutAssignmentsInput = {
   dailyProteinGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendedGymSessionsPerWeek?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workoutScheduleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyCarbsGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  dailyFatGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutClientProfileNestedInput
   memberships?: Prisma.ClientMembershipUpdateManyWithoutClientNestedInput
@@ -1593,6 +1737,9 @@ export type ClientProfileUncheckedUpdateWithoutWorkoutAssignmentsInput = {
   dailyProteinGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendedGymSessionsPerWeek?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workoutScheduleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyCarbsGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  dailyFatGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignedCoachId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memberships?: Prisma.ClientMembershipUncheckedUpdateManyWithoutClientNestedInput
@@ -1618,6 +1765,9 @@ export type ClientProfileCreateWithoutWorkoutProgressInput = {
   dailyProteinGrams?: number | null
   recommendedGymSessionsPerWeek?: number | null
   workoutScheduleNotes?: string | null
+  activityLevel?: string | null
+  dailyCarbsGrams?: number | null
+  dailyFatGrams?: number | null
   joinDate?: Date | string
   user: Prisma.UserCreateNestedOneWithoutClientProfileInput
   memberships?: Prisma.ClientMembershipCreateNestedManyWithoutClientInput
@@ -1645,6 +1795,9 @@ export type ClientProfileUncheckedCreateWithoutWorkoutProgressInput = {
   dailyProteinGrams?: number | null
   recommendedGymSessionsPerWeek?: number | null
   workoutScheduleNotes?: string | null
+  activityLevel?: string | null
+  dailyCarbsGrams?: number | null
+  dailyFatGrams?: number | null
   joinDate?: Date | string
   assignedCoachId?: string | null
   memberships?: Prisma.ClientMembershipUncheckedCreateNestedManyWithoutClientInput
@@ -1686,6 +1839,9 @@ export type ClientProfileUpdateWithoutWorkoutProgressInput = {
   dailyProteinGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendedGymSessionsPerWeek?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workoutScheduleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyCarbsGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  dailyFatGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutClientProfileNestedInput
   memberships?: Prisma.ClientMembershipUpdateManyWithoutClientNestedInput
@@ -1713,6 +1869,9 @@ export type ClientProfileUncheckedUpdateWithoutWorkoutProgressInput = {
   dailyProteinGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendedGymSessionsPerWeek?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workoutScheduleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyCarbsGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  dailyFatGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignedCoachId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memberships?: Prisma.ClientMembershipUncheckedUpdateManyWithoutClientNestedInput
@@ -1738,6 +1897,9 @@ export type ClientProfileCreateWithoutAttendancesInput = {
   dailyProteinGrams?: number | null
   recommendedGymSessionsPerWeek?: number | null
   workoutScheduleNotes?: string | null
+  activityLevel?: string | null
+  dailyCarbsGrams?: number | null
+  dailyFatGrams?: number | null
   joinDate?: Date | string
   user: Prisma.UserCreateNestedOneWithoutClientProfileInput
   memberships?: Prisma.ClientMembershipCreateNestedManyWithoutClientInput
@@ -1765,6 +1927,9 @@ export type ClientProfileUncheckedCreateWithoutAttendancesInput = {
   dailyProteinGrams?: number | null
   recommendedGymSessionsPerWeek?: number | null
   workoutScheduleNotes?: string | null
+  activityLevel?: string | null
+  dailyCarbsGrams?: number | null
+  dailyFatGrams?: number | null
   joinDate?: Date | string
   assignedCoachId?: string | null
   memberships?: Prisma.ClientMembershipUncheckedCreateNestedManyWithoutClientInput
@@ -1806,6 +1971,9 @@ export type ClientProfileUpdateWithoutAttendancesInput = {
   dailyProteinGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendedGymSessionsPerWeek?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workoutScheduleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyCarbsGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  dailyFatGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutClientProfileNestedInput
   memberships?: Prisma.ClientMembershipUpdateManyWithoutClientNestedInput
@@ -1833,6 +2001,9 @@ export type ClientProfileUncheckedUpdateWithoutAttendancesInput = {
   dailyProteinGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendedGymSessionsPerWeek?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workoutScheduleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyCarbsGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  dailyFatGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignedCoachId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memberships?: Prisma.ClientMembershipUncheckedUpdateManyWithoutClientNestedInput
@@ -1858,6 +2029,9 @@ export type ClientProfileCreateWithoutPaymentsInput = {
   dailyProteinGrams?: number | null
   recommendedGymSessionsPerWeek?: number | null
   workoutScheduleNotes?: string | null
+  activityLevel?: string | null
+  dailyCarbsGrams?: number | null
+  dailyFatGrams?: number | null
   joinDate?: Date | string
   user: Prisma.UserCreateNestedOneWithoutClientProfileInput
   memberships?: Prisma.ClientMembershipCreateNestedManyWithoutClientInput
@@ -1885,6 +2059,9 @@ export type ClientProfileUncheckedCreateWithoutPaymentsInput = {
   dailyProteinGrams?: number | null
   recommendedGymSessionsPerWeek?: number | null
   workoutScheduleNotes?: string | null
+  activityLevel?: string | null
+  dailyCarbsGrams?: number | null
+  dailyFatGrams?: number | null
   joinDate?: Date | string
   assignedCoachId?: string | null
   memberships?: Prisma.ClientMembershipUncheckedCreateNestedManyWithoutClientInput
@@ -1926,6 +2103,9 @@ export type ClientProfileUpdateWithoutPaymentsInput = {
   dailyProteinGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendedGymSessionsPerWeek?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workoutScheduleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyCarbsGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  dailyFatGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutClientProfileNestedInput
   memberships?: Prisma.ClientMembershipUpdateManyWithoutClientNestedInput
@@ -1953,6 +2133,9 @@ export type ClientProfileUncheckedUpdateWithoutPaymentsInput = {
   dailyProteinGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendedGymSessionsPerWeek?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workoutScheduleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyCarbsGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  dailyFatGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignedCoachId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memberships?: Prisma.ClientMembershipUncheckedUpdateManyWithoutClientNestedInput
@@ -1979,6 +2162,9 @@ export type ClientProfileCreateManyAssignedCoachInput = {
   dailyProteinGrams?: number | null
   recommendedGymSessionsPerWeek?: number | null
   workoutScheduleNotes?: string | null
+  activityLevel?: string | null
+  dailyCarbsGrams?: number | null
+  dailyFatGrams?: number | null
   joinDate?: Date | string
 }
 
@@ -1997,6 +2183,9 @@ export type ClientProfileUpdateWithoutAssignedCoachInput = {
   dailyProteinGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendedGymSessionsPerWeek?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workoutScheduleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyCarbsGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  dailyFatGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutClientProfileNestedInput
   memberships?: Prisma.ClientMembershipUpdateManyWithoutClientNestedInput
@@ -2024,6 +2213,9 @@ export type ClientProfileUncheckedUpdateWithoutAssignedCoachInput = {
   dailyProteinGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendedGymSessionsPerWeek?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workoutScheduleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyCarbsGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  dailyFatGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.ClientMembershipUncheckedUpdateManyWithoutClientNestedInput
   goals?: Prisma.ClientGoalUncheckedUpdateManyWithoutClientNestedInput
@@ -2050,6 +2242,9 @@ export type ClientProfileUncheckedUpdateManyWithoutAssignedCoachInput = {
   dailyProteinGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   recommendedGymSessionsPerWeek?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   workoutScheduleNotes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  activityLevel?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dailyCarbsGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  dailyFatGrams?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
   joinDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -2145,6 +2340,9 @@ export type ClientProfileSelect<ExtArgs extends runtime.Types.Extensions.Interna
   dailyProteinGrams?: boolean
   recommendedGymSessionsPerWeek?: boolean
   workoutScheduleNotes?: boolean
+  activityLevel?: boolean
+  dailyCarbsGrams?: boolean
+  dailyFatGrams?: boolean
   joinDate?: boolean
   assignedCoachId?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -2175,6 +2373,9 @@ export type ClientProfileSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   dailyProteinGrams?: boolean
   recommendedGymSessionsPerWeek?: boolean
   workoutScheduleNotes?: boolean
+  activityLevel?: boolean
+  dailyCarbsGrams?: boolean
+  dailyFatGrams?: boolean
   joinDate?: boolean
   assignedCoachId?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -2197,6 +2398,9 @@ export type ClientProfileSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   dailyProteinGrams?: boolean
   recommendedGymSessionsPerWeek?: boolean
   workoutScheduleNotes?: boolean
+  activityLevel?: boolean
+  dailyCarbsGrams?: boolean
+  dailyFatGrams?: boolean
   joinDate?: boolean
   assignedCoachId?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -2219,11 +2423,14 @@ export type ClientProfileSelectScalar = {
   dailyProteinGrams?: boolean
   recommendedGymSessionsPerWeek?: boolean
   workoutScheduleNotes?: boolean
+  activityLevel?: boolean
+  dailyCarbsGrams?: boolean
+  dailyFatGrams?: boolean
   joinDate?: boolean
   assignedCoachId?: boolean
 }
 
-export type ClientProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "dateOfBirth" | "weight" | "height" | "emergencyContact" | "address" | "gender" | "occupation" | "gymNotes" | "nutritionObjective" | "dailyCalorieTarget" | "dailyProteinGrams" | "recommendedGymSessionsPerWeek" | "workoutScheduleNotes" | "joinDate" | "assignedCoachId", ExtArgs["result"]["clientProfile"]>
+export type ClientProfileOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "dateOfBirth" | "weight" | "height" | "emergencyContact" | "address" | "gender" | "occupation" | "gymNotes" | "nutritionObjective" | "dailyCalorieTarget" | "dailyProteinGrams" | "recommendedGymSessionsPerWeek" | "workoutScheduleNotes" | "activityLevel" | "dailyCarbsGrams" | "dailyFatGrams" | "joinDate" | "assignedCoachId", ExtArgs["result"]["clientProfile"]>
 export type ClientProfileInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   memberships?: boolean | Prisma.ClientProfile$membershipsArgs<ExtArgs>
@@ -2283,6 +2490,12 @@ export type $ClientProfilePayload<ExtArgs extends runtime.Types.Extensions.Inter
      * Optional detail: which days, times, or split (e.g. "Tue & Thu evenings").
      */
     workoutScheduleNotes: string | null
+    /**
+     * Activity level for TDEE: SEDENTARY | LIGHT | MODERATE | VERY_ACTIVE.
+     */
+    activityLevel: string | null
+    dailyCarbsGrams: number | null
+    dailyFatGrams: number | null
     joinDate: Date
     assignedCoachId: string | null
   }, ExtArgs["result"]["clientProfile"]>
@@ -2732,6 +2945,9 @@ export interface ClientProfileFieldRefs {
   readonly dailyProteinGrams: Prisma.FieldRef<"ClientProfile", 'Float'>
   readonly recommendedGymSessionsPerWeek: Prisma.FieldRef<"ClientProfile", 'Int'>
   readonly workoutScheduleNotes: Prisma.FieldRef<"ClientProfile", 'String'>
+  readonly activityLevel: Prisma.FieldRef<"ClientProfile", 'String'>
+  readonly dailyCarbsGrams: Prisma.FieldRef<"ClientProfile", 'Float'>
+  readonly dailyFatGrams: Prisma.FieldRef<"ClientProfile", 'Float'>
   readonly joinDate: Prisma.FieldRef<"ClientProfile", 'DateTime'>
   readonly assignedCoachId: Prisma.FieldRef<"ClientProfile", 'String'>
 }

@@ -49,6 +49,10 @@ model ClientProfile {
   recommendedGymSessionsPerWeek Int?
   /// Optional detail: which days, times, or split (e.g. "Tue & Thu evenings").
   workoutScheduleNotes          String?
+  /// Activity level for TDEE: SEDENTARY | LIGHT | MODERATE | VERY_ACTIVE.
+  activityLevel    String?   @default("SEDENTARY")
+  dailyCarbsGrams  Float?
+  dailyFatGrams    Float?
   joinDate         DateTime  @default(now())
 
   user               User               @relation(fields: [userId], references: [id])

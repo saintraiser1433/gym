@@ -91,6 +91,28 @@ export async function GET() {
       });
       return acc;
     }, {} as Record<string, { equipmentId: string; equipmentName: string; quantity: number; measureTypes: string[]; targetKg: number | null; targetPcs: number | null }[]>);
+    const goalLinks = workoutIds.length
+      ? await prisma.goalWorkout.findMany({
+          where: { workoutId: { in: workoutIds } },
+          select: { workoutId: true, goalId: true, goal: { select: { id: true, name: true } } },
+        })
+      : [];
+    const goalsByWorkout = goalLinks.reduce(
+      (acc, link) => {
+        const list = acc[link.workoutId] ?? (acc[link.workoutId] = []);
+        if (!list.find((g) => g.id === link.goalId)) {
+          list.push({ id: link.goalId, name: link.goal?.name ?? "Goal" });
+        }
+        return acc;
+      },
+      {} as Record<string, { id: string; name: string }[]>,
+    );
+
+    const goals = await prisma.workoutGoal.findMany({
+      select: { id: true, name: true, category: true },
+      orderBy: { name: "asc" },
+    });
+
     const data = workouts.map((w) => ({
       ...w,
       media: w.media.length
@@ -109,8 +131,9 @@ export async function GET() {
             ]
           : [],
       equipment: equipmentByWorkout[w.id] ?? [],
+      goals: goalsByWorkout[w.id] ?? [],
     }));
-    return NextResponse.json({ data, equipment });
+    return NextResponse.json({ data, equipment, goals });
   } catch {
     return NextResponse.json(
       { error: "Failed to load workouts", data: [] },
