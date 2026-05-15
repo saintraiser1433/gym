@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireCoach } from "@/lib/auth";
+import { resolveClientGoalWorkoutLinks } from "@/lib/client-goal-workouts";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -13,7 +14,7 @@ function parsePlanDayParam(day: string | null): number | null {
   return n;
 }
 
-/** Get workouts linked to this client's goals. Coach must own the client. Optional ?goalId= and ?day=day-N with goalId for plan day. */
+/** Get workouts linked to this client's goals (catalog or coach custom plan). */
 export async function GET(req: NextRequest, { params }: Params) {
   const session = await requireCoach();
   const userId = (session.user as { id?: string }).id as string;
@@ -39,29 +40,51 @@ export async function GET(req: NextRequest, { params }: Params) {
 
   const clientGoals = await prisma.clientGoal.findMany({
     where: { clientId: client.id },
-    select: { goalId: true },
+    select: {
+      id: true,
+      goalId: true,
+      workoutPlanMode: true,
+      goal: { select: { id: true, name: true } },
+    },
   });
-  const goalIds = clientGoals.map((cg) => cg.goalId);
-  if (goalIds.length === 0) {
+  if (clientGoals.length === 0) {
     return NextResponse.json({ data: [] });
   }
 
-  const filterGoalIds = goalIdParam && goalIds.includes(goalIdParam) ? [goalIdParam] : goalIds;
+  const filterGoals =
+    goalIdParam && clientGoals.some((cg) => cg.goalId === goalIdParam)
+      ? clientGoals.filter((cg) => cg.goalId === goalIdParam)
+      : clientGoals;
 
   const usePlanDayFilter =
     planDayFilter != null &&
     goalIdParam != null &&
-    filterGoalIds.length === 1 &&
-    filterGoalIds[0] === goalIdParam;
+    filterGoals.length === 1 &&
+    filterGoals[0].goalId === goalIdParam;
 
-  const links = await prisma.goalWorkout.findMany({
-    where: {
-      goalId: { in: filterGoalIds },
-      ...(usePlanDayFilter ? { planDay: planDayFilter } : {}),
-    },
-    select: { workoutId: true, goal: { select: { id: true, name: true } } },
-  });
-  const workoutIds = [...new Set(links.map((l) => l.workoutId))];
+  const linkRows: {
+    workoutId: string;
+    planDay: number;
+    goal: { id: string; name: string };
+  }[] = [];
+
+  for (const cg of filterGoals) {
+    const resolved = await resolveClientGoalWorkoutLinks({
+      clientGoalId: cg.id,
+      goalId: cg.goalId,
+      workoutPlanMode: cg.workoutPlanMode,
+    });
+    for (const link of resolved) {
+      if (usePlanDayFilter && link.planDay !== planDayFilter) continue;
+      linkRows.push({
+        workoutId: link.workoutId,
+        planDay: link.planDay,
+        goal: cg.goal,
+      });
+    }
+  }
+
+  const workoutIds = [...new Set(linkRows.map((l) => l.workoutId))];
   if (workoutIds.length === 0) {
     return NextResponse.json({ data: [] });
   }
@@ -103,10 +126,11 @@ export async function GET(req: NextRequest, { params }: Params) {
     }),
   ]);
 
-  const goalsByWorkoutId = links.reduce(
+  const goalsByWorkoutId = linkRows.reduce(
     (acc, l) => {
       if (!acc[l.workoutId]) acc[l.workoutId] = [];
-      acc[l.workoutId].push(l.goal);
+      const exists = acc[l.workoutId].some((g) => g.id === l.goal.id);
+      if (!exists) acc[l.workoutId].push(l.goal);
       return acc;
     },
     {} as Record<string, { id: string; name: string }[]>,

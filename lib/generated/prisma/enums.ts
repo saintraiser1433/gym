@@ -9,6 +9,14 @@
 * 🟢 You can import this file directly.
 */
 
+export const ClientGoalWorkoutPlanMode = {
+  CATALOG: 'CATALOG',
+  CUSTOM: 'CUSTOM'
+} as const
+
+export type ClientGoalWorkoutPlanMode = (typeof ClientGoalWorkoutPlanMode)[keyof typeof ClientGoalWorkoutPlanMode]
+
+
 export const Role = {
   ADMIN: 'ADMIN',
   CLIENT: 'CLIENT',

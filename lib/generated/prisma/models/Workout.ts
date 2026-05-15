@@ -248,6 +248,7 @@ export type WorkoutWhereInput = {
   exercises?: Prisma.WorkoutExerciseListRelationFilter
   assignments?: Prisma.WorkoutAssignmentListRelationFilter
   goalWorkouts?: Prisma.GoalWorkoutListRelationFilter
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutListRelationFilter
   equipmentUsed?: Prisma.WorkoutEquipmentListRelationFilter
   progressEntries?: Prisma.WorkoutProgressListRelationFilter
   media?: Prisma.WorkoutMediaListRelationFilter
@@ -267,6 +268,7 @@ export type WorkoutOrderByWithRelationInput = {
   exercises?: Prisma.WorkoutExerciseOrderByRelationAggregateInput
   assignments?: Prisma.WorkoutAssignmentOrderByRelationAggregateInput
   goalWorkouts?: Prisma.GoalWorkoutOrderByRelationAggregateInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutOrderByRelationAggregateInput
   equipmentUsed?: Prisma.WorkoutEquipmentOrderByRelationAggregateInput
   progressEntries?: Prisma.WorkoutProgressOrderByRelationAggregateInput
   media?: Prisma.WorkoutMediaOrderByRelationAggregateInput
@@ -289,6 +291,7 @@ export type WorkoutWhereUniqueInput = Prisma.AtLeast<{
   exercises?: Prisma.WorkoutExerciseListRelationFilter
   assignments?: Prisma.WorkoutAssignmentListRelationFilter
   goalWorkouts?: Prisma.GoalWorkoutListRelationFilter
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutListRelationFilter
   equipmentUsed?: Prisma.WorkoutEquipmentListRelationFilter
   progressEntries?: Prisma.WorkoutProgressListRelationFilter
   media?: Prisma.WorkoutMediaListRelationFilter
@@ -339,6 +342,7 @@ export type WorkoutCreateInput = {
   exercises?: Prisma.WorkoutExerciseCreateNestedManyWithoutWorkoutInput
   assignments?: Prisma.WorkoutAssignmentCreateNestedManyWithoutWorkoutInput
   goalWorkouts?: Prisma.GoalWorkoutCreateNestedManyWithoutWorkoutInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutCreateNestedManyWithoutWorkoutInput
   equipmentUsed?: Prisma.WorkoutEquipmentCreateNestedManyWithoutWorkoutInput
   progressEntries?: Prisma.WorkoutProgressCreateNestedManyWithoutWorkoutInput
   media?: Prisma.WorkoutMediaCreateNestedManyWithoutWorkoutInput
@@ -357,6 +361,7 @@ export type WorkoutUncheckedCreateInput = {
   exercises?: Prisma.WorkoutExerciseUncheckedCreateNestedManyWithoutWorkoutInput
   assignments?: Prisma.WorkoutAssignmentUncheckedCreateNestedManyWithoutWorkoutInput
   goalWorkouts?: Prisma.GoalWorkoutUncheckedCreateNestedManyWithoutWorkoutInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUncheckedCreateNestedManyWithoutWorkoutInput
   equipmentUsed?: Prisma.WorkoutEquipmentUncheckedCreateNestedManyWithoutWorkoutInput
   progressEntries?: Prisma.WorkoutProgressUncheckedCreateNestedManyWithoutWorkoutInput
   media?: Prisma.WorkoutMediaUncheckedCreateNestedManyWithoutWorkoutInput
@@ -375,6 +380,7 @@ export type WorkoutUpdateInput = {
   exercises?: Prisma.WorkoutExerciseUpdateManyWithoutWorkoutNestedInput
   assignments?: Prisma.WorkoutAssignmentUpdateManyWithoutWorkoutNestedInput
   goalWorkouts?: Prisma.GoalWorkoutUpdateManyWithoutWorkoutNestedInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUpdateManyWithoutWorkoutNestedInput
   equipmentUsed?: Prisma.WorkoutEquipmentUpdateManyWithoutWorkoutNestedInput
   progressEntries?: Prisma.WorkoutProgressUpdateManyWithoutWorkoutNestedInput
   media?: Prisma.WorkoutMediaUpdateManyWithoutWorkoutNestedInput
@@ -393,6 +399,7 @@ export type WorkoutUncheckedUpdateInput = {
   exercises?: Prisma.WorkoutExerciseUncheckedUpdateManyWithoutWorkoutNestedInput
   assignments?: Prisma.WorkoutAssignmentUncheckedUpdateManyWithoutWorkoutNestedInput
   goalWorkouts?: Prisma.GoalWorkoutUncheckedUpdateManyWithoutWorkoutNestedInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUncheckedUpdateManyWithoutWorkoutNestedInput
   equipmentUsed?: Prisma.WorkoutEquipmentUncheckedUpdateManyWithoutWorkoutNestedInput
   progressEntries?: Prisma.WorkoutProgressUncheckedUpdateManyWithoutWorkoutNestedInput
   media?: Prisma.WorkoutMediaUncheckedUpdateManyWithoutWorkoutNestedInput
@@ -559,6 +566,20 @@ export type WorkoutUpdateOneRequiredWithoutGoalWorkoutsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.WorkoutUpdateToOneWithWhereWithoutGoalWorkoutsInput, Prisma.WorkoutUpdateWithoutGoalWorkoutsInput>, Prisma.WorkoutUncheckedUpdateWithoutGoalWorkoutsInput>
 }
 
+export type WorkoutCreateNestedOneWithoutClientGoalWorkoutsInput = {
+  create?: Prisma.XOR<Prisma.WorkoutCreateWithoutClientGoalWorkoutsInput, Prisma.WorkoutUncheckedCreateWithoutClientGoalWorkoutsInput>
+  connectOrCreate?: Prisma.WorkoutCreateOrConnectWithoutClientGoalWorkoutsInput
+  connect?: Prisma.WorkoutWhereUniqueInput
+}
+
+export type WorkoutUpdateOneRequiredWithoutClientGoalWorkoutsNestedInput = {
+  create?: Prisma.XOR<Prisma.WorkoutCreateWithoutClientGoalWorkoutsInput, Prisma.WorkoutUncheckedCreateWithoutClientGoalWorkoutsInput>
+  connectOrCreate?: Prisma.WorkoutCreateOrConnectWithoutClientGoalWorkoutsInput
+  upsert?: Prisma.WorkoutUpsertWithoutClientGoalWorkoutsInput
+  connect?: Prisma.WorkoutWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.WorkoutUpdateToOneWithWhereWithoutClientGoalWorkoutsInput, Prisma.WorkoutUpdateWithoutClientGoalWorkoutsInput>, Prisma.WorkoutUncheckedUpdateWithoutClientGoalWorkoutsInput>
+}
+
 export type WorkoutCreatetypesInput = {
   set: string[]
 }
@@ -652,6 +673,7 @@ export type WorkoutCreateWithoutCreatedByInput = {
   exercises?: Prisma.WorkoutExerciseCreateNestedManyWithoutWorkoutInput
   assignments?: Prisma.WorkoutAssignmentCreateNestedManyWithoutWorkoutInput
   goalWorkouts?: Prisma.GoalWorkoutCreateNestedManyWithoutWorkoutInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutCreateNestedManyWithoutWorkoutInput
   equipmentUsed?: Prisma.WorkoutEquipmentCreateNestedManyWithoutWorkoutInput
   progressEntries?: Prisma.WorkoutProgressCreateNestedManyWithoutWorkoutInput
   media?: Prisma.WorkoutMediaCreateNestedManyWithoutWorkoutInput
@@ -669,6 +691,7 @@ export type WorkoutUncheckedCreateWithoutCreatedByInput = {
   exercises?: Prisma.WorkoutExerciseUncheckedCreateNestedManyWithoutWorkoutInput
   assignments?: Prisma.WorkoutAssignmentUncheckedCreateNestedManyWithoutWorkoutInput
   goalWorkouts?: Prisma.GoalWorkoutUncheckedCreateNestedManyWithoutWorkoutInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUncheckedCreateNestedManyWithoutWorkoutInput
   equipmentUsed?: Prisma.WorkoutEquipmentUncheckedCreateNestedManyWithoutWorkoutInput
   progressEntries?: Prisma.WorkoutProgressUncheckedCreateNestedManyWithoutWorkoutInput
   media?: Prisma.WorkoutMediaUncheckedCreateNestedManyWithoutWorkoutInput
@@ -727,6 +750,7 @@ export type WorkoutCreateWithoutGoalWorkoutsInput = {
   createdBy?: Prisma.CoachProfileCreateNestedOneWithoutCreatedWorkoutsInput
   exercises?: Prisma.WorkoutExerciseCreateNestedManyWithoutWorkoutInput
   assignments?: Prisma.WorkoutAssignmentCreateNestedManyWithoutWorkoutInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutCreateNestedManyWithoutWorkoutInput
   equipmentUsed?: Prisma.WorkoutEquipmentCreateNestedManyWithoutWorkoutInput
   progressEntries?: Prisma.WorkoutProgressCreateNestedManyWithoutWorkoutInput
   media?: Prisma.WorkoutMediaCreateNestedManyWithoutWorkoutInput
@@ -744,6 +768,7 @@ export type WorkoutUncheckedCreateWithoutGoalWorkoutsInput = {
   types?: Prisma.WorkoutCreatetypesInput | string[]
   exercises?: Prisma.WorkoutExerciseUncheckedCreateNestedManyWithoutWorkoutInput
   assignments?: Prisma.WorkoutAssignmentUncheckedCreateNestedManyWithoutWorkoutInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUncheckedCreateNestedManyWithoutWorkoutInput
   equipmentUsed?: Prisma.WorkoutEquipmentUncheckedCreateNestedManyWithoutWorkoutInput
   progressEntries?: Prisma.WorkoutProgressUncheckedCreateNestedManyWithoutWorkoutInput
   media?: Prisma.WorkoutMediaUncheckedCreateNestedManyWithoutWorkoutInput
@@ -777,6 +802,7 @@ export type WorkoutUpdateWithoutGoalWorkoutsInput = {
   createdBy?: Prisma.CoachProfileUpdateOneWithoutCreatedWorkoutsNestedInput
   exercises?: Prisma.WorkoutExerciseUpdateManyWithoutWorkoutNestedInput
   assignments?: Prisma.WorkoutAssignmentUpdateManyWithoutWorkoutNestedInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUpdateManyWithoutWorkoutNestedInput
   equipmentUsed?: Prisma.WorkoutEquipmentUpdateManyWithoutWorkoutNestedInput
   progressEntries?: Prisma.WorkoutProgressUpdateManyWithoutWorkoutNestedInput
   media?: Prisma.WorkoutMediaUpdateManyWithoutWorkoutNestedInput
@@ -794,6 +820,95 @@ export type WorkoutUncheckedUpdateWithoutGoalWorkoutsInput = {
   types?: Prisma.WorkoutUpdatetypesInput | string[]
   exercises?: Prisma.WorkoutExerciseUncheckedUpdateManyWithoutWorkoutNestedInput
   assignments?: Prisma.WorkoutAssignmentUncheckedUpdateManyWithoutWorkoutNestedInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUncheckedUpdateManyWithoutWorkoutNestedInput
+  equipmentUsed?: Prisma.WorkoutEquipmentUncheckedUpdateManyWithoutWorkoutNestedInput
+  progressEntries?: Prisma.WorkoutProgressUncheckedUpdateManyWithoutWorkoutNestedInput
+  media?: Prisma.WorkoutMediaUncheckedUpdateManyWithoutWorkoutNestedInput
+}
+
+export type WorkoutCreateWithoutClientGoalWorkoutsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  targetGoals?: string | null
+  duration?: number | null
+  difficulty?: string | null
+  demoMediaUrl?: string | null
+  types?: Prisma.WorkoutCreatetypesInput | string[]
+  createdBy?: Prisma.CoachProfileCreateNestedOneWithoutCreatedWorkoutsInput
+  exercises?: Prisma.WorkoutExerciseCreateNestedManyWithoutWorkoutInput
+  assignments?: Prisma.WorkoutAssignmentCreateNestedManyWithoutWorkoutInput
+  goalWorkouts?: Prisma.GoalWorkoutCreateNestedManyWithoutWorkoutInput
+  equipmentUsed?: Prisma.WorkoutEquipmentCreateNestedManyWithoutWorkoutInput
+  progressEntries?: Prisma.WorkoutProgressCreateNestedManyWithoutWorkoutInput
+  media?: Prisma.WorkoutMediaCreateNestedManyWithoutWorkoutInput
+}
+
+export type WorkoutUncheckedCreateWithoutClientGoalWorkoutsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  createdById?: string | null
+  targetGoals?: string | null
+  duration?: number | null
+  difficulty?: string | null
+  demoMediaUrl?: string | null
+  types?: Prisma.WorkoutCreatetypesInput | string[]
+  exercises?: Prisma.WorkoutExerciseUncheckedCreateNestedManyWithoutWorkoutInput
+  assignments?: Prisma.WorkoutAssignmentUncheckedCreateNestedManyWithoutWorkoutInput
+  goalWorkouts?: Prisma.GoalWorkoutUncheckedCreateNestedManyWithoutWorkoutInput
+  equipmentUsed?: Prisma.WorkoutEquipmentUncheckedCreateNestedManyWithoutWorkoutInput
+  progressEntries?: Prisma.WorkoutProgressUncheckedCreateNestedManyWithoutWorkoutInput
+  media?: Prisma.WorkoutMediaUncheckedCreateNestedManyWithoutWorkoutInput
+}
+
+export type WorkoutCreateOrConnectWithoutClientGoalWorkoutsInput = {
+  where: Prisma.WorkoutWhereUniqueInput
+  create: Prisma.XOR<Prisma.WorkoutCreateWithoutClientGoalWorkoutsInput, Prisma.WorkoutUncheckedCreateWithoutClientGoalWorkoutsInput>
+}
+
+export type WorkoutUpsertWithoutClientGoalWorkoutsInput = {
+  update: Prisma.XOR<Prisma.WorkoutUpdateWithoutClientGoalWorkoutsInput, Prisma.WorkoutUncheckedUpdateWithoutClientGoalWorkoutsInput>
+  create: Prisma.XOR<Prisma.WorkoutCreateWithoutClientGoalWorkoutsInput, Prisma.WorkoutUncheckedCreateWithoutClientGoalWorkoutsInput>
+  where?: Prisma.WorkoutWhereInput
+}
+
+export type WorkoutUpdateToOneWithWhereWithoutClientGoalWorkoutsInput = {
+  where?: Prisma.WorkoutWhereInput
+  data: Prisma.XOR<Prisma.WorkoutUpdateWithoutClientGoalWorkoutsInput, Prisma.WorkoutUncheckedUpdateWithoutClientGoalWorkoutsInput>
+}
+
+export type WorkoutUpdateWithoutClientGoalWorkoutsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  targetGoals?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  difficulty?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  demoMediaUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  types?: Prisma.WorkoutUpdatetypesInput | string[]
+  createdBy?: Prisma.CoachProfileUpdateOneWithoutCreatedWorkoutsNestedInput
+  exercises?: Prisma.WorkoutExerciseUpdateManyWithoutWorkoutNestedInput
+  assignments?: Prisma.WorkoutAssignmentUpdateManyWithoutWorkoutNestedInput
+  goalWorkouts?: Prisma.GoalWorkoutUpdateManyWithoutWorkoutNestedInput
+  equipmentUsed?: Prisma.WorkoutEquipmentUpdateManyWithoutWorkoutNestedInput
+  progressEntries?: Prisma.WorkoutProgressUpdateManyWithoutWorkoutNestedInput
+  media?: Prisma.WorkoutMediaUpdateManyWithoutWorkoutNestedInput
+}
+
+export type WorkoutUncheckedUpdateWithoutClientGoalWorkoutsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  targetGoals?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  duration?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  difficulty?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  demoMediaUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  types?: Prisma.WorkoutUpdatetypesInput | string[]
+  exercises?: Prisma.WorkoutExerciseUncheckedUpdateManyWithoutWorkoutNestedInput
+  assignments?: Prisma.WorkoutAssignmentUncheckedUpdateManyWithoutWorkoutNestedInput
+  goalWorkouts?: Prisma.GoalWorkoutUncheckedUpdateManyWithoutWorkoutNestedInput
   equipmentUsed?: Prisma.WorkoutEquipmentUncheckedUpdateManyWithoutWorkoutNestedInput
   progressEntries?: Prisma.WorkoutProgressUncheckedUpdateManyWithoutWorkoutNestedInput
   media?: Prisma.WorkoutMediaUncheckedUpdateManyWithoutWorkoutNestedInput
@@ -812,6 +927,7 @@ export type WorkoutCreateWithoutMediaInput = {
   exercises?: Prisma.WorkoutExerciseCreateNestedManyWithoutWorkoutInput
   assignments?: Prisma.WorkoutAssignmentCreateNestedManyWithoutWorkoutInput
   goalWorkouts?: Prisma.GoalWorkoutCreateNestedManyWithoutWorkoutInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutCreateNestedManyWithoutWorkoutInput
   equipmentUsed?: Prisma.WorkoutEquipmentCreateNestedManyWithoutWorkoutInput
   progressEntries?: Prisma.WorkoutProgressCreateNestedManyWithoutWorkoutInput
 }
@@ -829,6 +945,7 @@ export type WorkoutUncheckedCreateWithoutMediaInput = {
   exercises?: Prisma.WorkoutExerciseUncheckedCreateNestedManyWithoutWorkoutInput
   assignments?: Prisma.WorkoutAssignmentUncheckedCreateNestedManyWithoutWorkoutInput
   goalWorkouts?: Prisma.GoalWorkoutUncheckedCreateNestedManyWithoutWorkoutInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUncheckedCreateNestedManyWithoutWorkoutInput
   equipmentUsed?: Prisma.WorkoutEquipmentUncheckedCreateNestedManyWithoutWorkoutInput
   progressEntries?: Prisma.WorkoutProgressUncheckedCreateNestedManyWithoutWorkoutInput
 }
@@ -862,6 +979,7 @@ export type WorkoutUpdateWithoutMediaInput = {
   exercises?: Prisma.WorkoutExerciseUpdateManyWithoutWorkoutNestedInput
   assignments?: Prisma.WorkoutAssignmentUpdateManyWithoutWorkoutNestedInput
   goalWorkouts?: Prisma.GoalWorkoutUpdateManyWithoutWorkoutNestedInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUpdateManyWithoutWorkoutNestedInput
   equipmentUsed?: Prisma.WorkoutEquipmentUpdateManyWithoutWorkoutNestedInput
   progressEntries?: Prisma.WorkoutProgressUpdateManyWithoutWorkoutNestedInput
 }
@@ -879,6 +997,7 @@ export type WorkoutUncheckedUpdateWithoutMediaInput = {
   exercises?: Prisma.WorkoutExerciseUncheckedUpdateManyWithoutWorkoutNestedInput
   assignments?: Prisma.WorkoutAssignmentUncheckedUpdateManyWithoutWorkoutNestedInput
   goalWorkouts?: Prisma.GoalWorkoutUncheckedUpdateManyWithoutWorkoutNestedInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUncheckedUpdateManyWithoutWorkoutNestedInput
   equipmentUsed?: Prisma.WorkoutEquipmentUncheckedUpdateManyWithoutWorkoutNestedInput
   progressEntries?: Prisma.WorkoutProgressUncheckedUpdateManyWithoutWorkoutNestedInput
 }
@@ -895,6 +1014,7 @@ export type WorkoutCreateWithoutExercisesInput = {
   createdBy?: Prisma.CoachProfileCreateNestedOneWithoutCreatedWorkoutsInput
   assignments?: Prisma.WorkoutAssignmentCreateNestedManyWithoutWorkoutInput
   goalWorkouts?: Prisma.GoalWorkoutCreateNestedManyWithoutWorkoutInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutCreateNestedManyWithoutWorkoutInput
   equipmentUsed?: Prisma.WorkoutEquipmentCreateNestedManyWithoutWorkoutInput
   progressEntries?: Prisma.WorkoutProgressCreateNestedManyWithoutWorkoutInput
   media?: Prisma.WorkoutMediaCreateNestedManyWithoutWorkoutInput
@@ -912,6 +1032,7 @@ export type WorkoutUncheckedCreateWithoutExercisesInput = {
   types?: Prisma.WorkoutCreatetypesInput | string[]
   assignments?: Prisma.WorkoutAssignmentUncheckedCreateNestedManyWithoutWorkoutInput
   goalWorkouts?: Prisma.GoalWorkoutUncheckedCreateNestedManyWithoutWorkoutInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUncheckedCreateNestedManyWithoutWorkoutInput
   equipmentUsed?: Prisma.WorkoutEquipmentUncheckedCreateNestedManyWithoutWorkoutInput
   progressEntries?: Prisma.WorkoutProgressUncheckedCreateNestedManyWithoutWorkoutInput
   media?: Prisma.WorkoutMediaUncheckedCreateNestedManyWithoutWorkoutInput
@@ -945,6 +1066,7 @@ export type WorkoutUpdateWithoutExercisesInput = {
   createdBy?: Prisma.CoachProfileUpdateOneWithoutCreatedWorkoutsNestedInput
   assignments?: Prisma.WorkoutAssignmentUpdateManyWithoutWorkoutNestedInput
   goalWorkouts?: Prisma.GoalWorkoutUpdateManyWithoutWorkoutNestedInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUpdateManyWithoutWorkoutNestedInput
   equipmentUsed?: Prisma.WorkoutEquipmentUpdateManyWithoutWorkoutNestedInput
   progressEntries?: Prisma.WorkoutProgressUpdateManyWithoutWorkoutNestedInput
   media?: Prisma.WorkoutMediaUpdateManyWithoutWorkoutNestedInput
@@ -962,6 +1084,7 @@ export type WorkoutUncheckedUpdateWithoutExercisesInput = {
   types?: Prisma.WorkoutUpdatetypesInput | string[]
   assignments?: Prisma.WorkoutAssignmentUncheckedUpdateManyWithoutWorkoutNestedInput
   goalWorkouts?: Prisma.GoalWorkoutUncheckedUpdateManyWithoutWorkoutNestedInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUncheckedUpdateManyWithoutWorkoutNestedInput
   equipmentUsed?: Prisma.WorkoutEquipmentUncheckedUpdateManyWithoutWorkoutNestedInput
   progressEntries?: Prisma.WorkoutProgressUncheckedUpdateManyWithoutWorkoutNestedInput
   media?: Prisma.WorkoutMediaUncheckedUpdateManyWithoutWorkoutNestedInput
@@ -979,6 +1102,7 @@ export type WorkoutCreateWithoutAssignmentsInput = {
   createdBy?: Prisma.CoachProfileCreateNestedOneWithoutCreatedWorkoutsInput
   exercises?: Prisma.WorkoutExerciseCreateNestedManyWithoutWorkoutInput
   goalWorkouts?: Prisma.GoalWorkoutCreateNestedManyWithoutWorkoutInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutCreateNestedManyWithoutWorkoutInput
   equipmentUsed?: Prisma.WorkoutEquipmentCreateNestedManyWithoutWorkoutInput
   progressEntries?: Prisma.WorkoutProgressCreateNestedManyWithoutWorkoutInput
   media?: Prisma.WorkoutMediaCreateNestedManyWithoutWorkoutInput
@@ -996,6 +1120,7 @@ export type WorkoutUncheckedCreateWithoutAssignmentsInput = {
   types?: Prisma.WorkoutCreatetypesInput | string[]
   exercises?: Prisma.WorkoutExerciseUncheckedCreateNestedManyWithoutWorkoutInput
   goalWorkouts?: Prisma.GoalWorkoutUncheckedCreateNestedManyWithoutWorkoutInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUncheckedCreateNestedManyWithoutWorkoutInput
   equipmentUsed?: Prisma.WorkoutEquipmentUncheckedCreateNestedManyWithoutWorkoutInput
   progressEntries?: Prisma.WorkoutProgressUncheckedCreateNestedManyWithoutWorkoutInput
   media?: Prisma.WorkoutMediaUncheckedCreateNestedManyWithoutWorkoutInput
@@ -1029,6 +1154,7 @@ export type WorkoutUpdateWithoutAssignmentsInput = {
   createdBy?: Prisma.CoachProfileUpdateOneWithoutCreatedWorkoutsNestedInput
   exercises?: Prisma.WorkoutExerciseUpdateManyWithoutWorkoutNestedInput
   goalWorkouts?: Prisma.GoalWorkoutUpdateManyWithoutWorkoutNestedInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUpdateManyWithoutWorkoutNestedInput
   equipmentUsed?: Prisma.WorkoutEquipmentUpdateManyWithoutWorkoutNestedInput
   progressEntries?: Prisma.WorkoutProgressUpdateManyWithoutWorkoutNestedInput
   media?: Prisma.WorkoutMediaUpdateManyWithoutWorkoutNestedInput
@@ -1046,6 +1172,7 @@ export type WorkoutUncheckedUpdateWithoutAssignmentsInput = {
   types?: Prisma.WorkoutUpdatetypesInput | string[]
   exercises?: Prisma.WorkoutExerciseUncheckedUpdateManyWithoutWorkoutNestedInput
   goalWorkouts?: Prisma.GoalWorkoutUncheckedUpdateManyWithoutWorkoutNestedInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUncheckedUpdateManyWithoutWorkoutNestedInput
   equipmentUsed?: Prisma.WorkoutEquipmentUncheckedUpdateManyWithoutWorkoutNestedInput
   progressEntries?: Prisma.WorkoutProgressUncheckedUpdateManyWithoutWorkoutNestedInput
   media?: Prisma.WorkoutMediaUncheckedUpdateManyWithoutWorkoutNestedInput
@@ -1064,6 +1191,7 @@ export type WorkoutCreateWithoutProgressEntriesInput = {
   exercises?: Prisma.WorkoutExerciseCreateNestedManyWithoutWorkoutInput
   assignments?: Prisma.WorkoutAssignmentCreateNestedManyWithoutWorkoutInput
   goalWorkouts?: Prisma.GoalWorkoutCreateNestedManyWithoutWorkoutInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutCreateNestedManyWithoutWorkoutInput
   equipmentUsed?: Prisma.WorkoutEquipmentCreateNestedManyWithoutWorkoutInput
   media?: Prisma.WorkoutMediaCreateNestedManyWithoutWorkoutInput
 }
@@ -1081,6 +1209,7 @@ export type WorkoutUncheckedCreateWithoutProgressEntriesInput = {
   exercises?: Prisma.WorkoutExerciseUncheckedCreateNestedManyWithoutWorkoutInput
   assignments?: Prisma.WorkoutAssignmentUncheckedCreateNestedManyWithoutWorkoutInput
   goalWorkouts?: Prisma.GoalWorkoutUncheckedCreateNestedManyWithoutWorkoutInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUncheckedCreateNestedManyWithoutWorkoutInput
   equipmentUsed?: Prisma.WorkoutEquipmentUncheckedCreateNestedManyWithoutWorkoutInput
   media?: Prisma.WorkoutMediaUncheckedCreateNestedManyWithoutWorkoutInput
 }
@@ -1114,6 +1243,7 @@ export type WorkoutUpdateWithoutProgressEntriesInput = {
   exercises?: Prisma.WorkoutExerciseUpdateManyWithoutWorkoutNestedInput
   assignments?: Prisma.WorkoutAssignmentUpdateManyWithoutWorkoutNestedInput
   goalWorkouts?: Prisma.GoalWorkoutUpdateManyWithoutWorkoutNestedInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUpdateManyWithoutWorkoutNestedInput
   equipmentUsed?: Prisma.WorkoutEquipmentUpdateManyWithoutWorkoutNestedInput
   media?: Prisma.WorkoutMediaUpdateManyWithoutWorkoutNestedInput
 }
@@ -1131,6 +1261,7 @@ export type WorkoutUncheckedUpdateWithoutProgressEntriesInput = {
   exercises?: Prisma.WorkoutExerciseUncheckedUpdateManyWithoutWorkoutNestedInput
   assignments?: Prisma.WorkoutAssignmentUncheckedUpdateManyWithoutWorkoutNestedInput
   goalWorkouts?: Prisma.GoalWorkoutUncheckedUpdateManyWithoutWorkoutNestedInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUncheckedUpdateManyWithoutWorkoutNestedInput
   equipmentUsed?: Prisma.WorkoutEquipmentUncheckedUpdateManyWithoutWorkoutNestedInput
   media?: Prisma.WorkoutMediaUncheckedUpdateManyWithoutWorkoutNestedInput
 }
@@ -1148,6 +1279,7 @@ export type WorkoutCreateWithoutEquipmentUsedInput = {
   exercises?: Prisma.WorkoutExerciseCreateNestedManyWithoutWorkoutInput
   assignments?: Prisma.WorkoutAssignmentCreateNestedManyWithoutWorkoutInput
   goalWorkouts?: Prisma.GoalWorkoutCreateNestedManyWithoutWorkoutInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutCreateNestedManyWithoutWorkoutInput
   progressEntries?: Prisma.WorkoutProgressCreateNestedManyWithoutWorkoutInput
   media?: Prisma.WorkoutMediaCreateNestedManyWithoutWorkoutInput
 }
@@ -1165,6 +1297,7 @@ export type WorkoutUncheckedCreateWithoutEquipmentUsedInput = {
   exercises?: Prisma.WorkoutExerciseUncheckedCreateNestedManyWithoutWorkoutInput
   assignments?: Prisma.WorkoutAssignmentUncheckedCreateNestedManyWithoutWorkoutInput
   goalWorkouts?: Prisma.GoalWorkoutUncheckedCreateNestedManyWithoutWorkoutInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUncheckedCreateNestedManyWithoutWorkoutInput
   progressEntries?: Prisma.WorkoutProgressUncheckedCreateNestedManyWithoutWorkoutInput
   media?: Prisma.WorkoutMediaUncheckedCreateNestedManyWithoutWorkoutInput
 }
@@ -1198,6 +1331,7 @@ export type WorkoutUpdateWithoutEquipmentUsedInput = {
   exercises?: Prisma.WorkoutExerciseUpdateManyWithoutWorkoutNestedInput
   assignments?: Prisma.WorkoutAssignmentUpdateManyWithoutWorkoutNestedInput
   goalWorkouts?: Prisma.GoalWorkoutUpdateManyWithoutWorkoutNestedInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUpdateManyWithoutWorkoutNestedInput
   progressEntries?: Prisma.WorkoutProgressUpdateManyWithoutWorkoutNestedInput
   media?: Prisma.WorkoutMediaUpdateManyWithoutWorkoutNestedInput
 }
@@ -1215,6 +1349,7 @@ export type WorkoutUncheckedUpdateWithoutEquipmentUsedInput = {
   exercises?: Prisma.WorkoutExerciseUncheckedUpdateManyWithoutWorkoutNestedInput
   assignments?: Prisma.WorkoutAssignmentUncheckedUpdateManyWithoutWorkoutNestedInput
   goalWorkouts?: Prisma.GoalWorkoutUncheckedUpdateManyWithoutWorkoutNestedInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUncheckedUpdateManyWithoutWorkoutNestedInput
   progressEntries?: Prisma.WorkoutProgressUncheckedUpdateManyWithoutWorkoutNestedInput
   media?: Prisma.WorkoutMediaUncheckedUpdateManyWithoutWorkoutNestedInput
 }
@@ -1242,6 +1377,7 @@ export type WorkoutUpdateWithoutCreatedByInput = {
   exercises?: Prisma.WorkoutExerciseUpdateManyWithoutWorkoutNestedInput
   assignments?: Prisma.WorkoutAssignmentUpdateManyWithoutWorkoutNestedInput
   goalWorkouts?: Prisma.GoalWorkoutUpdateManyWithoutWorkoutNestedInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUpdateManyWithoutWorkoutNestedInput
   equipmentUsed?: Prisma.WorkoutEquipmentUpdateManyWithoutWorkoutNestedInput
   progressEntries?: Prisma.WorkoutProgressUpdateManyWithoutWorkoutNestedInput
   media?: Prisma.WorkoutMediaUpdateManyWithoutWorkoutNestedInput
@@ -1259,6 +1395,7 @@ export type WorkoutUncheckedUpdateWithoutCreatedByInput = {
   exercises?: Prisma.WorkoutExerciseUncheckedUpdateManyWithoutWorkoutNestedInput
   assignments?: Prisma.WorkoutAssignmentUncheckedUpdateManyWithoutWorkoutNestedInput
   goalWorkouts?: Prisma.GoalWorkoutUncheckedUpdateManyWithoutWorkoutNestedInput
+  clientGoalWorkouts?: Prisma.ClientGoalWorkoutUncheckedUpdateManyWithoutWorkoutNestedInput
   equipmentUsed?: Prisma.WorkoutEquipmentUncheckedUpdateManyWithoutWorkoutNestedInput
   progressEntries?: Prisma.WorkoutProgressUncheckedUpdateManyWithoutWorkoutNestedInput
   media?: Prisma.WorkoutMediaUncheckedUpdateManyWithoutWorkoutNestedInput
@@ -1284,6 +1421,7 @@ export type WorkoutCountOutputType = {
   exercises: number
   assignments: number
   goalWorkouts: number
+  clientGoalWorkouts: number
   equipmentUsed: number
   progressEntries: number
   media: number
@@ -1293,6 +1431,7 @@ export type WorkoutCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   exercises?: boolean | WorkoutCountOutputTypeCountExercisesArgs
   assignments?: boolean | WorkoutCountOutputTypeCountAssignmentsArgs
   goalWorkouts?: boolean | WorkoutCountOutputTypeCountGoalWorkoutsArgs
+  clientGoalWorkouts?: boolean | WorkoutCountOutputTypeCountClientGoalWorkoutsArgs
   equipmentUsed?: boolean | WorkoutCountOutputTypeCountEquipmentUsedArgs
   progressEntries?: boolean | WorkoutCountOutputTypeCountProgressEntriesArgs
   media?: boolean | WorkoutCountOutputTypeCountMediaArgs
@@ -1332,6 +1471,13 @@ export type WorkoutCountOutputTypeCountGoalWorkoutsArgs<ExtArgs extends runtime.
 /**
  * WorkoutCountOutputType without action
  */
+export type WorkoutCountOutputTypeCountClientGoalWorkoutsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ClientGoalWorkoutWhereInput
+}
+
+/**
+ * WorkoutCountOutputType without action
+ */
 export type WorkoutCountOutputTypeCountEquipmentUsedArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.WorkoutEquipmentWhereInput
 }
@@ -1365,6 +1511,7 @@ export type WorkoutSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   exercises?: boolean | Prisma.Workout$exercisesArgs<ExtArgs>
   assignments?: boolean | Prisma.Workout$assignmentsArgs<ExtArgs>
   goalWorkouts?: boolean | Prisma.Workout$goalWorkoutsArgs<ExtArgs>
+  clientGoalWorkouts?: boolean | Prisma.Workout$clientGoalWorkoutsArgs<ExtArgs>
   equipmentUsed?: boolean | Prisma.Workout$equipmentUsedArgs<ExtArgs>
   progressEntries?: boolean | Prisma.Workout$progressEntriesArgs<ExtArgs>
   media?: boolean | Prisma.Workout$mediaArgs<ExtArgs>
@@ -1415,6 +1562,7 @@ export type WorkoutInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   exercises?: boolean | Prisma.Workout$exercisesArgs<ExtArgs>
   assignments?: boolean | Prisma.Workout$assignmentsArgs<ExtArgs>
   goalWorkouts?: boolean | Prisma.Workout$goalWorkoutsArgs<ExtArgs>
+  clientGoalWorkouts?: boolean | Prisma.Workout$clientGoalWorkoutsArgs<ExtArgs>
   equipmentUsed?: boolean | Prisma.Workout$equipmentUsedArgs<ExtArgs>
   progressEntries?: boolean | Prisma.Workout$progressEntriesArgs<ExtArgs>
   media?: boolean | Prisma.Workout$mediaArgs<ExtArgs>
@@ -1434,6 +1582,7 @@ export type $WorkoutPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     exercises: Prisma.$WorkoutExercisePayload<ExtArgs>[]
     assignments: Prisma.$WorkoutAssignmentPayload<ExtArgs>[]
     goalWorkouts: Prisma.$GoalWorkoutPayload<ExtArgs>[]
+    clientGoalWorkouts: Prisma.$ClientGoalWorkoutPayload<ExtArgs>[]
     equipmentUsed: Prisma.$WorkoutEquipmentPayload<ExtArgs>[]
     progressEntries: Prisma.$WorkoutProgressPayload<ExtArgs>[]
     media: Prisma.$WorkoutMediaPayload<ExtArgs>[]
@@ -1846,6 +1995,7 @@ export interface Prisma__WorkoutClient<T, Null = never, ExtArgs extends runtime.
   exercises<T extends Prisma.Workout$exercisesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workout$exercisesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkoutExercisePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   assignments<T extends Prisma.Workout$assignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workout$assignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkoutAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   goalWorkouts<T extends Prisma.Workout$goalWorkoutsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workout$goalWorkoutsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GoalWorkoutPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  clientGoalWorkouts<T extends Prisma.Workout$clientGoalWorkoutsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workout$clientGoalWorkoutsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClientGoalWorkoutPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   equipmentUsed<T extends Prisma.Workout$equipmentUsedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workout$equipmentUsedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkoutEquipmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   progressEntries<T extends Prisma.Workout$progressEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workout$progressEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkoutProgressPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   media<T extends Prisma.Workout$mediaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Workout$mediaArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WorkoutMediaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2371,6 +2521,30 @@ export type Workout$goalWorkoutsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.GoalWorkoutScalarFieldEnum | Prisma.GoalWorkoutScalarFieldEnum[]
+}
+
+/**
+ * Workout.clientGoalWorkouts
+ */
+export type Workout$clientGoalWorkoutsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ClientGoalWorkout
+   */
+  select?: Prisma.ClientGoalWorkoutSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ClientGoalWorkout
+   */
+  omit?: Prisma.ClientGoalWorkoutOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ClientGoalWorkoutInclude<ExtArgs> | null
+  where?: Prisma.ClientGoalWorkoutWhereInput
+  orderBy?: Prisma.ClientGoalWorkoutOrderByWithRelationInput | Prisma.ClientGoalWorkoutOrderByWithRelationInput[]
+  cursor?: Prisma.ClientGoalWorkoutWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ClientGoalWorkoutScalarFieldEnum | Prisma.ClientGoalWorkoutScalarFieldEnum[]
 }
 
 /**

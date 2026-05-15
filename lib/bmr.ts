@@ -160,37 +160,101 @@ export function autoMacros(
   };
 }
 
+export type WorkoutPlanRow = {
+  day: string;
+  /** Plan day index (Mon = 1 … Sun = 7) for goal–workout links. */
+  planDay: number;
+  type: string;
+  intensity: string;
+};
+
 export type WorkoutRecommendation = {
   workoutType: string;
   frequency: string;
   intensity: string;
+  weeklyPlan: WorkoutPlanRow[];
 };
+
+const OBESE_WEEKLY_PLAN: WorkoutPlanRow[] = [
+  { day: "Mon", planDay: 1, type: "Low-impact cardio", intensity: "Low" },
+  { day: "Tue", planDay: 2, type: "Strength (machines)", intensity: "Medium" },
+  { day: "Wed", planDay: 3, type: "Mobility / stretch", intensity: "Low" },
+  { day: "Thu", planDay: 4, type: "Low-impact cardio", intensity: "Low" },
+  { day: "Fri", planDay: 5, type: "Strength (machines)", intensity: "Medium" },
+  { day: "Sat", planDay: 6, type: "Walking / light activity", intensity: "Low" },
+  { day: "Sun", planDay: 7, type: "Rest / Recover", intensity: "Low" },
+];
 
 const RECOMMENDATIONS: Record<string, WorkoutRecommendation> = {
   WEIGHT_LOSS: {
     workoutType: "Full Body + HIIT",
     frequency: "4-5 days / week",
     intensity: "High HR zone",
+    weeklyPlan: [
+      { day: "Mon", planDay: 1, type: "Strength", intensity: "Medium" },
+      { day: "Tue", planDay: 2, type: "HIIT", intensity: "High" },
+      { day: "Wed", planDay: 3, type: "Rest / Recover", intensity: "Low" },
+      { day: "Thu", planDay: 4, type: "Strength", intensity: "Medium" },
+      { day: "Fri", planDay: 5, type: "HIIT", intensity: "High" },
+      { day: "Sat", planDay: 6, type: "Cardio (optional)", intensity: "Low" },
+      { day: "Sun", planDay: 7, type: "Rest", intensity: "Low" },
+    ],
   },
   MUSCLE_GAIN: {
     workoutType: "Split Routine (Push / Pull / Legs)",
     frequency: "3-5 days / week",
     intensity: "High resistance, low reps",
+    weeklyPlan: [
+      { day: "Mon", planDay: 1, type: "Push (chest / shoulders)", intensity: "High" },
+      { day: "Tue", planDay: 2, type: "Pull (back / biceps)", intensity: "High" },
+      { day: "Wed", planDay: 3, type: "Legs", intensity: "High" },
+      { day: "Thu", planDay: 4, type: "Push", intensity: "Medium" },
+      { day: "Fri", planDay: 5, type: "Pull", intensity: "Medium" },
+      { day: "Sat", planDay: 6, type: "Active recovery", intensity: "Low" },
+      { day: "Sun", planDay: 7, type: "Rest", intensity: "Low" },
+    ],
   },
   ENDURANCE: {
     workoutType: "Steady-state Cardio + Core",
     frequency: "5+ days / week",
     intensity: "Zone 2 heart rate focus",
+    weeklyPlan: [
+      { day: "Mon", planDay: 1, type: "Zone 2 cardio", intensity: "Medium" },
+      { day: "Tue", planDay: 2, type: "Tempo run / bike", intensity: "High" },
+      { day: "Wed", planDay: 3, type: "Core + mobility", intensity: "Low" },
+      { day: "Thu", planDay: 4, type: "Zone 2 cardio", intensity: "Medium" },
+      { day: "Fri", planDay: 5, type: "Intervals", intensity: "High" },
+      { day: "Sat", planDay: 6, type: "Long steady cardio", intensity: "Medium" },
+      { day: "Sun", planDay: 7, type: "Rest / light walk", intensity: "Low" },
+    ],
   },
   FLEXIBILITY: {
     workoutType: "Yoga + Pilates + Mobility",
     frequency: "Daily or 3-4 days / week",
     intensity: "Low HR, controlled tempo",
+    weeklyPlan: [
+      { day: "Mon", planDay: 1, type: "Yoga flow", intensity: "Low" },
+      { day: "Tue", planDay: 2, type: "Pilates", intensity: "Low" },
+      { day: "Wed", planDay: 3, type: "Mobility", intensity: "Low" },
+      { day: "Thu", planDay: 4, type: "Yoga flow", intensity: "Low" },
+      { day: "Fri", planDay: 5, type: "Pilates", intensity: "Low" },
+      { day: "Sat", planDay: 6, type: "Stretch / restore", intensity: "Low" },
+      { day: "Sun", planDay: 7, type: "Rest", intensity: "Low" },
+    ],
   },
   GENERAL_FITNESS: {
     workoutType: "Mixed: Strength + Cardio",
     frequency: "3-4 days / week",
     intensity: "Moderate",
+    weeklyPlan: [
+      { day: "Mon", planDay: 1, type: "Full-body strength", intensity: "Medium" },
+      { day: "Tue", planDay: 2, type: "Cardio", intensity: "Medium" },
+      { day: "Wed", planDay: 3, type: "Rest", intensity: "Low" },
+      { day: "Thu", planDay: 4, type: "Full-body strength", intensity: "Medium" },
+      { day: "Fri", planDay: 5, type: "Cardio / mobility", intensity: "Low" },
+      { day: "Sat", planDay: 6, type: "Optional activity", intensity: "Low" },
+      { day: "Sun", planDay: 7, type: "Rest", intensity: "Low" },
+    ],
   },
 };
 
@@ -199,6 +263,15 @@ export function goalRecommendation(
 ): WorkoutRecommendation | null {
   if (!goal) return null;
   return RECOMMENDATIONS[goal] ?? null;
+}
+
+/** Weekly day-by-day plan; BMI &gt; 30 uses low-impact schedule per app logic. */
+export function weeklyWorkoutPlan(
+  goal: GoalCategory | string | null | undefined,
+  bmi: number | null | undefined,
+): WorkoutPlanRow[] {
+  if (bmi != null && bmi > 30) return OBESE_WEEKLY_PLAN;
+  return goalRecommendation(goal)?.weeklyPlan ?? [];
 }
 
 /**

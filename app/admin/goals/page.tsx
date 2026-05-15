@@ -27,7 +27,6 @@ type GoalRow = {
   name: string;
   description?: string | null;
   category: string;
-  targetSessions?: number | null;
   goalWorkouts?: GoalWorkoutAssignment[];
 };
 
@@ -44,7 +43,6 @@ export default function AdminGoalsPage() {
     name: "",
     description: "",
     category: "GENERAL_FITNESS",
-    targetSessions: "" as string,
     goalWorkouts: [] as { workoutId: string; planDay: string }[],
   });
   const [workouts, setWorkouts] = React.useState<WorkoutOption[]>([]);
@@ -80,7 +78,6 @@ export default function AdminGoalsPage() {
             name: g.name,
             description: g.description,
             category: g.category,
-            targetSessions: g.targetSessions ?? null,
             goalWorkouts:
               g.goalWorkouts?.map((gw: { id?: string; workoutId?: string; name: string; planDay?: number }) => ({
                 workoutId: gw.id ?? gw.workoutId ?? "",
@@ -127,7 +124,6 @@ export default function AdminGoalsPage() {
       name: "",
       description: "",
       category: "GENERAL_FITNESS",
-      targetSessions: "",
       goalWorkouts: [{ workoutId: "", planDay: "1" }],
     });
     setDialogOpen(true);
@@ -139,7 +135,6 @@ export default function AdminGoalsPage() {
       name: row.name,
       description: row.description ?? "",
       category: row.category,
-      targetSessions: row.targetSessions != null ? String(row.targetSessions) : "",
       goalWorkouts:
         row.goalWorkouts?.length
           ? row.goalWorkouts.map((gw) => ({
@@ -209,7 +204,6 @@ export default function AdminGoalsPage() {
         name: formValues.name,
         description: formValues.description || undefined,
         category: formValues.category,
-        targetSessions: formValues.targetSessions ? Number(formValues.targetSessions) : undefined,
         goalWorkouts: normalizedGoalWorkouts,
       };
 
@@ -250,7 +244,6 @@ export default function AdminGoalsPage() {
                     name: updated.name ?? r.name,
                     description: updated.description ?? r.description,
                     category: updated.category ?? r.category,
-                    targetSessions: updated.targetSessions ?? r.targetSessions,
                     goalWorkouts: goalWorkouts.map((w) => ({
                       workoutId: w.id,
                       name: w.name,
@@ -267,7 +260,6 @@ export default function AdminGoalsPage() {
               name: updated.name ?? "",
               description: updated.description ?? null,
               category: updated.category ?? "",
-              targetSessions: updated.targetSessions ?? null,
               goalWorkouts: goalWorkouts.map((w) => ({
                 workoutId: w.id,
                 name: w.name,
@@ -300,12 +292,6 @@ export default function AdminGoalsPage() {
           .split("_")
           .map((p) => p.charAt(0) + p.slice(1).toLowerCase())
           .join(" "),
-    },
-    {
-      key: "targetSessions",
-      header: "Sessions",
-      render: (row) =>
-        row.targetSessions != null ? String(row.targetSessions) : "—",
     },
     {
       key: "workouts",
@@ -389,7 +375,7 @@ export default function AdminGoalsPage() {
         <div>
           <h1 className="text-lg font-semibold">Workout Goals</h1>
           <p className="text-sm text-muted-foreground">
-            Manage types of workout goals available to clients.
+            Goal templates and weekly workout links. Used by members and by coaches for premium clients.
           </p>
         </div>
         <Button
@@ -400,6 +386,33 @@ export default function AdminGoalsPage() {
           New Goal
         </Button>
       </div>
+
+      <Card className="space-y-2 border border-primary/15 bg-primary/5 p-3 text-[11px] leading-snug text-muted-foreground">
+        <p className="font-semibold text-foreground">How this module fits the app</p>
+        <ul className="list-disc space-y-1.5 pl-4">
+          <li>
+            <strong className="text-foreground">Workout goals (here)</strong> — Admin builds each goal
+            template and links workouts by <strong>plan day</strong> (1 = Mon … 7 = Sun). This is the
+            catalog, not a specific person&apos;s schedule yet.
+          </li>
+          <li>
+            <strong className="text-foreground">Basic / no coach</strong> — After admin assigns a goal to
+            the member (Admin → Client goals), they see these linked workouts under{" "}
+            <strong className="text-foreground">Workouts</strong> and can log progress themselves by plan
+            day.
+          </li>
+          <li>
+            <strong className="text-foreground">Premium with coach</strong> — Members do{" "}
+            <strong className="text-foreground">not</strong> pick goals themselves. The coach assigns a
+            catalog goal in <strong className="text-foreground">Coach → My Clients</strong>; the weekly
+            table and workouts come from what you configure below.
+          </li>
+        </ul>
+        <p className="text-[10px]">
+          Add workouts in Admin → Workouts first, then link them here. Empty plan days show coach
+          recommendations until you add a catalog workout for that day.
+        </p>
+      </Card>
 
       <Card className="p-3">
         <DataTable
@@ -469,28 +482,17 @@ export default function AdminGoalsPage() {
                   <option value="GENERAL_FITNESS">General fitness</option>
                 </select>
               </div>
-              <div className="space-y-1">
-                <label className="font-medium" htmlFor="targetSessions">
-                  Number of sessions (optional)
-                </label>
-                <Input
-                  id="targetSessions"
-                  name="targetSessions"
-                  type="number"
-                  min={1}
-                  className="h-7 text-[11px]"
-                  value={formValues.targetSessions}
-                  onChange={handleFormChange}
-                  placeholder="e.g. 12"
-                />
-                <p className="text-[10px] text-muted-foreground">
-                  Sessions required to complete this goal. Set by admin; clients see this when they add the goal.
+              <div className="space-y-1 rounded-md border border-dashed border-muted-foreground/35 bg-muted/20 p-2">
+                <label className="font-medium">Workouts (weekly plan template)</label>
+                <p className="text-[10px] leading-snug text-muted-foreground">
+                  Link library workouts to each plan day. Same workout can appear on multiple days.
+                  These rows define what <strong className="text-foreground">basic members</strong> see when
+                  that goal is assigned to them, and what <strong className="text-foreground">premium coached</strong>{" "}
+                  clients see after their coach assigns this goal.
                 </p>
-              </div>
-              <div className="space-y-1">
-                <label className="font-medium">Workouts</label>
                 <p className="text-[10px] text-muted-foreground">
-                  Build the plan by day. You can reuse the same workout on multiple days.
+                  Plan day: <span className="font-medium text-foreground">1 = Mon</span>, 2 = Tue, 3 = Wed,
+                  4 = Thu, 5 = Fri, 6 = Sat, 7 = Sun.
                 </p>
                 {workouts.length === 0 ? (
                   <p className="py-2 text-[11px] text-muted-foreground">
@@ -507,7 +509,8 @@ export default function AdminGoalsPage() {
                           className="h-7 text-[11px]"
                           value={row.planDay}
                           onChange={(e) => updateGoalWorkoutRow(index, { planDay: e.target.value })}
-                          placeholder="Day"
+                          placeholder="1–7"
+                          title="Plan day: 1 = Monday, 7 = Sunday"
                         />
                         <select
                           className="h-7 w-full rounded-md border bg-transparent px-2 text-[11px]"

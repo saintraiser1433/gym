@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireClient } from "@/lib/auth";
+import { resolveClientGoalWorkoutLinks } from "@/lib/client-goal-workouts";
 
 function parsePlanDayParam(day: string | null): number | null {
   if (!day?.trim()) return null;
@@ -35,40 +36,60 @@ export async function GET(req: NextRequest) {
 
   const clientGoals = await prisma.clientGoal.findMany({
     where: { clientId: profile.id },
-    select: { goalId: true },
+    select: {
+      id: true,
+      goalId: true,
+      workoutPlanMode: true,
+      goal: { select: { id: true, name: true } },
+    },
   });
-  const goalIds = clientGoals.map((cg) => cg.goalId);
-  if (goalIds.length === 0) {
+  if (clientGoals.length === 0) {
     return NextResponse.json({ data: [] });
   }
 
-  const filterGoalIds = goalId && goalIds.includes(goalId) ? [goalId] : goalIds;
-  const selectedGoalId = goalId && filterGoalIds.length === 1 ? filterGoalIds[0] : null;
-  const goalPlan = selectedGoalId
-    ? await prisma.goalWorkout.findMany({
-        where: { goalId: selectedGoalId },
-        select: { planDay: true },
-      })
-    : [];
+  const filterGoals =
+    goalId && clientGoals.some((cg) => cg.goalId === goalId)
+      ? clientGoals.filter((cg) => cg.goalId === goalId)
+      : clientGoals;
+  const selectedGoalId =
+    goalId && filterGoals.length === 1 && filterGoals[0].goalId === goalId
+      ? goalId
+      : null;
 
   const usePlanDayFilter =
     planDayFilter != null &&
     goalId != null &&
-    filterGoalIds.length === 1 &&
-    filterGoalIds[0] === goalId;
+    filterGoals.length === 1 &&
+    filterGoals[0].goalId === goalId;
 
-  // Use GoalWorkout join table (database has this; no _WorkoutToWorkoutGoal)
-  const links = await prisma.goalWorkout.findMany({
-    where: {
-      goalId: { in: filterGoalIds },
-      ...(usePlanDayFilter ? { planDay: planDayFilter } : {}),
-    },
-    select: { workoutId: true, planDay: true, goal: { select: { id: true, name: true } } },
-  });
-  const workoutIds = [...new Set(links.map((l) => l.workoutId))];
+  const linkRows: {
+    workoutId: string;
+    planDay: number;
+    goal: { id: string; name: string };
+  }[] = [];
+
+  for (const cg of filterGoals) {
+    const resolved = await resolveClientGoalWorkoutLinks({
+      clientGoalId: cg.id,
+      goalId: cg.goalId,
+      workoutPlanMode: cg.workoutPlanMode,
+    });
+    for (const link of resolved) {
+      if (usePlanDayFilter && link.planDay !== planDayFilter) continue;
+      linkRows.push({
+        workoutId: link.workoutId,
+        planDay: link.planDay,
+        goal: cg.goal,
+      });
+    }
+  }
+
+  const workoutIds = [...new Set(linkRows.map((l) => l.workoutId))];
+  const goalPlanDays = linkRows.map((l) => l.planDay);
+
   if (workoutIds.length === 0) {
     const availableDays = selectedGoalId
-      ? [...new Set(goalPlan.map((l) => l.planDay))].sort((a, b) => a - b)
+      ? [...new Set(goalPlanDays)].sort((a, b) => a - b)
       : [];
     return NextResponse.json({
       data: [],
@@ -119,10 +140,11 @@ export async function GET(req: NextRequest) {
     }),
   ]);
 
-  const goalsByWorkoutId = links.reduce(
+  const goalsByWorkoutId = linkRows.reduce(
     (acc, l) => {
       if (!acc[l.workoutId]) acc[l.workoutId] = [];
-      acc[l.workoutId].push(l.goal);
+      const exists = acc[l.workoutId].some((g) => g.id === l.goal.id);
+      if (!exists) acc[l.workoutId].push(l.goal);
       return acc;
     },
     {} as Record<string, { id: string; name: string }[]>,
@@ -166,8 +188,8 @@ export async function GET(req: NextRequest) {
   const planMeta = selectedGoalId
     ? {
         goalId: selectedGoalId,
-        availableDays: [...new Set(goalPlan.map((l) => l.planDay))].sort((a, b) => a - b),
-        maxDay: goalPlan.reduce((max, l) => (l.planDay > max ? l.planDay : max), 1),
+        availableDays: [...new Set(goalPlanDays)].sort((a, b) => a - b),
+        maxDay: goalPlanDays.reduce((max, d) => (d > max ? d : max), 1),
       }
     : null;
 

@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { resolveClientGoalWorkoutLinks } from "@/lib/client-goal-workouts";
 
 /**
  * Recalculates currentValue and status for all active ClientGoals for a client.
@@ -7,13 +8,20 @@ import { prisma } from "@/lib/db";
 export async function recalculateClientGoalProgress(clientId: string): Promise<void> {
   const clientGoals = await prisma.clientGoal.findMany({
     where: { clientId },
-    select: { id: true, goalId: true, targetValue: true, targetSessions: true },
+    select: {
+      id: true,
+      goalId: true,
+      targetValue: true,
+      targetSessions: true,
+      workoutPlanMode: true,
+    },
   });
 
   for (const cg of clientGoals) {
-    const links = await prisma.goalWorkout.findMany({
-      where: { goalId: cg.goalId },
-      select: { workoutId: true, workoutType: true },
+    const links = await resolveClientGoalWorkoutLinks({
+      clientGoalId: cg.id,
+      goalId: cg.goalId,
+      workoutPlanMode: cg.workoutPlanMode,
     });
     const workoutIdsForGoal = links.map((l) => l.workoutId);
     const isKgGoal = links.some((l) => l.workoutType === "PER_KG");

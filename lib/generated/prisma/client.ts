@@ -90,6 +90,11 @@ export type GoalWorkout = Prisma.GoalWorkoutModel
  */
 export type ClientGoal = Prisma.ClientGoalModel
 /**
+ * Model ClientGoalWorkout
+ * 
+ */
+export type ClientGoalWorkout = Prisma.ClientGoalWorkoutModel
+/**
  * Model Exercise
  * 
  */

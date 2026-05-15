@@ -433,6 +433,13 @@ export type EnumGoalStatusFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumGoalStatusFilter<$PrismaModel> | $Enums.GoalStatus
 }
 
+export type EnumClientGoalWorkoutPlanModeFilter<$PrismaModel = never> = {
+  equals?: $Enums.ClientGoalWorkoutPlanMode | Prisma.EnumClientGoalWorkoutPlanModeFieldRefInput<$PrismaModel>
+  in?: $Enums.ClientGoalWorkoutPlanMode[] | Prisma.ListEnumClientGoalWorkoutPlanModeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ClientGoalWorkoutPlanMode[] | Prisma.ListEnumClientGoalWorkoutPlanModeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumClientGoalWorkoutPlanModeFilter<$PrismaModel> | $Enums.ClientGoalWorkoutPlanMode
+}
+
 export type EnumGoalStatusWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.GoalStatus | Prisma.EnumGoalStatusFieldRefInput<$PrismaModel>
   in?: $Enums.GoalStatus[] | Prisma.ListEnumGoalStatusFieldRefInput<$PrismaModel>
@@ -441,6 +448,16 @@ export type EnumGoalStatusWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumGoalStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumGoalStatusFilter<$PrismaModel>
+}
+
+export type EnumClientGoalWorkoutPlanModeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ClientGoalWorkoutPlanMode | Prisma.EnumClientGoalWorkoutPlanModeFieldRefInput<$PrismaModel>
+  in?: $Enums.ClientGoalWorkoutPlanMode[] | Prisma.ListEnumClientGoalWorkoutPlanModeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ClientGoalWorkoutPlanMode[] | Prisma.ListEnumClientGoalWorkoutPlanModeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumClientGoalWorkoutPlanModeWithAggregatesFilter<$PrismaModel> | $Enums.ClientGoalWorkoutPlanMode
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumClientGoalWorkoutPlanModeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumClientGoalWorkoutPlanModeFilter<$PrismaModel>
 }
 
 export type EnumWorkoutMediaTypeFilter<$PrismaModel = never> = {
@@ -945,6 +962,13 @@ export type NestedEnumGoalStatusFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumGoalStatusFilter<$PrismaModel> | $Enums.GoalStatus
 }
 
+export type NestedEnumClientGoalWorkoutPlanModeFilter<$PrismaModel = never> = {
+  equals?: $Enums.ClientGoalWorkoutPlanMode | Prisma.EnumClientGoalWorkoutPlanModeFieldRefInput<$PrismaModel>
+  in?: $Enums.ClientGoalWorkoutPlanMode[] | Prisma.ListEnumClientGoalWorkoutPlanModeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ClientGoalWorkoutPlanMode[] | Prisma.ListEnumClientGoalWorkoutPlanModeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumClientGoalWorkoutPlanModeFilter<$PrismaModel> | $Enums.ClientGoalWorkoutPlanMode
+}
+
 export type NestedEnumGoalStatusWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.GoalStatus | Prisma.EnumGoalStatusFieldRefInput<$PrismaModel>
   in?: $Enums.GoalStatus[] | Prisma.ListEnumGoalStatusFieldRefInput<$PrismaModel>
@@ -953,6 +977,16 @@ export type NestedEnumGoalStatusWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumGoalStatusFilter<$PrismaModel>
   _max?: Prisma.NestedEnumGoalStatusFilter<$PrismaModel>
+}
+
+export type NestedEnumClientGoalWorkoutPlanModeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.ClientGoalWorkoutPlanMode | Prisma.EnumClientGoalWorkoutPlanModeFieldRefInput<$PrismaModel>
+  in?: $Enums.ClientGoalWorkoutPlanMode[] | Prisma.ListEnumClientGoalWorkoutPlanModeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.ClientGoalWorkoutPlanMode[] | Prisma.ListEnumClientGoalWorkoutPlanModeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumClientGoalWorkoutPlanModeWithAggregatesFilter<$PrismaModel> | $Enums.ClientGoalWorkoutPlanMode
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumClientGoalWorkoutPlanModeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumClientGoalWorkoutPlanModeFilter<$PrismaModel>
 }
 
 export type NestedEnumWorkoutMediaTypeFilter<$PrismaModel = never> = {

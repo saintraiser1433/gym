@@ -147,46 +147,68 @@ export async function PATCH(req: Request, { params }: Params) {
 }
 
 export async function GET(_req: Request, { params }: Params) {
-  const { id } = await params;
-  const session = await requireCoach();
-  const userId = (session.user as any).id as string;
+  try {
+    const { id } = await params;
+    const session = await requireCoach();
+    const userId = (session.user as { id?: string }).id as string;
 
-  const coach = await prisma.coachProfile.findUnique({
-    where: { userId },
-    select: { id: true },
-  });
+    const coach = await prisma.coachProfile.findUnique({
+      where: { userId },
+      select: { id: true },
+    });
 
-  if (!coach) {
-    return NextResponse.json(
-      { error: "Coach profile not found" },
-      { status: 404 },
-    );
-  }
+    if (!coach) {
+      return NextResponse.json(
+        { error: "Coach profile not found" },
+        { status: 404 },
+      );
+    }
 
-  const client = await prisma.clientProfile.findFirst({
-    where: { id, assignedCoachId: coach.id },
-    include: {
-      user: true,
-      mealPlan: true,
-      goals: { include: { goal: true }, orderBy: { deadline: "asc" } },
-      workoutAssignments: {
-        include: { workout: { select: { id: true, name: true } } },
-        orderBy: { startDate: "desc" },
+    const client = await prisma.clientProfile.findFirst({
+      where: { id, assignedCoachId: coach.id },
+      include: {
+        user: true,
+        mealPlan: true,
+        goals: {
+          include: {
+            goal: true,
+          customWorkouts: {
+            select: {
+              workoutId: true,
+              planDay: true,
+              intensity: true,
+              workout: { select: { id: true, name: true } },
+            },
+            orderBy: [{ planDay: "asc" }],
+          },
+          },
+          orderBy: { deadline: "asc" },
+        },
+        workoutAssignments: {
+          include: { workout: { select: { id: true, name: true } } },
+          orderBy: { startDate: "desc" },
+        },
+        memberships: {
+          include: { membership: true },
+          orderBy: { startDate: "desc" },
+        },
       },
-      memberships: {
-        include: { membership: true },
-        orderBy: { startDate: "desc" },
-      },
-    },
-  });
+    });
 
-  if (!client) {
-    return NextResponse.json(
-      { error: "Client not found" },
-      { status: 404 },
-    );
+    if (!client) {
+      return NextResponse.json(
+        { error: "Client not found" },
+        { status: 404 },
+      );
+    }
+
+    return NextResponse.json({ data: client });
+  } catch (err) {
+    console.error("[GET /api/coach/clients/[id]]", err);
+    const message = err instanceof Error ? err.message : "Server error";
+    const status =
+      message === "Unauthorized" ? 401 : message === "Forbidden" ? 403 : 500;
+    return NextResponse.json({ error: message }, { status });
   }
-
-  return NextResponse.json({ data: client });
 }
 

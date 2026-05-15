@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { GoalStatus } from "@/lib/generated/prisma/client";
 import { prisma } from "@/lib/db";
 import { requireCoach } from "@/lib/auth";
+import {
+  normalizeCustomWorkoutsForDb,
+  parseCustomWorkouts,
+} from "@/lib/client-goal-workouts";
 
 type Params = { params: Promise<{ id: string; clientGoalId: string }> };
 
@@ -19,7 +23,7 @@ function parseOptionalInt(v: unknown): number | null | undefined {
   return Number.isFinite(n) ? n : undefined;
 }
 
-/** PATCH: coach updates client goal targets (kg/sessions), deadline, status. */
+/** PATCH: coach updates client goal targets, plan mode, custom workouts, deadline, status. */
 export async function PATCH(req: Request, { params }: Params) {
   const { id: clientId, clientGoalId } = await params;
   const session = await requireCoach();
@@ -64,6 +68,7 @@ export async function PATCH(req: Request, { params }: Params) {
     targetSessions?: number | null;
     deadline?: Date | null;
     status?: GoalStatus;
+    workoutPlanMode?: "CATALOG" | "CUSTOM";
   } = {};
 
   if ("targetValue" in body) {
@@ -96,14 +101,57 @@ export async function PATCH(req: Request, { params }: Params) {
     data.status = s;
   }
 
-  if (Object.keys(data).length === 0) {
+  if ("workoutPlanMode" in body) {
+    const mode = body.workoutPlanMode;
+    if (mode !== "CATALOG" && mode !== "CUSTOM") {
+      return NextResponse.json({ error: "Invalid workoutPlanMode" }, { status: 400 });
+    }
+    data.workoutPlanMode = mode;
+  }
+
+  const nextMode = data.workoutPlanMode ?? existing.workoutPlanMode;
+  const replacingCustom = "customWorkouts" in body;
+  const customRows = replacingCustom ? parseCustomWorkouts(body.customWorkouts) : null;
+
+  if (nextMode === "CUSTOM" && replacingCustom && customRows!.length === 0) {
+    return NextResponse.json(
+      { error: "Custom plan requires at least one workout." },
+      { status: 400 },
+    );
+  }
+
+  if (
+    Object.keys(data).length === 0 &&
+    !replacingCustom
+  ) {
     return NextResponse.json({ error: "No updatable fields" }, { status: 400 });
   }
 
-  const updated = await prisma.clientGoal.update({
-    where: { id: clientGoalId },
-    data,
-    include: { goal: true },
+  const updated = await prisma.$transaction(async (tx) => {
+    if (replacingCustom || data.workoutPlanMode === "CATALOG") {
+      await tx.clientGoalWorkout.deleteMany({ where: { clientGoalId } });
+    }
+
+    if (nextMode === "CUSTOM" && replacingCustom && customRows!.length > 0) {
+      await tx.clientGoalWorkout.createMany({
+        data: normalizeCustomWorkoutsForDb(customRows!).map((row) => ({
+          ...row,
+          clientGoalId,
+        })),
+      });
+    }
+
+    return tx.clientGoal.update({
+      where: { id: clientGoalId },
+      data,
+      include: {
+        goal: true,
+        customWorkouts: {
+          include: { workout: { select: { id: true, name: true } } },
+          orderBy: [{ planDay: "asc" }],
+        },
+      },
+    });
   });
 
   return NextResponse.json({ data: updated });

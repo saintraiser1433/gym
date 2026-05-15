@@ -163,19 +163,41 @@ model GoalWorkout {
   @@unique([goalId, workoutId, planDay])
 }
 
-model ClientGoal {
-  id             String      @id @default(cuid())
-  clientId       String
-  goalId         String
-  targetValue    Float?
-  targetSessions Int?        // optional: number of sessions to complete this goal
-  currentValue   Float?
-  deadline       DateTime?
-  status         GoalStatus  @default(ACTIVE)
+enum ClientGoalWorkoutPlanMode {
+  CATALOG
+  CUSTOM
+}
 
-  client ClientProfile @relation(fields: [clientId], references: [id])
-  goal   WorkoutGoal   @relation(fields: [goalId], references: [id])
-  updates ClientGoalUpdate[]
+model ClientGoal {
+  id              String                    @id @default(cuid())
+  clientId        String
+  goalId          String
+  targetValue     Float?
+  targetSessions  Int?        // optional: number of sessions to complete this goal
+  currentValue    Float?
+  deadline        DateTime?
+  status          GoalStatus                @default(ACTIVE)
+  workoutPlanMode ClientGoalWorkoutPlanMode @default(CATALOG)
+
+  client         ClientProfile       @relation(fields: [clientId], references: [id])
+  goal           WorkoutGoal         @relation(fields: [goalId], references: [id])
+  updates        ClientGoalUpdate[]
+  customWorkouts ClientGoalWorkout[]
+}
+
+model ClientGoalWorkout {
+  id           String     @id @default(cuid())
+  clientGoalId String
+  workoutId    String
+  workoutType  WorkoutType
+  targetValue  Float?
+  planDay      Int        @default(1)
+  intensity    String?    // coach-set per client (e.g. Low, Medium, High)
+
+  clientGoal ClientGoal @relation(fields: [clientGoalId], references: [id], onDelete: Cascade)
+  workout    Workout      @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+
+  @@unique([clientGoalId, workoutId, planDay])
 }
 
 model Exercise {
@@ -206,7 +228,8 @@ model Workout {
   createdBy    CoachProfile?       @relation(fields: [createdById], references: [id])
   exercises    WorkoutExercise[]
   assignments  WorkoutAssignment[]
-  goalWorkouts GoalWorkout[]
+  goalWorkouts      GoalWorkout[]
+  clientGoalWorkouts ClientGoalWorkout[]
   equipmentUsed WorkoutEquipment[]
   progressEntries WorkoutProgress[]
   media          WorkoutMedia[]

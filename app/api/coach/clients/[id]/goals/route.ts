@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireCoach } from "@/lib/auth";
+import {
+  normalizeCustomWorkoutsForDb,
+  parseCustomWorkouts,
+} from "@/lib/client-goal-workouts";
 
 type Params = { params: Promise<{ id: string }> };
 
@@ -33,6 +37,8 @@ export async function POST(req: Request, { params }: Params) {
     targetValue?: number | null;
     targetSessions?: number | null;
     deadline?: string | null;
+    workoutPlanMode?: string;
+    customWorkouts?: unknown;
   };
   try {
     body = await req.json();
@@ -42,6 +48,16 @@ export async function POST(req: Request, { params }: Params) {
 
   if (!body.goalId || typeof body.goalId !== "string") {
     return NextResponse.json({ error: "goalId is required" }, { status: 400 });
+  }
+
+  const workoutPlanMode =
+    body.workoutPlanMode === "CUSTOM" ? "CUSTOM" : ("CATALOG" as const);
+  const customRows = parseCustomWorkouts(body.customWorkouts);
+  if (workoutPlanMode === "CUSTOM" && customRows.length === 0) {
+    return NextResponse.json(
+      { error: "Add at least one workout for a custom plan, or use catalog defaults." },
+      { status: 400 },
+    );
   }
 
   const goalRecord = await prisma.workoutGoal.findUnique({
@@ -87,8 +103,22 @@ export async function POST(req: Request, { params }: Params) {
       targetValue: isSessionStyle ? null : resolvedTargetValue,
       targetSessions: isSessionStyle ? resolvedTargetSessions : null,
       deadline,
+      workoutPlanMode,
+      ...(workoutPlanMode === "CUSTOM"
+        ? {
+            customWorkouts: {
+              create: normalizeCustomWorkoutsForDb(customRows),
+            },
+          }
+        : {}),
     },
-    include: { goal: { select: { name: true, category: true } } },
+    include: {
+      goal: { select: { name: true, category: true } },
+      customWorkouts: {
+        include: { workout: { select: { id: true, name: true } } },
+        orderBy: [{ planDay: "asc" }],
+      },
+    },
   });
 
   return NextResponse.json({ data: created }, { status: 201 });
