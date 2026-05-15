@@ -711,21 +711,55 @@ export default function CoachClientsPage() {
     return Math.max(25, Math.round((cal / 1000) * 14));
   }, [profileDraft.dailyCalorieTarget]);
 
+  const applyMacroValues = React.useCallback(
+    (macros: NonNullable<ReturnType<typeof autoMacros>>) => {
+      setProfileDraft((p) => {
+        const nextCal = String(macros.calories);
+        const nextP = String(macros.proteinG);
+        const nextC = String(macros.carbsG);
+        const nextF = String(macros.fatG);
+        if (
+          p.dailyCalorieTarget === nextCal &&
+          p.dailyProteinGrams === nextP &&
+          p.dailyCarbsGrams === nextC &&
+          p.dailyFatGrams === nextF
+        ) {
+          return p;
+        }
+        return {
+          ...p,
+          dailyCalorieTarget: nextCal,
+          dailyProteinGrams: nextP,
+          dailyCarbsGrams: nextC,
+          dailyFatGrams: nextF,
+        };
+      });
+    },
+    [],
+  );
+
   const applyAutoMacros = React.useCallback(() => {
     const macros = autoMacros(goalForMacros, bmrDerived.weight, bmrDerived.tdee);
     if (!macros) {
       toast.error("Set weight, height, date of birth, gender, activity level, and assign a catalog goal first.");
       return;
     }
-    setProfileDraft((p) => ({
-      ...p,
-      dailyCalorieTarget: String(macros.calories),
-      dailyProteinGrams: String(macros.proteinG),
-      dailyCarbsGrams: String(macros.carbsG),
-      dailyFatGrams: String(macros.fatG),
-    }));
-    toast.success("Auto-filled macros from BMR / goal.");
-  }, [goalForMacros, bmrDerived.weight, bmrDerived.tdee]);
+    applyMacroValues(macros);
+    toast.success("Recalculated macros from BMR / goal.");
+  }, [goalForMacros, bmrDerived.weight, bmrDerived.tdee, applyMacroValues]);
+
+  React.useEffect(() => {
+    if (!detailOpen) return;
+    const macros = autoMacros(goalForMacros, bmrDerived.weight, bmrDerived.tdee);
+    if (!macros) return;
+    applyMacroValues(macros);
+  }, [
+    detailOpen,
+    goalForMacros,
+    bmrDerived.weight,
+    bmrDerived.tdee,
+    applyMacroValues,
+  ]);
 
   const saveProfile = React.useCallback(async () => {
     if (!clientId) return;

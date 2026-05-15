@@ -284,6 +284,9 @@ export function ClientGoalPlanForm({
             <span className="text-[11px] text-muted-foreground">g</span>
           </div>
         </div>
+        <p className="text-[10px] text-muted-foreground">
+          Calories and macros update automatically when weight, activity, or goal changes. Fiber follows daily calories.
+        </p>
         <Button
           type="button"
           size="sm"
@@ -293,7 +296,7 @@ export function ClientGoalPlanForm({
           disabled={bmrDerived.tdee == null || bmrDerived.weight == null || !goalForMacros}
         >
           <Sparkles className="h-3 w-3 text-orange-500" />
-          Auto-fill macros from goal
+          Recalculate macros
         </Button>
       </div>
 
