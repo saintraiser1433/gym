@@ -4,12 +4,13 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { ACTIVITY_LEVELS, type WorkoutRecommendation } from "@/lib/bmr";
+import { ACTIVITY_LEVELS, dobFromAge, type WorkoutRecommendation } from "@/lib/bmr";
 import type { WeeklyPlanRow, WeeklyPlanResult } from "@/lib/weekly-plan";
 import { Flame, Sparkles } from "lucide-react";
 
 export type GoalPlanProfileDraft = {
   userName: string;
+  dateOfBirth: string;
   weight: string;
   height: string;
   gender: string;
@@ -34,13 +35,13 @@ type BmrDerived = {
 type ClientGoalPlanFormProps = {
   profileDraft: GoalPlanProfileDraft;
   updateProfile: (patch: Partial<GoalPlanProfileDraft>) => void;
-  contactFieldsUnlocked: boolean;
   bmrDerived: BmrDerived;
   goalForMacros: string | null;
   weeklyPlan: WeeklyPlanRow[];
   weeklyPlanLoading: boolean;
   weeklyPlanSource: WeeklyPlanResult["source"];
   weeklyPlanGoalName: string | null;
+  weeklyPlanMode?: "CATALOG" | "CUSTOM" | null;
   assignedGoals: { goalId: string; name: string }[];
   planGoalId: string;
   onPlanGoalChange: (goalId: string) => void;
@@ -58,13 +59,13 @@ const fieldInput = "h-7 text-[11px]";
 export function ClientGoalPlanForm({
   profileDraft,
   updateProfile,
-  contactFieldsUnlocked,
   bmrDerived,
   goalForMacros,
   weeklyPlan,
   weeklyPlanLoading,
   weeklyPlanSource,
   weeklyPlanGoalName,
+  weeklyPlanMode,
   assignedGoals,
   planGoalId,
   onPlanGoalChange,
@@ -86,9 +87,7 @@ export function ClientGoalPlanForm({
           <div className="space-y-1">
             <label className={fieldLabel}>Name</label>
             <Input
-              className={cn(fieldInput, !contactFieldsUnlocked && "cursor-not-allowed bg-muted/50")}
-              readOnly={!contactFieldsUnlocked}
-              aria-readonly={!contactFieldsUnlocked}
+              className={fieldInput}
               value={profileDraft.userName}
               onChange={(e) => updateProfile({ userName: e.target.value })}
             />
@@ -96,11 +95,23 @@ export function ClientGoalPlanForm({
           <div className="space-y-1">
             <label className={fieldLabel}>Age</label>
             <Input
-              readOnly
-              aria-readonly
-              tabIndex={-1}
-              className={cn(fieldInput, "cursor-default bg-muted/50 text-muted-foreground")}
-              value={bmrDerived.age != null ? String(bmrDerived.age) : "—"}
+              type="number"
+              min={0}
+              max={120}
+              className={fieldInput}
+              placeholder="—"
+              value={bmrDerived.age != null ? String(bmrDerived.age) : ""}
+              onChange={(e) => {
+                const raw = e.target.value.trim();
+                if (raw === "") {
+                  updateProfile({ dateOfBirth: "" });
+                  return;
+                }
+                const n = parseInt(raw, 10);
+                if (Number.isFinite(n) && n >= 0 && n <= 120) {
+                  updateProfile({ dateOfBirth: dobFromAge(n) });
+                }
+              }}
             />
           </div>
           <div className="space-y-1">
@@ -116,13 +127,15 @@ export function ClientGoalPlanForm({
           </div>
           <div className="space-y-1">
             <label className={fieldLabel}>Gender</label>
-            <Input
-              readOnly
-              aria-readonly
-              tabIndex={-1}
-              className={cn(fieldInput, "cursor-default bg-muted/50 text-muted-foreground")}
-              value={profileDraft.gender || "—"}
-            />
+            <select
+              className={cn(fieldInput, "flex h-7 w-full rounded-md border border-input bg-transparent px-2")}
+              value={profileDraft.gender}
+              onChange={(e) => updateProfile({ gender: e.target.value })}
+            >
+              <option value="">—</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
           </div>
           <div className="space-y-1 sm:col-span-2">
             <label className={fieldLabel}>Weight (kg)</label>
@@ -138,7 +151,7 @@ export function ClientGoalPlanForm({
           <div className="space-y-1 sm:col-span-2">
             <div className="flex flex-wrap items-end gap-2">
               <div className="min-w-0 flex-1 space-y-1">
-                <label className={fieldLabel}>Goal</label>
+                <label className={fieldLabel}>Workout</label>
                 <select
                   className="flex h-7 w-full rounded-md border border-input bg-transparent px-2 text-[11px] disabled:cursor-not-allowed disabled:opacity-60"
                   value={planGoalId}
@@ -146,7 +159,7 @@ export function ClientGoalPlanForm({
                   disabled={assignedGoals.length === 0}
                 >
                   {assignedGoals.length === 0 ? (
-                    <option value="">No catalog goal assigned</option>
+                    <option value="">Select workout</option>
                   ) : (
                     assignedGoals.map((g) => (
                       <option key={g.goalId} value={g.goalId}>
@@ -157,7 +170,7 @@ export function ClientGoalPlanForm({
                 </select>
                 {assignedGoals.length === 0 && (
                   <p className="text-[10px] text-muted-foreground">
-                    Assign a goal from Admin → Workout goals in the Goals section below.
+                    Assign workout goals in the Goals section below.
                   </p>
                 )}
               </div>
@@ -305,7 +318,12 @@ export function ClientGoalPlanForm({
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-[11px] font-semibold text-foreground">Workout plan</p>
           <div className="flex flex-wrap items-center gap-2 text-[10px] text-muted-foreground">
-            {weeklyPlanSource === "catalog" && (
+            {weeklyPlanMode === "CUSTOM" && (
+              <span className="rounded bg-violet-100 px-1.5 py-0.5 font-medium text-violet-900 dark:bg-violet-900/40 dark:text-violet-200">
+                Custom plan
+              </span>
+            )}
+            {weeklyPlanMode !== "CUSTOM" && weeklyPlanSource === "catalog" && (
               <span className="rounded bg-green-100 px-1.5 py-0.5 font-medium text-green-800 dark:bg-green-900/40 dark:text-green-300">
                 From catalog
               </span>

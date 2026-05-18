@@ -100,6 +100,65 @@ const formatCategory = (c: string) =>
         .join(" ")
     : "";
 
+type RawClientGoal = {
+  id: string;
+  goalId: string;
+  goal?: { name?: string; category?: string };
+  targetValue?: number | null;
+  targetSessions?: number | null;
+  currentValue?: number | null;
+  deadline?: string | null;
+  status?: string;
+  workoutPlanMode?: "CATALOG" | "CUSTOM";
+  customWorkouts?: {
+    workoutId: string;
+    planDay: number;
+    intensity?: string | null;
+    workout?: { id: string; name: string };
+  }[];
+};
+
+function mapRawClientGoal(g: RawClientGoal): ClientGoal {
+  return {
+    id: g.id,
+    goalId: g.goalId,
+    goal: {
+      name: g.goal?.name ?? "—",
+      category: g.goal?.category ?? "",
+    },
+    targetValue: g.targetValue,
+    targetSessions: g.targetSessions,
+    currentValue: g.currentValue,
+    deadline: g.deadline,
+    status: g.status ?? "ACTIVE",
+    workoutPlanMode: g.workoutPlanMode === "CUSTOM" ? "CUSTOM" : "CATALOG",
+    customWorkouts:
+      g.customWorkouts?.map((cw) => ({
+        workoutId: cw.workoutId,
+        planDay: cw.planDay,
+        intensity: cw.intensity ?? null,
+        workout: cw.workout,
+      })) ?? [],
+  };
+}
+
+function buildGoalPlanEdit(g: ClientGoal): {
+  mode: "CATALOG" | "CUSTOM";
+  rows: WorkoutPlanRow[];
+} {
+  return {
+    mode: g.workoutPlanMode === "CUSTOM" ? "CUSTOM" : "CATALOG",
+    rows:
+      g.customWorkouts && g.customWorkouts.length > 0
+        ? g.customWorkouts.map((cw) => ({
+            workoutId: cw.workoutId,
+            planDay: String(cw.planDay),
+            intensity: cw.intensity?.trim() || "Medium",
+          }))
+        : [{ workoutId: "", planDay: "1", intensity: "Medium" }],
+  };
+}
+
 const formatSeconds = (seconds: number) => {
   if (!Number.isFinite(seconds) || seconds <= 0) return "0s";
   const mins = Math.floor(seconds / 60);
@@ -235,7 +294,8 @@ export default function CoachClientsPage() {
     source: WeeklyPlanResult["source"];
     goalId: string | null;
     goalName: string | null;
-  }>({ source: "recommended", goalId: null, goalName: null });
+    planMode: "CATALOG" | "CUSTOM" | null;
+  }>({ source: "recommended", goalId: null, goalName: null, planMode: null });
   const [weeklyPlanLoading, setWeeklyPlanLoading] = React.useState(false);
   const [planGoalId, setPlanGoalId] = React.useState("");
 
@@ -341,61 +401,12 @@ export default function CoachClientsPage() {
               : "",
           workoutScheduleNotes: d.workoutScheduleNotes ?? "",
         });
-        const rawGoals = (d.goals ?? []) as {
-          id: string;
-          goalId: string;
-          goal?: { name?: string; category?: string };
-          targetValue?: number | null;
-          targetSessions?: number | null;
-          currentValue?: number | null;
-          deadline?: string | null;
-          status?: string;
-          workoutPlanMode?: "CATALOG" | "CUSTOM";
-          customWorkouts?: {
-            workoutId: string;
-            planDay: number;
-            intensity?: string | null;
-            workout?: { id: string; name: string };
-          }[];
-        }[];
-        const mappedGoals = rawGoals.map((g) => ({
-          id: g.id,
-          goalId: g.goalId,
-          goal: {
-            name: g.goal?.name ?? "—",
-            category: g.goal?.category ?? "",
-          },
-          targetValue: g.targetValue,
-          targetSessions: g.targetSessions,
-          currentValue: g.currentValue,
-          deadline: g.deadline,
-          status: g.status ?? "ACTIVE",
-          workoutPlanMode: g.workoutPlanMode ?? "CATALOG",
-          customWorkouts:
-            g.customWorkouts?.map((cw) => ({
-              workoutId: cw.workoutId,
-              planDay: cw.planDay,
-              intensity: cw.intensity ?? null,
-              workout: cw.workout,
-            })) ?? [],
-        }));
+        const rawGoals = (d.goals ?? []) as RawClientGoal[];
+        const mappedGoals = rawGoals.map(mapRawClientGoal);
         setGoals(mappedGoals);
-        const planEdits: Record<string, { mode: "CATALOG" | "CUSTOM"; rows: WorkoutPlanRow[] }> =
-          {};
-        for (const g of mappedGoals) {
-          planEdits[g.id] = {
-            mode: g.workoutPlanMode ?? "CATALOG",
-            rows:
-              g.customWorkouts && g.customWorkouts.length > 0
-                ? g.customWorkouts.map((cw) => ({
-                    workoutId: cw.workoutId,
-                    planDay: String(cw.planDay),
-                    intensity: cw.intensity?.trim() || "Medium",
-                  }))
-                : [{ workoutId: "", planDay: "1", intensity: "Medium" }],
-          };
-        }
-        setGoalPlanEdits(planEdits);
+        setGoalPlanEdits(
+          Object.fromEntries(mappedGoals.map((g) => [g.id, buildGoalPlanEdit(g)])),
+        );
         const ge: Record<string, { target: string; deadline: string }> = {};
         for (const g of rawGoals) {
           const isSessionGoal = g.targetSessions != null;
@@ -520,7 +531,7 @@ export default function CoachClientsPage() {
       setGoalPlanEdits({});
       setPlanGoalId("");
       setWeeklyPlan([]);
-      setWeeklyPlanMeta({ source: "recommended", goalId: null, goalName: null });
+      setWeeklyPlanMeta({ source: "recommended", goalId: null, goalName: null, planMode: null });
       await loadClientDetail(id);
       await Promise.all([
         loadWorkouts(id),
@@ -567,7 +578,6 @@ export default function CoachClientsPage() {
       const b = contactBaselineRef.current;
       setProfileDraft((p) => ({
         ...p,
-        userName: b.userName,
         userPhone: b.userPhone,
       }));
       setContactFieldsUnlocked(false);
@@ -655,10 +665,11 @@ export default function CoachClientsPage() {
           source: data?.source ?? "recommended",
           goalId: data?.goalId ?? null,
           goalName: data?.goalName ?? null,
+          planMode: data?.planMode ?? null,
         });
       } catch {
         setWeeklyPlan([]);
-        setWeeklyPlanMeta({ source: "recommended", goalId: null, goalName: null });
+        setWeeklyPlanMeta({ source: "recommended", goalId: null, goalName: null, planMode: null });
       } finally {
         setWeeklyPlanLoading(false);
       }
@@ -674,6 +685,21 @@ export default function CoachClientsPage() {
       if (defaultId) setPlanGoalId(defaultId);
     }
   }, [clientId, detailOpen, goals, planGoalId]);
+
+  React.useEffect(() => {
+    if (goals.length === 0) return;
+    setGoalPlanEdits((prev) => {
+      let changed = false;
+      const next = { ...prev };
+      for (const g of goals) {
+        if (!next[g.id]) {
+          next[g.id] = buildGoalPlanEdit(g);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [goals]);
 
   React.useEffect(() => {
     const cat = activeAssignedGoal?.goal?.category;
@@ -775,6 +801,8 @@ export default function CoachClientsPage() {
           },
           weight: profileDraft.weight === "" ? null : parseFloat(profileDraft.weight),
           height: profileDraft.height === "" ? null : parseFloat(profileDraft.height),
+          dateOfBirth: profileDraft.dateOfBirth || null,
+          gender: profileDraft.gender || null,
           nutritionObjective: profileDraft.nutritionObjective || null,
           activityLevel: profileDraft.activityLevel || null,
           dailyCalorieTarget:
@@ -935,7 +963,16 @@ export default function CoachClientsPage() {
           toast.error(json?.error ?? "Could not add goal");
           return;
         }
-        toast.success("Goal assigned");
+        const created = json.data as RawClientGoal | undefined;
+        if (created?.id) {
+          const mapped = mapRawClientGoal(created);
+          setGoals((prev) => {
+            const without = prev.filter((r) => r.goalId !== mapped.goalId);
+            return [...without, mapped];
+          });
+          setGoalPlanEdits((prev) => ({ ...prev, [mapped.id]: buildGoalPlanEdit(mapped) }));
+        }
+        toast.success("Workout goal assigned");
         setNewCoachGoalId("");
         setNewCoachTarget("");
         setNewCoachDeadline("");
@@ -997,6 +1034,12 @@ export default function CoachClientsPage() {
         if (!res.ok) {
           toast.error(json?.error ?? "Could not save workout plan");
           return;
+        }
+        const updated = json.data as RawClientGoal | undefined;
+        if (updated?.id) {
+          const mapped = mapRawClientGoal(updated);
+          setGoals((prev) => prev.map((r) => (r.id === mapped.id ? mapped : r)));
+          setGoalPlanEdits((prev) => ({ ...prev, [mapped.id]: buildGoalPlanEdit(mapped) }));
         }
         toast.success("Workout plan updated");
         await loadClientDetail(clientId);
@@ -1195,6 +1238,7 @@ export default function CoachClientsPage() {
                       <ClientGoalPlanForm
                         profileDraft={{
                           userName: profileDraft.userName,
+                          dateOfBirth: profileDraft.dateOfBirth,
                           weight: profileDraft.weight,
                           height: profileDraft.height,
                           gender: profileDraft.gender,
@@ -1209,13 +1253,13 @@ export default function CoachClientsPage() {
                         updateProfile={(patch) =>
                           setProfileDraft((p) => ({ ...p, ...patch }))
                         }
-                        contactFieldsUnlocked={contactFieldsUnlocked}
                         bmrDerived={bmrDerived}
                         goalForMacros={goalForMacros}
                         weeklyPlan={weeklyPlan}
                         weeklyPlanLoading={weeklyPlanLoading}
                         weeklyPlanSource={weeklyPlanMeta.source}
                         weeklyPlanGoalName={weeklyPlanMeta.goalName}
+                        weeklyPlanMode={weeklyPlanMeta.planMode}
                         assignedGoals={goals.map((g) => ({
                           goalId: g.goalId,
                           name: g.goal.name,
@@ -1232,8 +1276,8 @@ export default function CoachClientsPage() {
                       <div className="space-y-2 rounded-md border border-dashed border-muted-foreground/30 bg-muted/15 p-2">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <p className="text-[10px] leading-snug text-muted-foreground">
-                            Name is in the goal plan above. Phone is the client&apos;s account detail.
-                            {contactFieldsUnlocked ? " Lock to cancel unsaved edits." : " Unlock to edit phone."}
+                            Phone is the client&apos;s account detail.
+                            {contactFieldsUnlocked ? " Lock to cancel unsaved edits." : " Unlock to edit."}
                           </p>
                           <Button
                             type="button"
@@ -1250,7 +1294,7 @@ export default function CoachClientsPage() {
                             ) : (
                               <>
                                 <Unlock className="h-3.5 w-3.5" aria-hidden />
-                                Edit name &amp; phone
+                                Edit phone
                               </>
                             )}
                           </Button>
@@ -1288,17 +1332,17 @@ export default function CoachClientsPage() {
                       Goals
                     </h3>
                     <Card className="space-y-3 p-3 text-[11px]">
-                      <h4 className="text-xs font-semibold">Assign a goal</h4>
+                      <h4 className="text-xs font-semibold">Assign workout goals</h4>
                       <form onSubmit={submitNewCoachGoal} className="space-y-3">
                       <div className="grid gap-2 sm:grid-cols-3">
                         <div className="space-y-1 sm:col-span-1">
-                          <label className="font-medium">Goal</label>
+                          <label className="font-medium">Workout</label>
                           <select
                             className="flex h-7 w-full rounded-md border border-input bg-transparent px-2 text-[11px]"
                             value={newCoachGoalId}
                             onChange={(e) => setNewCoachGoalId(e.target.value)}
                           >
-                            <option value="">Select goal</option>
+                            <option value="">Select workout</option>
                             {catalogGoals.map((cg) => (
                               <option key={cg.id} value={cg.id}>
                                 {cg.name} ({formatCategory(cg.category)})
@@ -1389,10 +1433,7 @@ export default function CoachClientsPage() {
                           const isOverdue = daysLeft != null && daysLeft < 0;
                           const catalogDefaults =
                             catalogGoals.find((c) => c.id === g.goalId)?.defaultWorkouts ?? [];
-                          const planEdit = goalPlanEdits[g.id] ?? {
-                            mode: (g.workoutPlanMode ?? "CATALOG") as "CATALOG" | "CUSTOM",
-                            rows: [{ workoutId: "", planDay: "1" }],
-                          };
+                          const planEdit = goalPlanEdits[g.id] ?? buildGoalPlanEdit(g);
                           return (
                             <Card key={g.id} className="p-3 text-xs">
                               <div className="flex items-center justify-between gap-2">

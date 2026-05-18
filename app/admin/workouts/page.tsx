@@ -188,22 +188,7 @@ export default function AdminWorkoutsPage() {
     void fetchEquipment();
   }, [fetchEquipment]);
 
-  const openNewDialog = () => {
-    setEditingRow(null);
-    setFormValues({
-      name: "",
-      description: "",
-      duration: "",
-      difficulty: "",
-    });
-    setMediaEntries([emptyMediaEntry()]);
-    setEquipmentEntries({});
-    setDialogOpen(true);
-    void fetchEquipment();
-  };
-
-  const openEditDialog = (row: WorkoutRow) => {
-    setEditingRow(row);
+  const applyWorkoutToForm = React.useCallback((row: WorkoutRow) => {
     setFormValues({
       name: row.name,
       description: row.description ?? "",
@@ -224,7 +209,7 @@ export default function AdminWorkoutsPage() {
               url: row.demoMediaUrl,
               stepName: "",
               description: "",
-              mediaType: row.demoMediaUrl.toLowerCase().endsWith(".gif") ? "GIF" : "VIDEO",
+              mediaType: row.demoMediaUrl.toLowerCase().endsWith(".gif") ? "GIF" as const : "VIDEO" as const,
               ...secondsToMediaEntryTime((row.duration ?? 1) * 60),
             }]
           : [emptyMediaEntry()];
@@ -238,8 +223,42 @@ export default function AdminWorkoutsPage() {
       };
     });
     setEquipmentEntries(entries);
+  }, []);
+
+  const openNewDialog = () => {
+    setEditingRow(null);
+    setFormValues({
+      name: "",
+      description: "",
+      duration: "",
+      difficulty: "",
+    });
+    setMediaEntries([emptyMediaEntry()]);
+    setEquipmentEntries({});
     setDialogOpen(true);
     void fetchEquipment();
+  };
+
+  const openEditDialog = (row: WorkoutRow) => {
+    setEditingRow(row);
+    applyWorkoutToForm(row);
+    setDialogOpen(true);
+    void fetchEquipment();
+    void (async () => {
+      try {
+        const res = await fetch(`/api/admin/workouts/${row.id}`, {
+          cache: "no-store",
+          credentials: "include",
+        });
+        const json = (await res.json().catch(() => null)) as WorkoutRow | { error?: string } | null;
+        if (!res.ok || !json || "error" in json) return;
+        const fresh: WorkoutRow = { ...row, ...json, goals: row.goals };
+        setEditingRow(fresh);
+        applyWorkoutToForm(fresh);
+      } catch {
+        // Keep the list row data if detail fetch fails.
+      }
+    })();
   };
 
   const setEquipmentChecked = (equipmentId: string, checked: boolean) => {
@@ -346,7 +365,17 @@ export default function AdminWorkoutsPage() {
         }))
         .filter((m) => m.url.length > 0);
       if (mediaPayload.length > 0 && mediaPayload.some((m) => !Number.isFinite(m.durationSeconds) || m.durationSeconds <= 0)) {
-        toast.error("Each GIF/media item must have a duration in seconds greater than 0");
+        toast.error("Each perform step needs a step time greater than 0 seconds.");
+        return;
+      }
+      if (mediaEntries.some((entry) => {
+        const hasText =
+          entry.stepName.trim().length > 0 ||
+          entry.description.trim().length > 0 ||
+          mediaEntryToTotalSeconds(entry) > 0;
+        return hasText && !entry.url.trim();
+      })) {
+        toast.error("Upload a GIF or video for each perform step you add.");
         return;
       }
       const payload = {
@@ -367,7 +396,7 @@ export default function AdminWorkoutsPage() {
         body: JSON.stringify(payload),
       });
       const text = await res.text();
-      let json: { error?: string } | null = null;
+      let json: (WorkoutRow & { error?: string }) | null = null;
       if (text) {
         try {
           json = JSON.parse(text);
@@ -379,10 +408,25 @@ export default function AdminWorkoutsPage() {
         toast.error(json?.error ?? (editingRow ? "Failed to update workout" : "Failed to create workout"));
         return;
       }
+      const wasEditing = Boolean(editingRow);
+      if (json?.id && wasEditing) {
+        setRows((prev) =>
+          prev.map((r) =>
+            r.id === json!.id
+              ? {
+                  ...r,
+                  ...json!,
+                  goals: r.goals,
+                }
+              : r,
+          ),
+        );
+      } else {
+        await fetchData();
+      }
       setDialogOpen(false);
       setEditingRow(null);
-      await fetchData();
-      toast.success(editingRow ? "Workout updated" : "Workout created");
+      toast.success(wasEditing ? "Workout updated" : "Workout created");
     } finally {
       setSaving(false);
     }

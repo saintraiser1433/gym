@@ -14,6 +14,7 @@ export type WeeklyPlanResult = {
   source: "catalog" | "recommended" | "mixed";
   goalId: string | null;
   goalName: string | null;
+  planMode?: "CATALOG" | "CUSTOM" | null;
   rows: WeeklyPlanRow[];
 };
 

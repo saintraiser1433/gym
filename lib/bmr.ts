@@ -82,6 +82,13 @@ export function ageFromDob(dob: string | Date | null | undefined): number | null
   return age >= 0 ? age : null;
 }
 
+/** Approximate DOB (Jan 1) for a given age — used when coaches edit age in the goal plan. */
+export function dobFromAge(age: number): string {
+  const clamped = Math.min(120, Math.max(0, Math.round(age)));
+  const year = new Date().getFullYear() - clamped;
+  return `${year}-01-01`;
+}
+
 export type Macros = {
   calories: number;
   proteinG: number;

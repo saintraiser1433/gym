@@ -215,17 +215,19 @@ export async function POST(req: NextRequest) {
     });
 
     if (mediaList.length > 0) {
-      await prisma.workoutMedia.createMany({
-        data: mediaList.map((m: { url: string; stepName: string | null; description: string | null; mediaType: "GIF" | "VIDEO"; durationSeconds: number; order: number }) => ({
-          workoutId: workout.id,
-          url: m.url,
-          stepName: m.stepName,
-          description: m.description,
-          mediaType: m.mediaType,
-          durationSeconds: m.durationSeconds,
-          order: m.order,
-        })),
-      });
+      for (const m of mediaList) {
+        await prisma.workoutMedia.create({
+          data: {
+            workoutId: workout.id,
+            url: m.url,
+            stepName: m.stepName,
+            description: m.description,
+            mediaType: m.mediaType,
+            durationSeconds: m.durationSeconds,
+            order: m.order,
+          },
+        });
+      }
     }
 
     let equipment: { equipmentId: string; equipmentName: string; quantity: number; measureTypes: string[]; targetKg: number | null; targetPcs: number | null }[] = [];

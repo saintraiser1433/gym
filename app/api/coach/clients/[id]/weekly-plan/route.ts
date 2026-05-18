@@ -91,5 +91,10 @@ export async function GET(req: NextRequest, { params }: Params) {
     fillEmptyDaysWithRecommendations: picked?.workoutPlanMode !== "CUSTOM",
   });
 
-  return NextResponse.json({ data: plan });
+  return NextResponse.json({
+    data: {
+      ...plan,
+      planMode: picked?.workoutPlanMode ?? null,
+    },
+  });
 }

@@ -108,8 +108,31 @@ export async function PATCH(req: Request, { params }: Params) {
           : null;
   }
 
-  // Registration-owned fields (DOB, gender, occupation, address, emergency, gym notes) are not
-  // mutable via the coach API — clients update those through their own profile / signup.
+  if ("dateOfBirth" in body) {
+    const d = body.dateOfBirth;
+    if (d === null || d === undefined || d === "") {
+      profileData.dateOfBirth = null;
+    } else {
+      const parsed = new Date(String(d));
+      if (Number.isNaN(parsed.getTime())) {
+        return NextResponse.json({ error: "Invalid dateOfBirth" }, { status: 400 });
+      }
+      profileData.dateOfBirth = parsed;
+    }
+  }
+
+  if ("gender" in body) {
+    const g = body.gender;
+    if (g === null || g === undefined || g === "") {
+      profileData.gender = null;
+    } else {
+      const v = String(g).trim();
+      if (v !== "Male" && v !== "Female") {
+        return NextResponse.json({ error: "Invalid gender" }, { status: 400 });
+      }
+      profileData.gender = v;
+    }
+  }
 
   const userPatch: { name?: string; phone?: string | null } = {};
   if (body.user && typeof body.user === "object" && body.user !== null) {
